@@ -349,9 +349,9 @@ export default function App() {
                       initial={{ opacity: 0, y: 25 }}
                       animate={isCondensed ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 1.5, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      className="font-sans font-bold text-5xl md:text-7xl text-primary mb-6 tracking-tight leading-[1.1] text-balance max-w-4xl"
+                      className="font-serif font-medium text-5xl md:text-7xl text-primary mb-6 tracking-tight leading-[1.1] text-balance max-w-4xl"
                     >
-                      Scaling shouldn't feel <span className="text-secondary italic font-serif font-normal">this complicated</span>.
+                      Know Where to Focus Next
                     </motion.h1>
 
                     <motion.div
@@ -363,7 +363,7 @@ export default function App() {
                       <p 
                         className="font-sans text-base md:text-lg text-on-surface-variant max-w-2xl mb-8 leading-relaxed"
                       >
-                        Strip away the noise and move towards revenue.
+                        A consultant-style strategic assessment powered by AI — in <strong className="font-bold text-primary">15 mins</strong>.
                       </p>
 
                       <div className="flex flex-wrap gap-4 justify-center items-center">
@@ -375,7 +375,7 @@ export default function App() {
                           }}
                           className="bg-primary text-white px-8 py-3.5 font-mono text-xs uppercase tracking-widest hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] focus:bg-secondary transition-all flex items-center gap-3 cursor-pointer rounded-xl"
                         >
-                          Analyze My Business
+                          Diagnose My Business
                           <ArrowRight size={14} className="text-secondary" />
                         </a>
 

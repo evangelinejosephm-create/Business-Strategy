@@ -66,10 +66,17 @@ export default function ParallaxTiltCard({ children, onClick, className = "", wr
           rotateY: rotateYSpring,
           scale: scaleSpring,
           transformStyle: "preserve-3d", // Keeps child elements in the rotated 3D space
+          willChange: "transform",
         }}
-        className={`transition-shadow duration-300 ${className}`}
+        className={`transition-shadow duration-300 select-none ${className}`}
       >
-        <div className="h-full w-full" style={{ transform: "translateZ(10px)", transformStyle: "preserve-3d" }}>
+        <div 
+          className="h-full w-full [backface-visibility:hidden] [-webkit-font-smoothing:subpixel-antialiased] [transform-style:preserve-3d] [-webkit-backface-visibility:hidden]" 
+          style={{ 
+            transform: "translateZ(1px)", 
+            transformStyle: "preserve-3d" 
+          }}
+        >
           {children}
         </div>
       </motion.div>
