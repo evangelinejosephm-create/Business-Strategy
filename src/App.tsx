@@ -184,9 +184,6 @@ export default function App() {
             <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }}>
               Case Library
             </a>
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("insights"); }}>
-              Insights
-            </a>
             <a 
               onClick={(e) => { e.preventDefault(); setIsSchedulerOpen(true); }}
               className="bg-primary text-white px-6 py-2.5 font-mono text-xs uppercase tracking-wider hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] hover:border-transparent transition-all rounded-xl cursor-pointer"
@@ -233,12 +230,6 @@ export default function App() {
               className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
             >
               Case Library
-            </a>
-            <a 
-              onClick={() => handleNavClick("insights")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
-            >
-              Insights
             </a>
           </div>
 
@@ -1003,91 +994,6 @@ export default function App() {
           </div>
         </motion.section>
 
-        {/* 9. TESTIMONIALS & INSIGHTS (FOUNDER PERSPECTIVES) */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="py-24 px-6 md:px-16 bg-surface-container scroll-mt-20" 
-          id="insights"
-        >
-          <div className="max-w-4xl mx-auto text-center">
-            <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
-              05 // REAL EXPERIENCE LETTERS
-            </span>
-            <h2 className="font-sans font-bold text-3xl md:text-4xl text-primary mb-16 tracking-tight leading-none">
-              Words from the front lines.
-            </h2>
-
-            {/* Carousel Model */}
-            <div className="relative max-w-3xl mx-auto">
-              <motion.div 
-                key={activeTestimonial}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="bg-white border border-outline-variant p-8 md:p-12 shadow-[0_4px_24px_rgba(28,34,22,0.03)] flex flex-col justify-between rounded-lg text-left"
-              >
-                <p className="font-sans text-lg md:text-xl text-primary italic leading-relaxed mb-8">
-                  "{TESTIMONIALS[activeTestimonial].quote}"
-                </p>
-                
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-secondary-container/40 flex items-center justify-center border border-secondary/20 rounded-full">
-                    <span className="font-mono text-secondary font-bold text-sm">
-                      {TESTIMONIALS[activeTestimonial].author[0]}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-sans font-bold text-sm text-primary">{TESTIMONIALS[activeTestimonial].author}</div>
-                    <div className="font-mono text-xs text-on-surface-variant font-semibold">
-                      {TESTIMONIALS[activeTestimonial].role} @ {TESTIMONIALS[activeTestimonial].company}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Carousel Controls */}
-              <div className="flex items-center justify-between mt-8 max-w-3xl mx-auto">
-                {/* Custom dot selectors */}
-                <div className="flex gap-2">
-                  {TESTIMONIALS.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveTestimonial(idx)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        activeTestimonial === idx 
-                          ? "w-8 bg-secondary" 
-                          : "w-2 bg-secondary/30 hover:bg-secondary/60"
-                      }`}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-
-                {/* Left and Right navigation buttons */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setActiveTestimonial((prev) => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1))}
-                    className="w-10 h-10 flex items-center justify-center border border-outline-variant text-primary hover:text-secondary hover:border-secondary rounded-full bg-white transition-all cursor-pointer shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary/50"
-                    aria-label="Previous testimonial"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    onClick={() => setActiveTestimonial((prev) => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1))}
-                    className="w-10 h-10 flex items-center justify-center border border-outline-variant text-primary hover:text-secondary hover:border-secondary rounded-full bg-white transition-all cursor-pointer shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary/50"
-                    aria-label="Next testimonial"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
         {/* 10. FINAL ACTIONS MODULE (CTA) */}
         <motion.section 
           initial={{ opacity: 0, y: 40 }}
@@ -1149,7 +1055,6 @@ export default function App() {
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Assessment Console</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("about"); }} className="hover:text-secondary transition-colors cursor-pointer block">About</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }} className="hover:text-secondary transition-colors cursor-pointer block">Case Library</a></li>
-                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("insights"); }} className="hover:text-secondary transition-colors cursor-pointer block">Insights</a></li>
               </ul>
             </div>
 
