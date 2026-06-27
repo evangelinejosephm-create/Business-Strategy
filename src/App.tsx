@@ -1062,6 +1062,7 @@ export default function App() {
               <h5 className="font-mono text-xs font-bold text-secondary tracking-wider uppercase mb-4">INTERACTIVES</h5>
               <ul className="space-y-2 text-xs text-slate-400">
                 <li><a onClick={(e) => { e.preventDefault(); setIsSchedulerOpen(true); }} className="hover:text-secondary transition-colors cursor-pointer block">Discovery Scheduler</a></li>
+                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Strategy Console</a></li>
               </ul>
             </div>
 
@@ -1194,29 +1195,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* FLOATING CHAT ASSISTANT BOT */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
-        {isChatOpen && (
-          <div className="w-[360px] sm:w-[450px] max-w-[calc(100vw-2rem)] shadow-[0_4px_24px_rgba(21,25,18,0.02)] mb-4 bg-white rounded-lg overflow-hidden border border-outline animate-in fade-in slide-in-from-bottom-5 duration-300 font-sans">
-            <AIStrategistChat onClose={() => setIsChatOpen(false)} />
-          </div>
-        )}
-
-        <button
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className="flex items-center gap-2.5 bg-primary text-white hover:bg-secondary hover:shadow-[0_0_20px_rgba(154,123,79,0.4)] shadow-xl px-6 py-4 transition-all duration-300 group rounded-xl border border-white/10 hover:scale-[1.03] active:scale-95 cursor-pointer font-mono text-xs uppercase font-extrabold tracking-widest"
-          aria-label="Toggle strategic virtual assistant"
-        >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
-          </span>
-          <span>Ask me</span>
-          <MessageSquare size={15} className="group-hover:rotate-12 transition-transform duration-300" />
-        </button>
-      </div>
-
       <GoogleCalendarSchedulerModal 
         isOpen={isSchedulerOpen} 
         onClose={() => setIsSchedulerOpen(false)} 
