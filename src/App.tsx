@@ -605,49 +605,49 @@ export default function App() {
                     {/* Operational Channels */}
                     <div className="space-y-3">
                       
-                      <div className="grid sm:grid-cols-3 gap-3">
+                      <div className="grid sm:grid-cols-3 gap-4 md:gap-5">
                         {selectedOutcomePathway === "revenue" ? (
                           <>
-                            <div className="space-y-2 bg-white p-3.5 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-secondary block tracking-wider">UNDERSTAND THE WHY</span>
-                                <p className="text-[11px] text-slate-700 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white p-5 md:p-6 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-secondary block tracking-wider uppercase">UNDERSTAND THE WHY</span>
+                                <p className="text-xs md:text-sm text-slate-700/90 leading-relaxed font-sans font-normal">
                                   Identify the underlying factors limiting growth, efficiency, and business performance.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Conversion", "Operations", "Revenue"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
                               </div>
                             </div>
-                            <div className="space-y-2 bg-white p-3.5 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-secondary block tracking-wider">FOCUS ON WHAT MATTERS</span>
-                                <p className="text-[11px] text-slate-700 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white p-5 md:p-6 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-secondary block tracking-wider uppercase">FOCUS ON WHAT MATTERS</span>
+                                <p className="text-xs md:text-sm text-slate-700/90 leading-relaxed font-sans font-normal">
                                   Prioritize the opportunities that will create the greatest business impact.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Prioritization", "Opportunities", "Efficiency"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
                               </div>
                             </div>
-                            <div className="space-y-2 bg-white p-3.5 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-secondary block tracking-wider">BUILD A CLEAR PATH</span>
-                                <p className="text-[11px] text-slate-700 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white p-5 md:p-6 rounded-lg border-2 border-secondary/35 transition-all hover:border-secondary/60 hover:shadow-2xs flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-secondary block tracking-wider uppercase">BUILD A CLEAR PATH</span>
+                                <p className="text-xs md:text-sm text-slate-700/90 leading-relaxed font-sans font-normal">
                                   Translate insights into practical recommendations and execution plans.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Optimization", "Automation", "Execution"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-slate-100 text-slate-600 rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
@@ -656,46 +656,46 @@ export default function App() {
                           </>
                         ) : (
                           <>
-                            <div className="space-y-2 bg-white/5 p-3.5 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-white block tracking-wider">UNDERSTAND THE MARKET</span>
-                                <p className="text-[11px] text-slate-200 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white/5 p-5 md:p-6 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-white block tracking-wider uppercase">UNDERSTAND THE MARKET</span>
+                                <p className="text-xs md:text-sm text-slate-200/90 leading-relaxed font-sans font-normal">
                                   Evaluate customer needs, market opportunities, and business objectives.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Customers", "Problems", "Competition"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
                               </div>
                             </div>
-                            <div className="space-y-2 bg-white/5 p-3.5 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-white block tracking-wider">DEFINE THE DIRECTION</span>
-                                <p className="text-[11px] text-slate-200 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white/5 p-5 md:p-6 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-white block tracking-wider uppercase">DEFINE THE DIRECTION</span>
+                                <p className="text-xs md:text-sm text-slate-200/90 leading-relaxed font-sans font-normal">
                                   Create clarity around what should be built and why.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Positioning", "Prioritization", "MVP"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
                               </div>
                             </div>
-                            <div className="space-y-2 bg-white/5 p-3.5 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <span className="font-mono text-[9px] font-black text-white block tracking-wider">PREPARE FOR SUCCESS</span>
-                                <p className="text-[11px] text-slate-200 leading-normal font-sans font-normal">
+                            <div className="space-y-4 bg-white/5 p-5 md:p-6 rounded-lg border-2 border-white/25 transition-all hover:border-white/45 flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <span className="font-mono text-[10px] md:text-xs font-black text-white block tracking-wider uppercase">PREPARE FOR SUCCESS</span>
+                                <p className="text-xs md:text-sm text-slate-200/90 leading-relaxed font-sans font-normal">
                                   Develop a practical strategy for launch and adoption.
                                 </p>
                               </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
+                              <div className="flex flex-wrap gap-1.5 pt-2">
                                 {["Roadmap", "Pricing", "Go-to-Market"].map((tag) => (
-                                  <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
+                                  <span key={tag} className="font-mono text-[9px] md:text-xs px-2.5 py-1 bg-white/10 text-white rounded-sm font-semibold uppercase tracking-wider">
                                     {tag}
                                   </span>
                                 ))}
