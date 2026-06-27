@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, Cambria, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-surface-bg: #FBFBFA; /* Page Canvas Background: ultra-premium, soft alabaster/bone white */
+  --color-surface-dim: #F4F2EA; /* Soft organic off-white tone */
+  --color-surface-bright: #FFFFFF;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #FBFBFA;
+  --color-surface-container: #F4F2EA;
+  --color-surface-container-high: #EAE7DC;
+  --color-surface-container-highest: #DFDBCE;
+  
+  --color-primary: #151912; /* Rich, commanding, near-black Midnight Olive primary */
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2A3321; /* Rich dark-olive container background */
+  --color-on-primary-container: #FBFBFA;
+  --color-inverse-primary: #9A7B4F;
+  
+  --color-secondary: #9A7B4F; /* Accent Color: sophisticated, matte Antique Brass/Gold */
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #F9F6F0;
+  --color-on-secondary-container: #4A3E2F;
+  
+  --color-tertiary: #9A7B4F; /* Accent color fallback */
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #F9F6F0;
+  --color-on-tertiary-container: #4A3E2F;
+  
+  --color-on-surface: #151912; /* Rich, commanding Midnight Olive for high contrast headings/labels */
+  --color-on-surface-variant: #41463D; /* Muted charcoal-olive for body and secondary text */
+  --color-inverse-surface: #1E2516;
+  --color-inverse-on-surface: #FBFBFA;
+  
+  --color-outline: #EAE8E4; /* Sharp, thin 1px borders in Alabaster system */
+  --color-outline-variant: #EAE8E4;
+}
+
+/* Custom editorial styles */
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-surface-bg);
+  color: var(--color-on-surface);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Clean micro transitions block-wide */
+* {
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Custom Scrollbar styled for sleek modern canvas */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FBFBFA;
+  border-left: 1px solid #EAE8E4;
+}
+::-webkit-scrollbar-thumb {
+  background: #DFDBCE;
+  border: 2px solid #FBFBFA;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #151912;
+}
+
+/* Selection */
+::selection {
+  background-color: #F9F6F0;
+  color: #151912;
+}
+
+.architect-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(28, 34, 22, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(28, 34, 22, 0.035) 1px, transparent 1px);
+}
+
+.architect-grid-dark {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
