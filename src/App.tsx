@@ -422,7 +422,7 @@ export default function App() {
               <span className="font-mono text-xs text-secondary tracking-[0.25em] uppercase block mb-3 font-bold">
                 01 // OUTCOME-DRIVEN PARTNERSHIPS
               </span>
-              <h2 className="font-sans font-extrabold text-3xl md:text-5xl text-primary tracking-tight mb-6">
+              <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-6">
                 Engineered Outcomes
               </h2>
               <div className="h-0.5 w-16 bg-secondary mx-auto mb-6" />
@@ -801,7 +801,7 @@ export default function App() {
               <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
                 02 // AUTOMATED INTERFERENCE COMPILER
               </span>
-              <h2 className="font-sans font-bold text-3xl md:text-5xl text-primary tracking-tight mb-4">
+              <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-4">
                 Strategic Assessment Console
               </h2>
               <p className="text-on-surface-variant text-base leading-relaxed">
@@ -848,7 +848,7 @@ export default function App() {
                 <span className="font-mono text-xs text-secondary tracking-[0.2em] uppercase mb-4 block font-bold">
                   03 // ABOUT THE STRATEGIST
                 </span>
-                <h2 className="font-sans font-bold text-3xl md:text-4xl text-primary tracking-tight mb-6">
+                <h2 className="font-serif font-medium text-3xl md:text-4xl text-primary tracking-tight mb-6">
                   Your Partner in Scaling with Clarity and Confidence
                 </h2>
                 <div className="space-y-6 text-on-surface-variant text-base md:text-lg leading-relaxed mb-10">
@@ -940,7 +940,7 @@ export default function App() {
                 <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
                   04 // METRICS & EVIDENCE
                 </span>
-                <h2 className="font-sans font-bold text-3xl md:text-4xl text-slate-100 tracking-tight leading-none">
+                <h2 className="font-serif font-medium text-3xl md:text-4xl text-slate-100 tracking-tight leading-none">
                   Tangible outcomes from systemic shifts.
                 </h2>
               </div>
@@ -992,7 +992,7 @@ export default function App() {
           id="Services-Registry"
         >
           <div className="max-w-4xl mx-auto relative z-10 space-y-8">
-            <h2 className="font-sans font-bold text-3xl md:text-5xl text-primary tracking-tight leading-tight">
+            <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight leading-tight">
               Ready to Explore What's Holding Growth Back?
             </h2>
             <div className="space-y-4">
