@@ -65,7 +65,7 @@ export default function App() {
 
     const timer = setTimeout(() => {
       setIsCondensed(true);
-    }, 5000); // collapse after exactly 5.0 seconds
+    }, 2500); // collapse after 2.5 seconds for snappier load
     
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -293,6 +293,7 @@ export default function App() {
                         { text: "Is it a lead generation problem?", x: 100, y: 90 }
                       ].map((item, idx) => {
                         const scaleFactor = windowWidth < 768 ? 0.42 : 1.0;
+                        const floatClass = `animate-float-${idx % 3}`;
                         return (
                           <motion.div
                             key={idx}
@@ -300,41 +301,28 @@ export default function App() {
                             animate={isCondensed ? {
                               x: 0,
                               y: 0,
-                              scale: 0.05,
+                              scale: 0.1,
                               opacity: 0,
-                              filter: "blur(24px)"
+                              filter: "blur(16px)"
                             } : {
-                              opacity: [0.87, 0.7, 0.87],
+                              x: item.x * scaleFactor,
+                              y: item.y * scaleFactor,
                               scale: 1,
-                              filter: "blur(0px)",
-                              x: [
-                                item.x * scaleFactor, 
-                                item.x * scaleFactor + (idx % 2 === 0 ? 15 : -15), 
-                                item.x * scaleFactor + (idx % 2 === 0 ? -12 : 12), 
-                                item.x * scaleFactor
-                              ],
-                              y: [
-                                item.y * scaleFactor, 
-                                item.y * scaleFactor + (idx % 2 === 0 ? -20 : 20), 
-                                item.y * scaleFactor + (idx % 2 === 0 ? 15 : -15), 
-                                item.y * scaleFactor
-                              ],
+                              opacity: 0.85,
+                              filter: "blur(0px)"
                             }}
-                            transition={isCondensed ? {
+                            transition={{
                               type: "spring",
-                              stiffness: 150,
-                              damping: 22,
-                              mass: 0.55,
-                            } : {
-                              opacity: { repeat: Infinity, duration: 5, ease: [0.25, 0.1, 0.25, 1], delay: idx * 0.15 },
-                              x: { repeat: Infinity, duration: 9 + (idx % 4), ease: [0.25, 0.1, 0.25, 1] },
-                              y: { repeat: Infinity, duration: 9 + (idx % 4), ease: [0.25, 0.1, 0.25, 1] },
-                              scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-                              filter: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                              stiffness: 90,
+                              damping: 20,
+                              mass: 0.7,
+                              delay: isCondensed ? idx * 0.02 : idx * 0.05
                             }}
-                            className="absolute font-sans text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase select-none text-[#151912]/87 whitespace-nowrap"
+                            className="absolute font-sans text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase select-none text-[#151912]/80 whitespace-nowrap"
                           >
-                            {item.text}
+                            <div className={isCondensed ? "" : floatClass}>
+                              {item.text}
+                            </div>
                           </motion.div>
                         );
                       })}
@@ -396,7 +384,7 @@ export default function App() {
                             setIsCondensed(false);
                             setTimeout(() => {
                               setIsCondensed(true);
-                            }, 5000); // exactly 5.0 seconds
+                            }, 2500); // exactly 2.5 seconds
                           }}
                           className="border border-outline-variant/60 hover:border-secondary text-on-surface-variant hover:text-secondary px-5 py-3.5 font-mono text-xs uppercase tracking-widest bg-white rounded-xl transition-all cursor-pointer flex items-center gap-2"
                         >

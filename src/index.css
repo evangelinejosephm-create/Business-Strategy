@@ -57,9 +57,32 @@ body {
 
 /* Clean micro transitions block-wide */
 * {
-  transition-property: background-color, border-color, text-decoration-color, fill, stroke, transform;
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
+}
+
+@keyframes float-0 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-12px) translateX(6px); }
+}
+@keyframes float-1 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(14px) translateX(-8px); }
+}
+@keyframes float-2 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-10px) translateX(-10px); }
+}
+
+.animate-float-0 {
+  animation: float-0 8s ease-in-out infinite;
+}
+.animate-float-1 {
+  animation: float-1 9s ease-in-out infinite;
+}
+.animate-float-2 {
+  animation: float-2 7s ease-in-out infinite;
 }
 
 /* Custom Scrollbar styled for sleek modern canvas */
