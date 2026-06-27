@@ -11,7 +11,7 @@ import CaseStudyDetail from "./components/CaseStudyDetail";
 import SuccessConfetti from "./components/SuccessConfetti";
 import ParallaxTiltCard from "./components/ParallaxTiltCard";
 import GoogleCalendarSchedulerModal from "./components/GoogleCalendarSchedulerModal";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Check, 
   ArrowUpRight, 
@@ -1081,111 +1081,122 @@ export default function App() {
       </footer>
 
       {/* Dynamic Context Briefing Modal */}
-      {isBriefingModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop with click to close */}
-          <div 
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 animate-fade-in"
-            onClick={() => setIsBriefingModalOpen(false)}
-          />
-          
-          {/* Modal Container */}
-          <div className="relative bg-white border border-outline-variant rounded-lg w-full max-w-lg p-8 md:p-10 shadow-[0_10px_50px_rgba(28,34,22,0.08)] overflow-y-auto max-h-[90vh] text-primary z-10 transition-all select-none">
-            
-            {/* Close button in top-right */}
-            <button 
+      <AnimatePresence>
+        {isBriefingModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop with click to close */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
               onClick={() => setIsBriefingModalOpen(false)}
-              className="absolute top-6 right-6 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1 rounded-lg hover:bg-surface-dim"
-              aria-label="Close modal"
+            />
+            
+            {/* Modal Container */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative bg-white border border-outline-variant rounded-lg w-full max-w-lg p-8 md:p-10 shadow-[0_10px_50px_rgba(28,34,22,0.08)] overflow-y-auto max-h-[90vh] text-primary z-10 select-none"
             >
-              <span className="sr-only">Close Modal</span>
-              <X size={20} />
-            </button>
+              
+              {/* Close button in top-right */}
+              <button 
+                onClick={() => setIsBriefingModalOpen(false)}
+                className="absolute top-6 right-6 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1 rounded-lg hover:bg-surface-dim"
+                aria-label="Close modal"
+              >
+                <span className="sr-only">Close Modal</span>
+                <X size={20} />
+              </button>
 
-            <h3 className="font-sans font-bold text-2xl mb-4 text-center text-primary">Contact & Briefing Registry</h3>
-            <p className="text-xs text-on-surface-variant leading-relaxed mb-6 text-center max-w-sm mx-auto">
-              Ready to connect? Submit your briefing below to get in touch.
-            </p>
+              <h3 className="font-sans font-bold text-2xl mb-4 text-center text-primary">Contact & Briefing Registry</h3>
+              <p className="text-xs text-on-surface-variant leading-relaxed mb-6 text-center max-w-sm mx-auto">
+                Ready to connect? Submit your briefing below to get in touch.
+              </p>
 
-            {submitStatus === "success" ? (
-              <div className="bg-surface-dim border border-secondary p-6 rounded-lg text-center space-y-4">
-                <Check className="text-secondary mx-auto animate-bounce" size={32} />
-                <h4 className="font-sans font-extrabold uppercase tracking-wide text-sm text-primary">Briefing Received</h4>
-                <p className="text-xs text-on-surface-variant leading-relaxed font-sans">
-                  {submitSuccessMessage || "Thank you! Your briefing has been successfully received."}
-                </p>
-                <button 
-                  onClick={() => {
-                    setSubmitStatus("idle");
-                    setIsBriefingModalOpen(false);
-                  }}
-                  className="w-full mt-4 py-3 bg-primary text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] transition-all rounded-xl cursor-pointer"
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
-                {submissionError && (
-                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-mono">
-                    ⚠️ {submissionError}
-                  </div>
-                )}
-                <div>
-                  <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest mb-1 font-bold">Company Contact</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder="Your Name (Acme Exec)" 
-                    className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary rounded-lg"
-                  />
+              {submitStatus === "success" ? (
+                <div className="bg-surface-dim border border-secondary p-6 rounded-lg text-center space-y-4">
+                  <Check className="text-secondary mx-auto animate-bounce" size={32} />
+                  <h4 className="font-sans font-extrabold uppercase tracking-wide text-sm text-primary">Briefing Received</h4>
+                  <p className="text-xs text-on-surface-variant leading-relaxed font-sans">
+                    {submitSuccessMessage || "Thank you! Your briefing has been successfully received."}
+                  </p>
+                  <button 
+                    onClick={() => {
+                      setSubmitStatus("idle");
+                      setIsBriefingModalOpen(false);
+                    }}
+                    className="w-full mt-4 py-3 bg-primary text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] transition-all rounded-xl cursor-pointer"
+                  >
+                    Done
+                  </button>
                 </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest mb-1 font-bold">Direct Email</label>
-                  <input 
-                    type="email" 
-                    required
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder="you@company.com" 
-                    className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest font-bold">Context</label>
-                    <span className="text-[10px] font-mono text-on-surface-variant/70">{contactContext.length}/200</span>
-                  </div>
-                  <textarea 
-                    rows={4}
-                    maxLength={200}
-                    value={contactContext}
-                    onChange={(e) => setContactContext(e.target.value)}
-                    placeholder="Describe your context, situation, goals, or requirements..." 
-                    className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary resize-none rounded-lg"
-                  />
-                </div>
-
-                <button 
-                  type="submit"
-                  disabled={submitStatus === "submitting"}
-                  className="w-full py-4 bg-primary text-white font-mono text-xs uppercase tracking-widest hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] transition-all font-bold flex items-center justify-center gap-2 cursor-pointer rounded-xl mt-6"
-                >
-                  {submitStatus === "submitting" ? (
-                    <Loader2 size={12} className="animate-spin text-white" />
-                  ) : (
-                    "Submit"
+              ) : (
+                <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
+                  {submissionError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-mono">
+                      ⚠️ {submissionError}
+                    </div>
                   )}
-                </button>
-              </form>
-            )}
+                  <div>
+                    <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest mb-1 font-bold">Company Contact</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
+                      placeholder="Your Name (Acme Exec)" 
+                      className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest mb-1 font-bold">Direct Email</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      placeholder="you@company.com" 
+                      className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-[10px] font-mono text-secondary uppercase tracking-widest font-bold">Context</label>
+                      <span className="text-[10px] font-mono text-on-surface-variant/70">{contactContext.length}/200</span>
+                    </div>
+                    <textarea 
+                      rows={4}
+                      maxLength={200}
+                      value={contactContext}
+                      onChange={(e) => setContactContext(e.target.value)}
+                      placeholder="Describe your context, situation, goals, or requirements..." 
+                      className="w-full px-4 py-3 bg-white border border-outline-variant text-xs focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans text-primary resize-none rounded-lg"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={submitStatus === "submitting"}
+                    className="w-full py-4 bg-primary text-white font-mono text-xs uppercase tracking-widest hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] transition-all font-bold flex items-center justify-center gap-2 cursor-pointer rounded-xl mt-6"
+                  >
+                    {submitStatus === "submitting" ? (
+                      <Loader2 size={12} className="animate-spin text-white" />
+                    ) : (
+                      "Submit"
+                    )}
+                  </button>
+                </form>
+              )}
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
       <GoogleCalendarSchedulerModal 
         isOpen={isSchedulerOpen} 
         onClose={() => setIsSchedulerOpen(false)} 
