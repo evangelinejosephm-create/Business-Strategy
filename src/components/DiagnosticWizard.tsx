@@ -366,17 +366,16 @@ const EXPECTED_RESULT_MAP: Record<string, string> = {
 };
 
 const INDUSTRY_OPTIONS = [
-  "B2B SaaS & Enterprise Software",
-  "E-commerce & Consumer Brands",
-  "Professional Services & Agencies",
-  "Healthcare & Life Sciences",
-  "Education & EdTech",
-  "Manufacturing & Industrial",
-  "Logistics & Supply Chain",
-  "Real Estate & PropTech",
-  "Media, Marketing & Content",
-  "Hospitality, Travel & Events",
-  "Nonprofit & Social Impact"
+  "B2B SaaS",
+  "E-commerce",
+  "Professional Services",
+  "Healthcare",
+  "Education",
+  "Manufacturing",
+  "Logistics",
+  "Finance",
+  "Real Estate",
+  "Media & Marketing"
 ];
 
 export default function DiagnosticWizard() {
