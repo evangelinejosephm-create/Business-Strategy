@@ -1157,6 +1157,194 @@ ${blueprint || "No blueprint generated"}
   }
 });
 
+// REST Endpoint: Serve Privacy Policy
+app.get("/privacy", (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Evangeline Joseph | Business Strategist</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.7;
+      max-width: 760px;
+      margin: 60px auto;
+      padding: 0 24px;
+      color: #1e293b;
+      background-color: #f8fafc;
+    }
+    h1 {
+      color: #0b1215;
+      border-bottom: 2px solid #8b9d83;
+      padding-bottom: 12px;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+    h2 {
+      color: #0b1215;
+      margin-top: 36px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+    p, li {
+      color: #334155;
+      font-size: 1rem;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    footer {
+      margin-top: 60px;
+      font-size: 0.825rem;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    a {
+      color: #8b9d83;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p><strong>Last updated: June 27, 2026</strong></p>
+  <p>Your privacy is of paramount importance to our advisory practice. This Privacy Policy details how Evangeline Joseph ("we", "our", or "us") manages, utilizes, and safeguards any information shared when using our diagnostics tools, advisory platforms, and web assets.</p>
+  
+  <h2>1. Core Information Collected</h2>
+  <p>To deliver precise strategic advice, we may request or process specific business-level entries, including:</p>
+  <ul>
+    <li>Founder contact credentials, including name and email address</li>
+    <li>Business profiles, URL addresses, and respective operational industry sectors</li>
+    <li>Self-reported operational bottlenecks, process constraints, and target growth objectives submitted via our assessment consoles</li>
+  </ul>
+
+  <h2>2. Intended Information Usage</h2>
+  <p>We process your entries with strict relevance to standard advisory functions:</p>
+  <ul>
+    <li>To compile, format, and dispatch your personalized Strategic Diagnostic Blueprint reports</li>
+    <li>To improve diagnostic algorithm metrics and refine business advisory models</li>
+    <li>To facilitate direct communication regarding upcoming engagement schedules or discovery sprints</li>
+  </ul>
+
+  <h2>3. Data Protection Standards</h2>
+  <p>We apply robust administrative and electronic safeguards to ensure your inputs remain completely secure. We strictly enforce a zero-commercialization policy; no personal, contact, or company-internal data is ever leased, traded, or shared with unauthorized external third parties.</p>
+
+  <h2>4. Client Rights & Corrections</h2>
+  <p>You reserve the right to review the contact records we maintain, update details, or request total removal of your audit data at any time. Direct your requests to our support inbox at <a href="mailto:evangelinejoseph.m@gmail.com">evangelinejoseph.m@gmail.com</a>.</p>
+
+  <footer>
+    &copy; 2026 EVANGELINE JOSEPH &mdash; BUSINESS STRATEGIST. All rights reserved.
+  </footer>
+</body>
+</html>`);
+});
+
+// REST Endpoint: Serve Terms of Service
+app.get("/terms", (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - Evangeline Joseph | Business Strategist</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.7;
+      max-width: 760px;
+      margin: 60px auto;
+      padding: 0 24px;
+      color: #1e293b;
+      background-color: #f8fafc;
+    }
+    h1 {
+      color: #0b1215;
+      border-bottom: 2px solid #8b9d83;
+      padding-bottom: 12px;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+    h2 {
+      color: #0b1215;
+      margin-top: 36px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+    p, li {
+      color: #334155;
+      font-size: 1rem;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    footer {
+      margin-top: 60px;
+      font-size: 0.825rem;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    a {
+      color: #8b9d83;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Terms of Service</h1>
+  <p><strong>Last updated: June 27, 2026</strong></p>
+  <p>Please review these Terms of Service ("Terms") thoroughly before employing the advisory resources, diagnostic portals, and strategic toolsets offered by Evangeline Joseph ("we", "our", or "us").</p>
+  
+  <h2>1. General Acceptance</h2>
+  <p>By accessing our diagnostic suites, scheduling modules, or information logs, you acknowledge complete acceptance of these Terms of Service and our associated Privacy Policy. If any clause does not meet your approval, please cease usage of these tools.</p>
+
+  <h2>2. Scope of Strategic Advisory</h2>
+  <p>The diagnostic score estimations, friction indexes, and generated blueprints delivered by this platform serve educational, strategic planning, and operational modeling purposes. These resources reflect high-level heuristic modeling and expert insights; they do not constitute formal legal, financial, or strict implementation guarantees. Actual business achievements depend directly on execution capability and external market variables.</p>
+
+  <h2>3. Accuracy of Inputs</h2>
+  <p>You confirm that all operational details, website links, problems, and objectives logged in our diagnostic wizard are accurate, current, and do not infringe on the intellectual property, trade secrets, or confidentiality requirements of any third party.</p>
+
+  <h2>4. Limitation of Liability</h2>
+  <p>Under no circumstances shall Evangeline Joseph, our representatives, or our partners be liable for any operational delays, business disruptions, or lost margins arising from the application of recommendations or frameworks outlined in our strategic briefings.</p>
+
+  <h2>5. Framework Ownership</h2>
+  <p>All proprietary diagnostics, assessment structures, visual dashboard layouts, and advisory frameworks are the exclusive intellectual property of Evangeline Joseph. Unauthorized reproduction, resale, or distribution of these intellectual products is strictly prohibited.</p>
+
+  <h2>6. Inquiries and correspondence</h2>
+  <p>For clarifications concerning these Terms, please contact us directly at <a href="mailto:evangelinejoseph.m@gmail.com">evangelinejoseph.m@gmail.com</a>.</p>
+
+  <footer>
+    &copy; 2026 EVANGELINE JOSEPH &mdash; BUSINESS STRATEGIST. All rights reserved.
+  </footer>
+</body>
+</html>`);
+});
+
 // Initialize Vite server or production server
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

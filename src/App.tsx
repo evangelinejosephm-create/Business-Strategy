@@ -1041,8 +1041,11 @@ export default function App() {
           <div className="max-w-sm space-y-4">
             <div className="font-sans font-black text-2xl tracking-tighter">EVANGELINE JOSEPH</div>
             <div className="flex gap-4">
-              <a href="https://www.linkedin.com/in/evangeline-joseph/-" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center border border-slate-800 hover:border-secondary hover:text-secondary text-slate-450 transition-colors rounded-full">
+              <a href="https://www.linkedin.com/in/evangeline-joseph/-" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center border border-slate-800 hover:border-secondary hover:text-secondary text-slate-450 transition-colors rounded-full" title="LinkedIn Profile">
                 <Linkedin size={14} />
+              </a>
+              <a href="mailto:evangelinejoseph.m@gmail.com" className="w-8 h-8 flex items-center justify-center border border-slate-800 hover:border-secondary hover:text-secondary text-slate-450 transition-colors rounded-full" title="Email Evangeline Joseph">
+                <Mail size={14} />
               </a>
             </div>
           </div>
@@ -1071,7 +1074,7 @@ export default function App() {
               <ul className="space-y-2 text-xs text-slate-400">
                 <li className="flex items-center gap-2">
                   <Mail size={12} className="text-secondary shrink-0" />
-                  <a href="mailto:evangeliejoseph.m@gmail.com" className="hover:text-secondary transition-colors">evangeliejoseph.m@gmail.com</a>
+                  <a href="mailto:evangelinejoseph.m@gmail.com" className="hover:text-secondary transition-colors">evangelinejoseph.m@gmail.com</a>
                 </li>
               </ul>
             </div>
@@ -1081,10 +1084,10 @@ export default function App() {
 
         {/* Bottom credits */}
         <div className="max-w-7xl mx-auto pt-16 mt-16 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-          <div>© 2026 EVANGELINE JOSEPH — HIGH-INTEGRITY SYSTEMS ARCHITECTURE</div>
+          <div>© 2026 EVANGELINE JOSEPH — BUSINESS STRATEGIST</div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Privacy</a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Terms of Service</a>
           </div>
         </div>
       </footer>
