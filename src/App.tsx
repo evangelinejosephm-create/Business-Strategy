@@ -76,9 +76,106 @@ export default function App() {
   // SPA router state for active case studies
   const [selectedCaseStudyId, setSelectedCaseStudyId] = useState<string | null>(null);
 
+  // Path parsing on load & back/forward history handling
+  React.useEffect(() => {
+    const handleUrlRouting = () => {
+      const path = window.location.pathname;
+      const caseStudyMatch = path.match(/^\/case-study\/([^/]+)/);
+      if (caseStudyMatch) {
+        setSelectedCaseStudyId(caseStudyMatch[1]);
+      } else if (path === "/diagnostic") {
+        setSelectedCaseStudyId(null);
+        setTimeout(() => {
+          const el = document.getElementById("diagnostic");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      } else {
+        setSelectedCaseStudyId(null);
+      }
+    };
+
+    handleUrlRouting();
+    window.addEventListener("popstate", handleUrlRouting);
+    return () => window.removeEventListener("popstate", handleUrlRouting);
+  }, []);
+
+  // Update history state when selectedCaseStudyId changes
+  React.useEffect(() => {
+    const currentPath = window.location.pathname;
+    if (selectedCaseStudyId) {
+      const targetPath = `/case-study/${selectedCaseStudyId}`;
+      if (currentPath !== targetPath) {
+        window.history.pushState({ caseStudyId: selectedCaseStudyId }, "", targetPath);
+      }
+    } else {
+      const isDiag = window.location.pathname === "/diagnostic";
+      const targetPath = isDiag ? "/diagnostic" : "/";
+      if (currentPath !== "/" && currentPath !== "/diagnostic" && !currentPath.startsWith("/case-study/")) {
+        // preserve other custom subpages if any
+      } else if (currentPath.startsWith("/case-study/")) {
+        window.history.pushState(null, "", "/");
+      }
+    }
+  }, [selectedCaseStudyId]);
+
+  // Dynamic SEO meta tags and title updater
+  React.useEffect(() => {
+    let title = "Evangeline Joseph | Systems & Business Strategist";
+    let desc = "Audit operational bottlenecks, design scalable API architectures, and unlock predictable business growth with an enterprise-grade Systems Strategy Suite.";
+    let type = "website";
+    const url = typeof window !== "undefined" ? window.location.href : "";
+
+    if (selectedCaseStudyId) {
+      const study = CASE_STUDIES.find(cs => cs.id === selectedCaseStudyId);
+      if (study) {
+        title = `${study.title} | Strategic Systems Case Study`;
+        desc = `${study.description} [${study.metricLabel}: ${study.value}]`;
+        type = "article";
+      }
+    } else if (typeof window !== "undefined" && window.location.pathname === "/diagnostic") {
+      title = "Strategic Assessment Console | Evangeline Joseph";
+      desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
+    }
+
+    // Update document title
+    document.title = title;
+
+    // Helper to update or create meta tags
+    const updateMetaTag = (selector: string, attribute: string, value: string) => {
+      let el = document.querySelector(selector);
+      if (!el) {
+        el = document.createElement("meta");
+        const match = selector.match(/\[([^=]+)=["']?([^"']+)["']?\]/);
+        if (match) {
+          el.setAttribute(match[1], match[2]);
+        }
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attribute, value);
+    };
+
+    updateMetaTag('meta[name="description"]', 'content', desc);
+    updateMetaTag('meta[property="og:title"]', 'content', title);
+    updateMetaTag('meta[property="og:description"]', 'content', desc);
+    updateMetaTag('meta[property="og:url"]', 'content', url);
+    updateMetaTag('meta[property="og:type"]', 'content', type);
+    updateMetaTag('meta[name="twitter:title"]', 'content', title);
+    updateMetaTag('meta[name="twitter:description"]', 'content', desc);
+    updateMetaTag('meta[name="twitter:card"]', 'content', 'summary_large_image');
+  }, [selectedCaseStudyId]);
+
   const handleNavClick = (sectionId: string) => {
     setSelectedCaseStudyId(null);
     setIsMobileMenuOpen(false);
+    if (sectionId === "diagnostic") {
+      if (window.location.pathname !== "/diagnostic") {
+        window.history.pushState(null, "", "/diagnostic");
+      }
+    } else {
+      if (window.location.pathname !== "/") {
+        window.history.pushState(null, "", "/");
+      }
+    }
     setTimeout(() => {
       const el = document.getElementById(sectionId);
       if (el) {

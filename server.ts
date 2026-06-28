@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 
@@ -13,22 +14,27 @@ app.use(express.json());
 // Lazy-initialize Gemini client to avoid crashes on startup if key is missing
 let aiClient: GoogleGenAI | null = null;
 function getAi(): GoogleGenAI | null {
-  if (!aiClient) {
-    const key = process.env.GEMINI_API_KEY;
-    if (!key) {
-      console.warn("Warning: GEMINI_API_KEY environment variable is not set. The portal will operate in fallback mode.");
-      return null;
-    }
-    aiClient = new GoogleGenAI({
-      apiKey: key,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        }
+  try {
+    if (!aiClient) {
+      const key = process.env.GEMINI_API_KEY;
+      if (!key) {
+        console.warn("Warning: GEMINI_API_KEY environment variable is not set. The portal will operate in fallback mode.");
+        return null;
       }
-    });
+      aiClient = new GoogleGenAI({
+        apiKey: key,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
+    }
+    return aiClient;
+  } catch (err) {
+    console.error("Error initializing GoogleGenAI client:", err);
+    return null;
   }
-  return aiClient;
 }
 
 interface GenerateContentParams {
@@ -59,8 +65,22 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
         return response.text;
       }
     } catch (err: any) {
-      console.log(`[GEMINI API INFO] Model ${activeModel} is currently not responsive. Transitioning...`);
+      console.log(`[GEMINI API INFO] Model ${activeModel} is currently not responsive:`, err.message || err);
       lastError = err;
+
+      // Abort immediately if we detect a credential/API key error to prevent serverless execution timeout
+      const errMsg = String(err.message || "").toLowerCase();
+      if (
+        errMsg.includes("api key") || 
+        errMsg.includes("invalid") || 
+        errMsg.includes("unauthorized") || 
+        errMsg.includes("permission") || 
+        errMsg.includes("403") || 
+        errMsg.includes("400")
+      ) {
+        console.log("[GEMINI API INFO] Detected credential or authorization error. Aborting retry loop immediately.");
+        break;
+      }
     }
   }
 
@@ -517,22 +537,28 @@ ${text}
         `,
       };
 
-      try {
-        const nodemailer = await import("nodemailer");
-        const transporter = nodemailer.createTransport({
-          host,
-          port,
-          secure: port === 465,
-          auth: {
-            user,
-            pass,
-          },
-        });
-        await transporter.sendMail(mailOptions);
-        console.log(`Diagnostic report email dispatched successfully to ${toEmail}`);
-      } catch (smtpError: any) {
-        console.log("[INFO] Optional SMTP transport channel for audit has not dispatched live email, failing back smoothly:", smtpError.message || smtpError);
-      }
+      // Execute SMTP in the background without awaiting to prevent Vercel serverless function timeouts
+      (async () => {
+        try {
+          const nodemailer = await import("nodemailer");
+          const transporter = nodemailer.createTransport({
+            host,
+            port,
+            secure: port === 465,
+            auth: {
+              user,
+              pass,
+            },
+            connectionTimeout: 2000,
+            greetingTimeout: 2000,
+            socketTimeout: 3000,
+          });
+          await transporter.sendMail(mailOptions);
+          console.log(`Diagnostic report email dispatched successfully to ${toEmail}`);
+        } catch (smtpError: any) {
+          console.log("[INFO] Optional SMTP transport channel for audit has not dispatched live email, failing back smoothly:", smtpError.message || smtpError);
+        }
+      })();
     } else {
       console.log("[INFO] SMTP credentials not fully configured. Email report dispatch skipped (logged to console above).");
     }
@@ -992,6 +1018,9 @@ Context:    ${context || "None provided"}
           user,
           pass,
         },
+        connectionTimeout: 2000,
+        greetingTimeout: 2000,
+        socketTimeout: 3000,
       });
 
       await transporter.sendMail(mailOptions);
@@ -1124,24 +1153,30 @@ ${blueprint || "No blueprint generated"}
     };
 
     let smtpSuccess = false;
-    try {
-      const nodemailer = await import("nodemailer");
-      const transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: {
-          user,
-          pass,
-        },
-      });
+    // Execute SMTP in the background without awaiting to prevent Vercel serverless function timeouts
+    (async () => {
+      try {
+        const nodemailer = await import("nodemailer");
+        const transporter = nodemailer.createTransport({
+          host,
+          port,
+          secure: port === 465,
+          auth: {
+            user,
+            pass,
+          },
+          connectionTimeout: 2000,
+          greetingTimeout: 2000,
+          socketTimeout: 3000,
+        });
 
-      await transporter.sendMail(mailOptions);
-      console.log(`Strategic feedback and report email successfully dispatched to ${toEmail}.`);
-      smtpSuccess = true;
-    } catch (smtpError: any) {
-      console.log("[INFO] Optional SMTP transport channel has not dispatched feedback email, failing back smoothly:", smtpError.message || smtpError);
-    }
+        await transporter.sendMail(mailOptions);
+        console.log(`Strategic feedback and report email successfully dispatched to ${toEmail}.`);
+        smtpSuccess = true;
+      } catch (smtpError: any) {
+        console.log("[INFO] Optional SMTP transport channel has not dispatched feedback email, failing back smoothly:", smtpError.message || smtpError);
+      }
+    })();
 
     res.json({
       success: true,
@@ -1344,6 +1379,66 @@ app.get("/terms", (req, res) => {
 </html>`);
 });
 
+// Dynamic SEO generator for index.html based on request route path
+function getDynamicSEOHTML(htmlTemplate: string, requestPath: string, hostUrl: string = "https://evangelinejoseph.com"): string {
+  let title = "Evangeline Joseph | Systems & Business Strategist";
+  let desc = "Audit operational bottlenecks, design scalable API architectures, and unlock predictable business growth with an enterprise-grade Systems Strategy Suite.";
+  let type = "website";
+
+  if (requestPath.startsWith("/case-study/case-01")) {
+    title = "Enterprise Pricing Platform | Strategic Systems Case Study";
+    desc = "Led API performance, security, and efficiency optimization at Accenture, reducing calls and reclaiming 250+ annual manual hours. [LATENCY REDUCTION: ~40%]";
+    type = "article";
+  } else if (requestPath.startsWith("/case-study/case-02")) {
+    title = "Ecosystem Integration & Visibility | Strategic Systems Case Study";
+    desc = "Resolved systemic friction by bridging cross-functional data silos, replacing manual firefighting with automated status visibility. [OPERATIONAL CLARITY: 100%]";
+    type = "article";
+  } else if (requestPath.startsWith("/case-study/case-03")) {
+    title = "Systems-First Transformation | Strategic Systems Case Study";
+    desc = "Re-engineered a fragmented technical environment into a modular, user-centric SaaS ecosystem, unblocking high-throughput adoption. [USER SIGN-UPS GROWTH: +40%]";
+    type = "article";
+  } else if (requestPath === "/diagnostic") {
+    title = "Strategic Assessment Console | Evangeline Joseph";
+    desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
+  }
+
+  const url = `${hostUrl}${requestPath}`;
+
+  // Replace content dynamically
+  let result = htmlTemplate;
+  
+  // Replace title tag
+  result = result.replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`);
+  
+  // Replace meta tags helper
+  const replaceOrInsertMeta = (html: string, nameOrProperty: string, isProperty: boolean, content: string): string => {
+    const attribute = isProperty ? "property" : "name";
+    const regex = new RegExp(`<meta\\s+[^>]*${attribute}=["']${nameOrProperty}["'][^>]*content=["']([^"']*)["'][^>]*>`, 'i');
+    const alternativeRegex = new RegExp(`<meta\\s+[^>]*content=["']([^"']*)["'][^>]*${attribute}=["']${nameOrProperty}["'][^>]*>`, 'i');
+    
+    const replacement = `<meta ${attribute}="${nameOrProperty}" content="${content.replace(/"/g, '&quot;')}" />`;
+    
+    if (regex.test(html)) {
+      return html.replace(regex, replacement);
+    } else if (alternativeRegex.test(html)) {
+      return html.replace(alternativeRegex, replacement);
+    } else {
+      // If not found, insert before </head>
+      return html.replace('</head>', `  ${replacement}\n</head>`);
+    }
+  };
+
+  result = replaceOrInsertMeta(result, "description", false, desc);
+  result = replaceOrInsertMeta(result, "og:title", true, title);
+  result = replaceOrInsertMeta(result, "og:description", true, desc);
+  result = replaceOrInsertMeta(result, "og:url", true, url);
+  result = replaceOrInsertMeta(result, "og:type", true, type);
+  result = replaceOrInsertMeta(result, "twitter:title", false, title);
+  result = replaceOrInsertMeta(result, "twitter:description", false, desc);
+
+  return result;
+}
+
 // Initialize Vite server or production server
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
@@ -1356,9 +1451,23 @@ async function startServer() {
   } else {
     // Production serves client static bundle from dist/
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    // Keep serving assets as static files, except standard html requests
+    app.use(express.static(distPath, { index: false }));
+    
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const indexPath = path.join(distPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        try {
+          const htmlTemplate = fs.readFileSync(indexPath, 'utf-8');
+          const dynamicHtml = getDynamicSEOHTML(htmlTemplate, req.path, `https://${req.get('host') || 'evangelinejoseph.com'}`);
+          res.send(dynamicHtml);
+        } catch (err) {
+          console.error("Error generating dynamic SEO index.html", err);
+          res.sendFile(indexPath);
+        }
+      } else {
+        res.status(404).send("Application shell is still building, please refresh in a moment.");
+      }
     });
   }
 
