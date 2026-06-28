@@ -472,7 +472,7 @@ export default function App() {
                           }}
                           className="bg-primary text-white px-8 py-3.5 font-mono text-xs uppercase tracking-widest hover:bg-secondary hover:shadow-[0_0_15px_rgba(154,123,79,0.3)] focus:bg-secondary transition-all flex items-center gap-3 cursor-pointer rounded-xl"
                         >
-                          Diagnose My Business
+                          Start Northbound
                           <ArrowRight size={14} className="text-secondary" />
                         </a>
 

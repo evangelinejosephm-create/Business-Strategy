@@ -1421,7 +1421,7 @@ ${result.blueprint}`;
                 </>
               ) : (
                 <>
-                  Generate Strategic Assessment
+                  Go Northbound
                   <ArrowUpRight size={16} />
                 </>
               )}
