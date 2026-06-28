@@ -1398,7 +1398,7 @@ function getDynamicSEOHTML(htmlTemplate: string, requestPath: string, hostUrl: s
     desc = "Re-engineered a fragmented technical environment into a modular, user-centric SaaS ecosystem, unblocking high-throughput adoption. [USER SIGN-UPS GROWTH: +40%]";
     type = "article";
   } else if (requestPath === "/diagnostic") {
-    title = "Strategic Assessment Console | Evangeline Joseph";
+    title = "Northbound | Evangeline Joseph";
     desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
   }
 

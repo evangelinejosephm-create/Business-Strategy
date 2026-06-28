@@ -133,7 +133,7 @@ export default function App() {
         type = "article";
       }
     } else if (typeof window !== "undefined" && window.location.pathname === "/diagnostic") {
-      title = "Strategic Assessment Console | Evangeline Joseph";
+      title = "Northbound | Evangeline Joseph";
       desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
     }
 
@@ -273,7 +273,7 @@ export default function App() {
               Outcomes
             </a>
             <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }}>
-              Strategy Console
+              Northbound
             </a>
             <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("about"); }}>
               About
@@ -314,7 +314,7 @@ export default function App() {
               onClick={() => handleNavClick("diagnostic")}
               className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
             >
-              Strategy Console
+              Northbound
             </a>
             <a 
               onClick={() => handleNavClick("about")}
@@ -896,13 +896,13 @@ export default function App() {
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl mb-12">
               <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
-                02 // AUTOMATED INTERFERENCE COMPILER
+                02//Automated Strategy Checkpoint
               </span>
               <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-4">
-                Strategic Assessment Console
+                Northbound
               </h2>
               <p className="text-on-surface-variant text-base leading-relaxed">
-                Designed to provide an initial evaluation of your business landscape, growth objectives, and strategic challenges. The resulting assessment highlights potential areas of opportunity, underlying constraints, and considerations that may warrant further analysis.
+                Not every business challenge needs an immediate solution. Sometimes it needs a better question. Northbound helps you find it.
               </p>
             </div>
 
@@ -1140,7 +1140,7 @@ export default function App() {
               <h5 className="font-mono text-xs font-bold text-secondary tracking-wider uppercase mb-4">SITEMAP</h5>
               <ul className="space-y-2 text-xs text-slate-400">
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("services"); }} className="hover:text-secondary transition-colors cursor-pointer block">Outcomes</a></li>
-                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Assessment Console</a></li>
+                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Northbound</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("about"); }} className="hover:text-secondary transition-colors cursor-pointer block">About</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }} className="hover:text-secondary transition-colors cursor-pointer block">Case Library</a></li>
               </ul>
@@ -1150,7 +1150,7 @@ export default function App() {
               <h5 className="font-mono text-xs font-bold text-secondary tracking-wider uppercase mb-4">INTERACTIVES</h5>
               <ul className="space-y-2 text-xs text-slate-400">
                 <li><a onClick={(e) => { e.preventDefault(); setIsSchedulerOpen(true); }} className="hover:text-secondary transition-colors cursor-pointer block">Discovery Scheduler</a></li>
-                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Strategy Console</a></li>
+                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Northbound</a></li>
               </ul>
             </div>
 
