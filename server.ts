@@ -76,7 +76,19 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
           return response.text;
         }
       } catch (err: any) {
-        console.log(`[GEMINI API INFO] Model ${activeModel} (attempt ${attempt + 1}/${maxRetries + 1}) is currently not responsive:`, err.message || err);
+        let displayMsg = String(err.message || err);
+        try {
+          if (displayMsg.startsWith("{") || displayMsg.includes('{"error"')) {
+            const parsed = JSON.parse(displayMsg);
+            if (parsed && parsed.error && parsed.error.message) {
+              displayMsg = `Code ${parsed.error.code || 503}: ${parsed.error.message} (${parsed.error.status || 'UNAVAILABLE'})`;
+            }
+          }
+        } catch (pErr) {
+          // Fallback to original string if not parsable
+        }
+
+        console.log(`[GEMINI API INFO] Model ${activeModel} (attempt ${attempt + 1}/${maxRetries + 1}) is busy or unresponsive: ${displayMsg}`);
         lastError = err;
 
         // Abort immediately if we detect a credential/API key error to prevent serverless execution timeout
@@ -89,14 +101,14 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
           errMsg.includes("403") || 
           errMsg.includes("400")
         ) {
-          console.log("[GEMINI API INFO] Detected credential or authorization error. Aborting retry loop immediately.");
+          console.log("[GEMINI API INFO] Detected credential or authorization issue. Aborting retry loop immediately.");
           throw err;
         }
 
         // If it's not a 503/429/unavailable transient error, we can stop retrying this specific model and move to the next one
         const isTransient = errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("demand") || errMsg.includes("limit") || errMsg.includes("overloaded") || errMsg.includes("429");
         if (!isTransient) {
-          console.log(`[GEMINI API INFO] Non-transient error encountered. Moving to next model.`);
+          console.log(`[GEMINI API INFO] Non-transient status encountered. Moving to next model.`);
           break; // Break inner loop, move to next model
         }
       }
