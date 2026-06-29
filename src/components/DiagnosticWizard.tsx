@@ -1512,38 +1512,50 @@ ${result.blueprint}`;
                 {(() => {
                   const parsed = parseStrategicReport(result.blueprint);
                   if (parsed) {
-                    return <StructuredBlueprintView parsed={parsed} />;
+                    return (
+                      <div className="space-y-8">
+                        <StructuredBlueprintView parsed={parsed} />
+                        <div className="pt-6 border-t border-outline-variant/30 text-xs text-slate-500 italic font-normal">
+                          Northbound offers perspective, not certainty. The best decisions still begin with you.
+                        </div>
+                      </div>
+                    );
                   }
 
                   // Legacy / general markdown fallback
                   return (
-                    <div className="prose prose-slate max-w-none prose-sm">
-                      {result.blueprint.split("\n").map((line, index) => {
-                        const cleanLine = line.trim();
-                        if (cleanLine.startsWith("###") || cleanLine.startsWith("##")) {
-                          return (
-                            <h5 key={index} className="font-bold text-primary mt-6 mb-3 border-b border-outline-variant/30 pb-1.5 uppercase tracking-tight font-sans text-sm">
-                              {cleanLine.replace(/###|##/g, "").trim()}
-                            </h5>
-                          );
-                        } else if (cleanLine.match(/^\d+\./)) {
-                          return (
-                            <h5 key={index} className="font-bold text-primary mt-6 mb-3 border-b border-outline-variant/30 pb-1.5 uppercase tracking-tight font-sans text-sm">
-                              {cleanLine}
-                            </h5>
-                          );
-                        } else if (cleanLine.startsWith("-") || cleanLine.startsWith("*")) {
-                          return (
-                            <li key={index} className="ml-4 list-disc text-xs text-on-surface-variant font-sans leading-relaxed mb-1">
-                              {cleanLine.substring(1).trim()}
-                            </li>
-                          );
-                        } else if (cleanLine === "") {
-                          return <div key={index} className="h-4" />;
-                        } else {
-                          return <p key={index} className="text-xs text-on-surface-variant leading-relaxed font-sans">{cleanLine}</p>;
-                        }
-                      })}
+                    <div className="space-y-8">
+                      <div className="prose prose-slate max-w-none prose-sm">
+                        {result.blueprint.split("\n").map((line, index) => {
+                          const cleanLine = line.trim();
+                          if (cleanLine.startsWith("###") || cleanLine.startsWith("##")) {
+                            return (
+                              <h5 key={index} className="font-bold text-primary mt-6 mb-3 border-b border-outline-variant/30 pb-1.5 uppercase tracking-tight font-sans text-sm">
+                                {cleanLine.replace(/###|##/g, "").trim()}
+                              </h5>
+                            );
+                          } else if (cleanLine.match(/^\d+\./)) {
+                            return (
+                              <h5 key={index} className="font-bold text-primary mt-6 mb-3 border-b border-outline-variant/30 pb-1.5 uppercase tracking-tight font-sans text-sm">
+                                {cleanLine}
+                              </h5>
+                            );
+                          } else if (cleanLine.startsWith("-") || cleanLine.startsWith("*")) {
+                            return (
+                              <li key={index} className="ml-4 list-disc text-xs text-on-surface-variant font-sans leading-relaxed mb-1">
+                                {cleanLine.substring(1).trim()}
+                              </li>
+                            );
+                          } else if (cleanLine === "") {
+                            return <div key={index} className="h-4" />;
+                          } else {
+                            return <p key={index} className="text-xs text-on-surface-variant leading-relaxed font-sans">{cleanLine}</p>;
+                          }
+                        })}
+                      </div>
+                      <div className="pt-6 border-t border-outline-variant/30 text-xs text-slate-500 italic font-normal">
+                        Northbound offers perspective, not certainty. The best decisions still begin with you.
+                      </div>
                     </div>
                   );
                 })()}

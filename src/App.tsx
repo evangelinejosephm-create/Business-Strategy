@@ -460,7 +460,7 @@ export default function App() {
                       <p 
                         className="font-sans text-base md:text-lg text-on-surface-variant max-w-2xl mb-8 leading-relaxed"
                       >
-                        A consultant-style strategic assessment powered by AI — in <strong className="font-bold text-primary">15 mins</strong>.
+                        Every next move starts with why – <strong className="font-bold italic text-primary">Find yours in 15 minutes</strong>
                       </p>
 
                       <div className="flex flex-wrap gap-4 justify-center items-center">
