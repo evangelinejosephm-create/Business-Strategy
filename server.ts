@@ -1509,7 +1509,27 @@ async function startServer() {
   });
 }
 
-if (!process.env.VERCEL) {
+if (process.env.VERCEL) {
+  // On Vercel, configure production routes on import, but do not start listener
+  const distPath = path.join(process.cwd(), 'dist');
+  app.use(express.static(distPath, { index: false }));
+  
+  app.get('*', (req, res) => {
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      try {
+        const htmlTemplate = fs.readFileSync(indexPath, 'utf-8');
+        const dynamicHtml = getDynamicSEOHTML(htmlTemplate, req.path, `https://${req.get('host') || 'evangelinejoseph.com'}`);
+        res.send(dynamicHtml);
+      } catch (err) {
+        console.error("Error generating dynamic SEO index.html", err);
+        res.sendFile(indexPath);
+      }
+    } else {
+      res.status(404).send("Application shell is still building, please refresh in a moment.");
+    }
+  });
+} else {
   startServer();
 }
 
