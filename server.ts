@@ -1433,6 +1433,15 @@ function getDynamicSEOHTML(htmlTemplate: string, requestPath: string, hostUrl: s
   } else if (requestPath === "/northbound") {
     title = "Northbound | Evangeline Joseph";
     desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
+  } else if (requestPath === "/outcomes") {
+    title = "Outcomes | Evangeline Joseph";
+    desc = "Unlock predictable SaaS growth paths, design CRM and webhook synchronization, and eliminate systems friction.";
+  } else if (requestPath === "/about") {
+    title = "About Evangeline Joseph | Technical Product Operations Strategist";
+    desc = "Senior strategic product operations director partner. Former MSME architect and Accenture consultant.";
+  } else if (requestPath === "/caselibrary") {
+    title = "Case Library | Evangeline Joseph";
+    desc = "Examine strategic systems engineering interventions and business growth outcomes.";
   }
 
   const url = `${hostUrl}${requestPath}`;

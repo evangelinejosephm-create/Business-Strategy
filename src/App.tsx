@@ -75,11 +75,13 @@ export default function App() {
 
   // SPA router state for active case studies
   const [selectedCaseStudyId, setSelectedCaseStudyId] = useState<string | null>(null);
+  const [currentRoute, setCurrentRoute] = useState(() => typeof window !== "undefined" ? window.location.pathname : "/");
 
   // Path parsing on load & back/forward history handling
   React.useEffect(() => {
     const handleUrlRouting = () => {
       const path = window.location.pathname;
+      setCurrentRoute(path);
       const caseStudyMatch = path.match(/^\/case-study\/([^/]+)/);
       if (caseStudyMatch) {
         setSelectedCaseStudyId(caseStudyMatch[1]);
@@ -87,6 +89,24 @@ export default function App() {
         setSelectedCaseStudyId(null);
         setTimeout(() => {
           const el = document.getElementById("diagnostic");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      } else if (path === "/outcomes") {
+        setSelectedCaseStudyId(null);
+        setTimeout(() => {
+          const el = document.getElementById("services");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      } else if (path === "/about") {
+        setSelectedCaseStudyId(null);
+        setTimeout(() => {
+          const el = document.getElementById("about");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      } else if (path === "/caselibrary") {
+        setSelectedCaseStudyId(null);
+        setTimeout(() => {
+          const el = document.getElementById("case-studies");
           if (el) el.scrollIntoView({ behavior: "smooth" });
         }, 300);
       } else {
@@ -106,14 +126,15 @@ export default function App() {
       const targetPath = `/case-study/${selectedCaseStudyId}`;
       if (currentPath !== targetPath) {
         window.history.pushState({ caseStudyId: selectedCaseStudyId }, "", targetPath);
+        setCurrentRoute(targetPath);
       }
     } else {
-      const isDiag = window.location.pathname === "/northbound";
-      const targetPath = isDiag ? "/northbound" : "/";
-      if (currentPath !== "/" && currentPath !== "/northbound" && !currentPath.startsWith("/case-study/")) {
-        // preserve other custom subpages if any
-      } else if (currentPath.startsWith("/case-study/")) {
-        window.history.pushState(null, "", "/");
+      const validPaths = ["/northbound", "/outcomes", "/about", "/caselibrary"];
+      if (!validPaths.includes(currentPath) && currentPath !== "/") {
+        if (currentPath.startsWith("/case-study/")) {
+          window.history.pushState(null, "", "/");
+          setCurrentRoute("/");
+        }
       }
     }
   }, [selectedCaseStudyId]);
@@ -132,9 +153,18 @@ export default function App() {
         desc = `${study.description} [${study.metricLabel}: ${study.value}]`;
         type = "article";
       }
-    } else if (typeof window !== "undefined" && window.location.pathname === "/northbound") {
+    } else if (currentRoute === "/northbound") {
       title = "Northbound | Evangeline Joseph";
       desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
+    } else if (currentRoute === "/outcomes") {
+      title = "Outcomes | Evangeline Joseph";
+      desc = "Unlock predictable SaaS growth paths, design CRM and webhook synchronization, and eliminate systems friction.";
+    } else if (currentRoute === "/about") {
+      title = "About Evangeline Joseph | Technical Product Operations Strategist";
+      desc = "Senior strategic product operations director partner. Former MSME architect and Accenture consultant.";
+    } else if (currentRoute === "/caselibrary") {
+      title = "Case Library | Evangeline Joseph";
+      desc = "Examine strategic systems engineering interventions and business growth outcomes.";
     }
 
     // Update document title
@@ -162,19 +192,25 @@ export default function App() {
     updateMetaTag('meta[name="twitter:title"]', 'content', title);
     updateMetaTag('meta[name="twitter:description"]', 'content', desc);
     updateMetaTag('meta[name="twitter:card"]', 'content', 'summary_large_image');
-  }, [selectedCaseStudyId]);
+  }, [selectedCaseStudyId, currentRoute]);
 
   const handleNavClick = (sectionId: string) => {
     setSelectedCaseStudyId(null);
     setIsMobileMenuOpen(false);
+    let targetPath = "/";
     if (sectionId === "diagnostic") {
-      if (window.location.pathname !== "/northbound") {
-        window.history.pushState(null, "", "/northbound");
-      }
-    } else {
-      if (window.location.pathname !== "/") {
-        window.history.pushState(null, "", "/");
-      }
+      targetPath = "/northbound";
+    } else if (sectionId === "services") {
+      targetPath = "/outcomes";
+    } else if (sectionId === "about") {
+      targetPath = "/about";
+    } else if (sectionId === "case-studies") {
+      targetPath = "/caselibrary";
+    }
+
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, "", targetPath);
+      setCurrentRoute(targetPath);
     }
     setTimeout(() => {
       const el = document.getElementById(sectionId);
@@ -183,6 +219,74 @@ export default function App() {
       }
     }, 50);
   };
+
+  const handleHomeClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setSelectedCaseStudyId(null);
+    setIsMobileMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      window.history.pushState(null, "", "/");
+      setCurrentRoute("/");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Scroll spying to update URL when user scrolls through sections
+  React.useEffect(() => {
+    if (selectedCaseStudyId) return;
+
+    const sections = [
+      { id: "diagnostic", path: "/northbound" },
+      { id: "services", path: "/outcomes" },
+      { id: "about", path: "/about" },
+      { id: "case-studies", path: "/caselibrary" }
+    ];
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "-30% 0px -40% 0px", // Trigger when the section occupies a good chunk of viewport
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const section = sections.find(s => s.id === entry.target.id);
+          if (section) {
+            const currentPath = window.location.pathname;
+            if (currentPath !== section.path) {
+              window.history.replaceState(null, "", section.path);
+              setCurrentRoute(section.path);
+            }
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    sections.forEach((sec) => {
+      const el = document.getElementById(sec.id);
+      if (el) observer.observe(el);
+    });
+
+    const handleScroll = () => {
+      if (window.scrollY < 200) {
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/") {
+          window.history.replaceState(null, "", "/");
+          setCurrentRoute("/");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [selectedCaseStudyId]);
 
   // Custom interactive Pricing / Sprints Planner State
   const [selectedSprint, setSelectedSprint] = useState("architecture");
@@ -260,7 +364,7 @@ export default function App() {
       <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-outline-variant/30">
         <div className="max-w-7xl mx-auto px-6 md:px-16 py-5 flex justify-between items-center w-full">
           <div 
-            onClick={() => setSelectedCaseStudyId(null)}
+            onClick={handleHomeClick}
             id="author-signature" 
             className="font-sans font-extrabold text-lg tracking-tighter text-primary cursor-pointer select-none"
           >
@@ -269,16 +373,28 @@ export default function App() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }}>
+            <a 
+              className={`font-mono text-xs tracking-wider uppercase transition-colors cursor-pointer ${currentRoute === "/northbound" ? "text-secondary font-bold" : "text-on-surface-variant hover:text-secondary"}`} 
+              onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }}
+            >
               Northbound
             </a>
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("services"); }}>
+            <a 
+              className={`font-mono text-xs tracking-wider uppercase transition-colors cursor-pointer ${currentRoute === "/outcomes" ? "text-secondary font-bold" : "text-on-surface-variant hover:text-secondary"}`} 
+              onClick={(e) => { e.preventDefault(); handleNavClick("services"); }}
+            >
               Outcomes
             </a>
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("about"); }}>
+            <a 
+              className={`font-mono text-xs tracking-wider uppercase transition-colors cursor-pointer ${currentRoute === "/about" ? "text-secondary font-bold" : "text-on-surface-variant hover:text-secondary"}`} 
+              onClick={(e) => { e.preventDefault(); handleNavClick("about"); }}
+            >
               About
             </a>
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }}>
+            <a 
+              className={`font-mono text-xs tracking-wider uppercase transition-colors cursor-pointer ${currentRoute === "/caselibrary" ? "text-secondary font-bold" : "text-on-surface-variant hover:text-secondary"}`} 
+              onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }}
+            >
               Case Library
             </a>
             <a 
@@ -306,25 +422,25 @@ export default function App() {
           <div className="flex flex-col space-y-6">
             <a 
               onClick={() => handleNavClick("diagnostic")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
+              className={`font-mono text-sm tracking-widest uppercase border-b pb-2 cursor-pointer transition-colors ${currentRoute === "/northbound" ? "text-secondary border-secondary font-bold" : "text-primary border-outline-variant hover:text-secondary"}`} 
             >
               Northbound
             </a>
             <a 
               onClick={() => handleNavClick("services")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
+              className={`font-mono text-sm tracking-widest uppercase border-b pb-2 cursor-pointer transition-colors ${currentRoute === "/outcomes" ? "text-secondary border-secondary font-bold" : "text-primary border-outline-variant hover:text-secondary"}`} 
             >
               Outcomes
             </a>
             <a 
               onClick={() => handleNavClick("about")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
+              className={`font-mono text-sm tracking-widest uppercase border-b pb-2 cursor-pointer transition-colors ${currentRoute === "/about" ? "text-secondary border-secondary font-bold" : "text-primary border-outline-variant hover:text-secondary"}`} 
             >
               About
             </a>
             <a 
               onClick={() => handleNavClick("case-studies")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
+              className={`font-mono text-sm tracking-widest uppercase border-b pb-2 cursor-pointer transition-colors ${currentRoute === "/caselibrary" ? "text-secondary border-secondary font-bold" : "text-primary border-outline-variant hover:text-secondary"}`} 
             >
               Case Library
             </a>
