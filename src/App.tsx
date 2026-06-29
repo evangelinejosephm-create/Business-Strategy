@@ -344,6 +344,12 @@ export default function App() {
         throw new Error("Strategic pipeline rejected the briefing submission.");
       }
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Non-JSON response received from /api/contact");
+        throw new Error("The strategic server was restarting or unresponsive. Please wait 5 seconds and try again.");
+      }
+
       const data = await response.json();
       setSubmitSuccessMessage(data.message || "I will process your system metrics against current pipeline capacities and send structured suggestions in 24 hours.");
       setSubmitStatus("success");

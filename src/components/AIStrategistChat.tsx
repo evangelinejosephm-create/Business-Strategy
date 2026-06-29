@@ -54,6 +54,12 @@ export default function AIStrategistChat({ onClose }: AIStrategistChatProps) {
         throw new Error("Chat sequence rejected.");
       }
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Non-JSON response received from /api/chat");
+        throw new Error("The strategic server was restarting or unresponsive. Please wait 5 seconds and try again.");
+      }
+
       const data = await response.json();
 
       const assistantMsg: ChatMessage = {

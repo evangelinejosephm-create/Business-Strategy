@@ -1240,6 +1240,12 @@ ${result.blueprint}`;
         throw new Error("Audit generation rejected by backend.");
       }
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Non-JSON response received from /api/audit");
+        throw new Error("The strategic server was restarting or unresponsive. Please wait 5 seconds and try again.");
+      }
+
       const data = await response.json();
       setResult(data);
     } catch (err: any) {
