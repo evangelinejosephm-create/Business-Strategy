@@ -269,11 +269,11 @@ export default function App() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("services"); }}>
-              Outcomes
-            </a>
             <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }}>
               Northbound
+            </a>
+            <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("services"); }}>
+              Outcomes
             </a>
             <a className="font-mono text-xs tracking-wider uppercase text-on-surface-variant hover:text-secondary transition-colors cursor-pointer" onClick={(e) => { e.preventDefault(); handleNavClick("about"); }}>
               About
@@ -305,16 +305,16 @@ export default function App() {
         <div className="fixed inset-x-0 bottom-0 top-[65px] bg-white z-40 flex flex-col p-8 border-t border-outline-variant/30 justify-between overflow-y-auto">
           <div className="flex flex-col space-y-6">
             <a 
-              onClick={() => handleNavClick("services")}
-              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
-            >
-              Outcomes
-            </a>
-            <a 
               onClick={() => handleNavClick("diagnostic")}
               className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
             >
               Northbound
+            </a>
+            <a 
+              onClick={() => handleNavClick("services")}
+              className="font-mono text-sm tracking-widest uppercase text-primary border-b border-outline-variant pb-2 cursor-pointer" 
+            >
+              Outcomes
             </a>
             <a 
               onClick={() => handleNavClick("about")}
@@ -503,6 +503,33 @@ export default function App() {
               </div>
             </section>
 
+        {/* 5. REAL-TIME INTERACTIVE DIAGNOSTIC INTEGRATOR (WIDGET DOCK) */}
+        <motion.section 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="py-28 px-6 md:px-16 bg-surface-container-low border-b border-outline-variant scroll-mt-20" 
+          id="diagnostic"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl mb-12">
+              <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
+                01 // Automated Strategy Checkpoint
+              </span>
+              <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-4">
+                Northbound
+              </h2>
+              <p className="text-on-surface-variant text-base leading-relaxed">
+                Not every business challenge needs an immediate solution. Sometimes it needs a better question. Northbound helps you find it.
+              </p>
+            </div>
+
+            {/* Imported Live Diagnostic Wizard Component */}
+            <DiagnosticWizard />
+          </div>
+        </motion.section>
+
         {/* 4. ENGINEERED OUTCOMES */}
         <motion.section 
           initial={{ opacity: 0, y: 40 }}
@@ -517,7 +544,7 @@ export default function App() {
             {/* Header block with outcome narrative */}
             <div className="max-w-3xl mx-auto text-center mb-16">
               <span className="font-mono text-xs text-secondary tracking-[0.25em] uppercase block mb-3 font-bold">
-                01 // OUTCOME-DRIVEN PARTNERSHIPS
+                02 // OUTCOME-DRIVEN PARTNERSHIPS
               </span>
               <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-6">
                 Engineered Outcomes
@@ -884,32 +911,7 @@ export default function App() {
           </div>
         </motion.section>
 
-        {/* 5. REAL-TIME INTERACTIVE DIAGNOSTIC INTEGRATOR (WIDGET DOCK) */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="py-28 px-6 md:px-16 bg-surface-container-low border-b border-outline-variant scroll-mt-20" 
-          id="diagnostic"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-3xl mb-12">
-              <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
-                02//Automated Strategy Checkpoint
-              </span>
-              <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-4">
-                Northbound
-              </h2>
-              <p className="text-on-surface-variant text-base leading-relaxed">
-                Not every business challenge needs an immediate solution. Sometimes it needs a better question. Northbound helps you find it.
-              </p>
-            </div>
 
-            {/* Imported Live Diagnostic Wizard Component */}
-            <DiagnosticWizard />
-          </div>
-        </motion.section>
 
         {/* 6. ABOUT THE STRATEGIST SECTION */}
         <motion.section 
@@ -1139,8 +1141,8 @@ export default function App() {
             <div>
               <h5 className="font-mono text-xs font-bold text-secondary tracking-wider uppercase mb-4">SITEMAP</h5>
               <ul className="space-y-2 text-xs text-slate-400">
-                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("services"); }} className="hover:text-secondary transition-colors cursor-pointer block">Outcomes</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("diagnostic"); }} className="hover:text-secondary transition-colors cursor-pointer block">Northbound</a></li>
+                <li><a onClick={(e) => { e.preventDefault(); handleNavClick("services"); }} className="hover:text-secondary transition-colors cursor-pointer block">Outcomes</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("about"); }} className="hover:text-secondary transition-colors cursor-pointer block">About</a></li>
                 <li><a onClick={(e) => { e.preventDefault(); handleNavClick("case-studies"); }} className="hover:text-secondary transition-colors cursor-pointer block">Case Library</a></li>
               </ul>

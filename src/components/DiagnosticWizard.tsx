@@ -1362,30 +1362,10 @@ ${result.blueprint}`;
               <textarea
                 value={problemText}
                 onChange={(e) => setProblemText(e.target.value)}
-                placeholder="Type additional details or select from the options below..."
-                rows={2}
+                placeholder="Describe your current process, friction points, or specific challenges..."
+                rows={4}
                 className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg mb-3 resize-none"
               />
-              <div className="flex flex-wrap gap-2">
-                {(PROBLEM_OPTIONS[bottleneck] || []).map((opt) => {
-                  const isSelected = problemText.toLowerCase().includes(opt.toLowerCase());
-                  return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => toggleProblemCategory(opt)}
-                      className={`px-3.5 py-2 rounded-lg text-xs font-sans border transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
-                        isSelected
-                          ? "bg-secondary text-white border-secondary shadow-xs font-medium"
-                          : "bg-surface-dim text-on-surface-variant border-outline hover:bg-surface-container hover:text-primary"
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-lg transition-colors duration-150 ${isSelected ? "bg-white" : "bg-secondary/45"}`} />
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             <div>
