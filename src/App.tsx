@@ -639,20 +639,24 @@ export default function App() {
               <p className="text-on-surface-variant text-base leading-relaxed">
                 Not every business challenge needs an immediate solution. Sometimes it needs a better question. Northbound helps you find it.
               </p>
-              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-mono text-primary/70 uppercase tracking-wider">
-                <span className="font-bold text-primary/90">Built using:</span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-secondary font-bold">•</span> Public company signals
+              <div className="mt-5 space-y-2">
+                <span className="text-xs font-mono font-semibold text-primary/60 uppercase tracking-widest block">
+                  Built using:
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-secondary font-bold">•</span> Industry benchmarking
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-secondary font-bold">•</span> Strategy frameworks
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-secondary font-bold">•</span> AI reasoning
-                </span>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono text-primary/80 uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-secondary font-bold">•</span> Public company signals
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-secondary font-bold">•</span> Industry benchmarking
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-secondary font-bold">•</span> Strategy frameworks
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-secondary font-bold">•</span> AI reasoning
+                  </span>
+                </div>
               </div>
             </div>
 
