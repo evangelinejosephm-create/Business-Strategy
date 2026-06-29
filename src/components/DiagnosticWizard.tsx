@@ -378,6 +378,15 @@ const INDUSTRY_OPTIONS = [
   "Media & Marketing"
 ];
 
+const PROGRESS_STEPS = [
+  "Analyzing company website...",
+  "Understanding business model...",
+  "Benchmarking industry...",
+  "Building issue tree...",
+  "Prioritizing bottlenecks...",
+  "Preparing executive summary..."
+];
+
 export default function DiagnosticWizard() {
   const [companyName, setCompanyName] = useState(() => {
     if (typeof window !== "undefined") {
@@ -431,6 +440,7 @@ export default function DiagnosticWizard() {
     return "";
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [result, setResult] = useState<DiagnosticResult | null>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("diag_result");
@@ -599,6 +609,27 @@ export default function DiagnosticWizard() {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // Sequential progress updates effect while analyzing
+  useEffect(() => {
+    let interval: any = null;
+    if (isLoading) {
+      setCurrentStepIndex(0);
+      interval = setInterval(() => {
+        setCurrentStepIndex((prev) => {
+          if (prev < PROGRESS_STEPS.length - 1) {
+            return prev + 1;
+          }
+          return prev;
+        });
+      }, 1800); // Step updates every 1.8 seconds to feel organic
+    } else {
+      setCurrentStepIndex(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
 
   // Persist diagnostic progress and answers to local storage
   useEffect(() => {
@@ -1350,10 +1381,9 @@ ${result.blueprint}`;
               className="w-full py-4 bg-primary text-white font-mono hover:bg-secondary focus:bg-secondary transition-all flex items-center justify-center gap-2 cursor-pointer font-bold tracking-wider rounded-lg"
             >
               {isLoading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin text-white w-4 h-4" />
-                  Analyzing...
-                </>
+                <span className="flex items-center gap-1">
+                  Analyzing<span className="animate-pulse">.</span><span className="animate-pulse [animation-delay:0.2s]">.</span><span className="animate-pulse [animation-delay:0.4s]">.</span>
+                </span>
               ) : (
                 <>
                   Go Northbound
@@ -1367,11 +1397,76 @@ ${result.blueprint}`;
         {/* Right Output Strategic Blueprint Panel */}
         <div className="lg:col-span-7 bg-white border border-outline p-6 flex flex-col relative lg:h-[760px] min-h-[480px] overflow-hidden rounded-lg shadow-[0_4px_24px_rgba(21,25,18,0.02)]">
           {isLoading && (
-            <div className="absolute inset-0 bg-white/75 flex flex-col items-center justify-center p-6 z-10">
-              <Loader2 size={36} className="animate-spin text-secondary mb-4" />
-              <p className="font-mono text-xs text-primary/80 uppercase tracking-widest text-center max-w-sm">
-                Analyzing...
-              </p>
+            <div className="absolute inset-0 bg-white flex flex-col justify-center p-8 md:p-12 z-10">
+              <div className="max-w-md w-full mx-auto space-y-8">
+                {/* Visual Header */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono font-bold tracking-widest text-secondary uppercase block">
+                    Advisory Console // Systems Audit
+                  </span>
+                  <h3 className="font-sans font-extrabold text-xl text-primary tracking-tight">
+                    Running Strategic Diagnostics...
+                  </h3>
+                </div>
+
+                {/* Horizontal Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-secondary h-full transition-all duration-500 ease-out"
+                      style={{ width: `${((currentStepIndex + 1) / PROGRESS_STEPS.length) * 100}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center font-mono text-[9px] text-primary/40 uppercase tracking-wider">
+                    <span>Diagnostic Engine</span>
+                    <span>{Math.round(((currentStepIndex + 1) / PROGRESS_STEPS.length) * 100)}% Complete</span>
+                  </div>
+                </div>
+
+                {/* Sequential Steps List */}
+                <div className="space-y-3.5 pt-2">
+                  {PROGRESS_STEPS.map((step, idx) => {
+                    const isCompleted = idx < currentStepIndex;
+                    const isActive = idx === currentStepIndex;
+                    
+                    return (
+                      <div 
+                        key={idx} 
+                        className={`flex items-center gap-3.5 transition-all duration-300 ${
+                          isActive ? "translate-x-1" : ""
+                        }`}
+                      >
+                        {/* Status Indicator */}
+                        {isCompleted ? (
+                          <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100">
+                            <Check size={11} className="text-emerald-600 font-bold" />
+                          </div>
+                        ) : isActive ? (
+                          <div className="w-5 h-5 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-300 relative">
+                            <div className="absolute inset-0 rounded-full bg-amber-400/20 animate-ping" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                            <div className="w-1 h-1 rounded-full bg-slate-300" />
+                          </div>
+                        )}
+
+                        {/* Step Text */}
+                        <span 
+                          className={`text-xs font-mono tracking-wide ${
+                            isCompleted ? "text-slate-400 font-medium" :
+                            isActive ? "text-primary font-bold" :
+                            "text-slate-300 font-normal"
+                          }`}
+                        >
+                          {step}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
