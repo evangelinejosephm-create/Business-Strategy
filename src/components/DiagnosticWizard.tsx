@@ -50,19 +50,19 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
     const summaryText = getSectionText("EXECUTIVE SUMMARY") || getSectionText("EXECUTIVE DIAGNOSIS") || rawParts[1] || "";
     const executiveSummary = summaryText.trim();
 
-    // SECTION 2: KEY BOTTLENECKS
-    const bottlenecksText = getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
+    // SECTION 2: KEY SYSTEMIC GAPS
+    const bottlenecksText = getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
     const bottlenecksRaw = bottlenecksText.split(/(?=^\d+\.\s+)/m).map(b => b.trim()).filter(b => b.length > 0);
     const bottlenecks = bottlenecksRaw.slice(0, 5).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-      let title = lines[0] || `Bottleneck ${idx + 1}`;
-      title = title.replace(/^(\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, "").trim();
+      let title = lines[0] || `Gap ${idx + 1}`;
+      title = title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, "").trim();
 
       const rawTextLines: string[] = [];
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("description:")) {
-          rawTextLines.push(line.replace(/^description:\s*/i, "").trim());
+        if (lower.startsWith("description:") || lower.startsWith("gap:") || lower.startsWith("problem:")) {
+          rawTextLines.push(line.replace(/^(description|gap|problem):\s*/i, "").trim());
         } else if (lower.startsWith("what:")) {
           rawTextLines.push(line.replace(/^what:\s*/i, "").trim());
         } else if (lower.startsWith("why:")) {
@@ -142,8 +142,8 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
     const questionsText = getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[4] || "";
     const questions = questionsText.trim();
 
-    // SECTION 5: THINGS I WOULD FOCUS ON
-    const focusText = getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[5] || "";
+    // SECTION 5: WHERE TO FOCUS NEXT
+    const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[5] || "";
     const focusPoint = focusText.trim();
 
     return {
@@ -179,13 +179,13 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </p>
       </div>
 
-      {/* SECTION 2: KEY BOTTLENECKS */}
+      {/* SECTION 2: KEY SYSTEMIC GAPS */}
       {parsed.bottlenecks && parsed.bottlenecks.length > 0 && (
         <div className="space-y-5">
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <ShieldAlert size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              02 // KEY BOTTLENECKS
+              02 // KEY SYSTEMIC GAPS
             </h4>
             <span className="ml-auto text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
               3 min read
@@ -209,7 +209,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
 
                 <div className="text-xs font-sans text-slate-700">
                   <div className="bg-slate-50/50 border border-slate-100/80 p-4 rounded-xl space-y-1">
-                    <span className="text-[10px] font-mono text-rose-700 uppercase tracking-widest block font-bold">Bottleneck Description</span>
+                    <span className="text-[10px] font-mono text-rose-700 uppercase tracking-widest block font-bold">Gap Description / Problem Tree</span>
                     <p className="text-slate-800 leading-relaxed font-sans text-sm whitespace-pre-wrap">{bottleneck.description}</p>
                   </div>
                 </div>
@@ -283,16 +283,16 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </div>
       )}
 
-      {/* SECTION 5: THINGS I WOULD FOCUS ON */}
+      {/* SECTION 5: WHERE TO FOCUS NEXT */}
       {parsed.focusPoint && (
         <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-amber-500/10 pb-3">
             <Target size={18} className="text-amber-600" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-amber-900 font-bold">
-              05 // THINGS I WOULD FOCUS ON - CONSULTANT VIEW
+              05 // WHERE TO FOCUS NEXT - CONSULTANT VIEW
             </h4>
             <span className="ml-auto text-[10px] font-mono text-amber-700 uppercase tracking-wider font-bold">
-              High Priority Focus
+              Consultant POV
             </span>
           </div>
 

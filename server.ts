@@ -42,44 +42,63 @@ interface GenerateContentParams {
   config?: any;
 }
 
-// Resilient model caller: tries primary, stable secondary, and cost-efficient lite backup with fallback
+// Resilient model caller: tries primary, stable secondary, and cost-efficient lite backup with fallback and backoff retry for transient 503 errors
 async function generateContentWithRetry(params: GenerateContentParams): Promise<string> {
   const ai = getAi();
   if (!ai) {
     throw new Error("Missing Gemini Client / API Key.");
   }
 
-  const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite", "gemini-2.5-flash"];
+  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-2.5-flash"];
   let lastError: any = null;
 
   for (let i = 0; i < modelsToTry.length; i++) {
     const activeModel = modelsToTry[i];
-    try {
-      console.log(`[GEMINI API] Attempting generation with model: ${activeModel}`);
-      const response = await ai.models.generateContent({
-        ...params,
-        model: activeModel,
-      });
-      if (response && response.text) {
-        console.log(`[GEMINI API] Successfully generated content using: ${activeModel}`);
-        return response.text;
-      }
-    } catch (err: any) {
-      console.log(`[GEMINI API INFO] Model ${activeModel} is currently not responsive:`, err.message || err);
-      lastError = err;
+    const maxRetries = 2; // Retry the same model up to 2 times on transient errors
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const backoffDelay = attempt * 600; // 600ms, then 1200ms
+          console.log(`[GEMINI API] Attempt ${attempt + 1} for ${activeModel} after ${backoffDelay}ms transient error backoff.`);
+          await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+        } else {
+          console.log(`[GEMINI API] Attempting generation with model: ${activeModel}`);
+        }
 
-      // Abort immediately if we detect a credential/API key error to prevent serverless execution timeout
-      const errMsg = String(err.message || "").toLowerCase();
-      if (
-        errMsg.includes("api key") || 
-        errMsg.includes("invalid") || 
-        errMsg.includes("unauthorized") || 
-        errMsg.includes("permission") || 
-        errMsg.includes("403") || 
-        errMsg.includes("400")
-      ) {
-        console.log("[GEMINI API INFO] Detected credential or authorization error. Aborting retry loop immediately.");
-        break;
+        const response = await ai.models.generateContent({
+          ...params,
+          model: activeModel,
+        });
+
+        if (response && response.text) {
+          console.log(`[GEMINI API] Successfully generated content using: ${activeModel}`);
+          return response.text;
+        }
+      } catch (err: any) {
+        console.log(`[GEMINI API INFO] Model ${activeModel} (attempt ${attempt + 1}/${maxRetries + 1}) is currently not responsive:`, err.message || err);
+        lastError = err;
+
+        // Abort immediately if we detect a credential/API key error to prevent serverless execution timeout
+        const errMsg = String(err.message || "").toLowerCase();
+        if (
+          errMsg.includes("api key") || 
+          errMsg.includes("invalid") || 
+          errMsg.includes("unauthorized") || 
+          errMsg.includes("permission") || 
+          errMsg.includes("403") || 
+          errMsg.includes("400")
+        ) {
+          console.log("[GEMINI API INFO] Detected credential or authorization error. Aborting retry loop immediately.");
+          throw err;
+        }
+
+        // If it's not a 503/429/unavailable transient error, we can stop retrying this specific model and move to the next one
+        const isTransient = errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("demand") || errMsg.includes("limit") || errMsg.includes("overloaded") || errMsg.includes("429");
+        if (!isTransient) {
+          console.log(`[GEMINI API INFO] Non-transient error encountered. Moving to next model.`);
+          break; // Break inner loop, move to next model
+        }
       }
     }
   }
@@ -99,9 +118,9 @@ function getFallbackBlueprint(
 
   if (normalizedModel === "Product Strategy") {
     return `---SECTION 1: EXECUTIVE SUMMARY---
-The website of ${companyName} positions it as an innovator in the ${industry || "industry"} sector. To transition from broad developmental velocity to focused market leadership, the team must align current feature plans with validated customer adoption signals. Connecting these elements clears initial friction to deliver predictable, high-value user outcomes.
+The website of ${companyName} positions it as an innovator in the ${industry || "industry"} sector. To transition from broad developmental velocity to focused market leadership, the team must align current feature plans with validated customer adoption signals. Connecting these elements clears initial friction to deliver predictable, high-value user outcomes. This problem is highly legit and systemic for the given market stage.
 
----SECTION 2: KEY BOTTLENECKS---
+---SECTION 2: KEY SYSTEMIC GAPS---
 1. Broad Feature Plans
 Description: Development resources are distributed across multiple parallel feature enhancements based on internal plans, spreading engineering resources thin, delaying major updates, and preventing depth in core user actions.
 
@@ -119,15 +138,15 @@ Description: Historical product roadmaps are followed without regular adaptation
 
 ---SECTION 3: OPPORTUNITIES---
 1. Feature Consolidation
-What: Streamlining the product interface to focus on the top three high-adoption tools.
+What: Streamlining the product interface to focus on the top three high-adoption tools, validated against customer value.
 Why: Concentrating efforts on proven value sources increases user engagement and reduces maintenance costs.
 
 2. Clickable Prototyping
-What: Testing customer demand via clickable prototypes before writing production code.
+What: Testing customer demand via clickable prototypes before writing production code, validated against customer value.
 Why: Standardizing demand checks ensures every deployed feature directly matches verified customer interest.
 
 3. Context-Based Setup
-What: Introducing interactive onboarding steps tailored to distinct user profiles.
+What: Introducing interactive onboarding steps tailored to distinct user profiles, validated against customer value.
 Why: Assisting diverse cohorts during initial usage accelerates product adoption and expansion.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
@@ -138,16 +157,16 @@ However, it isn't yet clear:
 • which specific workflow has the highest abandonment rate
 Answering these questions will focus the roadmap on high-value initiatives.
 
----SECTION 5: THINGS I WOULD FOCUS ON---
-Things I would focus on - Consultant point of view
+---SECTION 5: WHERE TO FOCUS NEXT---
+Where to focus next - Consultant point of view
 I would immediately freeze all active development on secondary feature tracks and redirect one hundred percent of the team's engineering bandwidth to verify the usage metrics of the core product module. Focusing exclusively on establishing a clear adoption benchmark for primary actions before writing any new code is the single most beneficial initiative to stabilize product utility and secure the expected growth outcomes.`;
   }
 
   if (normalizedModel === "Customer Retention") {
     return `---SECTION 1: EXECUTIVE SUMMARY---
-The website of ${companyName} showcases a robust suite of ${industry || "digital"} services. To capture long-term lifetime value, leadership must transition from general support to proactive, structured onboarding paths. Guiding users to immediate product utility prevents early disengagement and secures predictable subscription renewal streams.
+The website of ${companyName} showcases a robust suite of ${industry || "digital"} services. To capture long-term lifetime value, leadership must transition from general support to proactive, structured onboarding paths. Guiding users to immediate product utility prevents early disengagement and secures predictable subscription renewal streams. This problem is highly legit and systemic for the given market stage.
 
----SECTION 2: KEY BOTTLENECKS---
+---SECTION 2: KEY SYSTEMIC GAPS---
 1. Extensive Registration Fields
 Description: Users face many form fields and configuration steps immediately after signing up, which drives away prospects before they experience core product benefits due to high upfront effort.
 
@@ -165,15 +184,15 @@ Description: Behavioral data is collected in separate tools with no single custo
 
 ---SECTION 3: OPPORTUNITIES---
 1. Simplified Entry Flow
-What: Restructuring the signup flow to defer non-essential profile questions to later sessions.
+What: Restructuring the signup flow to defer non-essential profile questions to later sessions, validated against customer value.
 Why: Lowering early entry barriers boosts conversion from signups to active users.
 
 2. Contextual Walkthroughs
-What: Deploying automated walkthroughs at key moments of high user intent.
+What: Deploying automated walkthroughs at key moments of high user intent, validated against customer value.
 Why: Directing users to high-value features establishes early product habits.
 
 3. Inactivity Alerts
-What: Configuring systems to notify team members when high-value accounts stop logging in.
+What: Configuring systems to notify team members when high-value accounts stop logging in, validated against customer value.
 Why: Initiating early outreach to inactive accounts resolves issues before churn occurs.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
@@ -184,16 +203,16 @@ However, it isn't yet clear:
 • which customer group has the lowest support request volume
 Answering these questions will redirect retention efforts to the most effective channels.
 
----SECTION 5: THINGS I WOULD FOCUS ON---
-Things I would focus on - Consultant point of view
+---SECTION 5: WHERE TO FOCUS NEXT---
+Where to focus next - Consultant point of view
 I would focus entirely on redesigning the first-mile signup experience to require under five input fields and delay all secondary profile setup configurations to the second user session. Simplifying this initial entry point is the most direct way to elevate first-week retention, reduce user drop-off, and increase the conversion rate of new signups to active product champions.`;
   }
 
   if (normalizedModel === "Operational Efficiency") {
     return `---SECTION 1: EXECUTIVE SUMMARY---
-The website of ${companyName} illustrates a highly specialized service delivery model in the ${industry || "business"} sector. To unlock scalable growth, the organization must centralize task tracking and replace repetitive manual coordination with automated status triggers. Eliminating these hand-off gaps recovers expert capacity to drive higher output.
+The website of ${companyName} illustrates a highly specialized service delivery model in the ${industry || "business"} sector. To unlock scalable growth, the organization must centralize task tracking and replace repetitive manual coordination with automated status triggers. Eliminating these hand-off gaps recovers expert capacity to drive higher output. This problem is highly legit and systemic for the given market stage.
 
----SECTION 2: KEY BOTTLENECKS---
+---SECTION 2: KEY SYSTEMIC GAPS---
 1. Disconnected Task Trackers
 Description: Separate departments use unlinked software applications to record project progress, making it difficult to get a real-time view of end-to-end operations.
 
@@ -211,15 +230,15 @@ Description: Primary operating tools rely on legacy databases without modern int
 
 ---SECTION 3: OPPORTUNITIES---
 1. Centralized Pipeline
-What: Creating a single, unified pipeline of work from initiation to completion.
+What: Creating a single, unified pipeline of work from initiation to completion, validated against customer value.
 Why: Providing complete visibility helps teams spot blockages before they impact clients.
 
 2. Automated Webhooks
-What: Connecting primary tracking systems to automate data sharing.
+What: Connecting primary tracking systems to automate data sharing, validated against customer value.
 Why: Removing manual data entry reclaims staff time and eliminates entry errors.
 
 3. Standardized Checklists
-What: Implementing formal quality checks at every transition stage.
+What: Implementing formal quality checks at every transition stage, validated against customer value.
 Why: Clear completion standards reduce rework and stabilize process speed.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
@@ -230,16 +249,16 @@ However, it isn't yet clear:
 • which tool integration will reclaim the most expert hours
 Answering these questions will pinpoint where to deploy automation first.
 
----SECTION 5: THINGS I WOULD FOCUS ON---
-Things I would focus on - Consultant point of view
+---SECTION 5: WHERE TO FOCUS NEXT---
+Where to focus next - Consultant point of view
 I would immediately centralize all operational tracking into a single shared pipeline view and establish mandatory quality checklists for every team transition point. Resolving this hand-off variance is the single most beneficial action to eliminate rework, stabilize project delivery times, and reclaim hours of senior staff capacity for strategic growth.`;
   }
 
   // Default: "Revenue Growth"
   return `---SECTION 1: EXECUTIVE SUMMARY---
-The website of ${companyName} highlights a compelling market solution in the ${industry || "technology"} domain. To convert strong customer interest into paying accounts, leadership must simplify the billing interface and align subscription packages with active usage moments. Streamlining this purchase path unlocks unearned revenue and accelerates business growth.
+The website of ${companyName} highlights a compelling market solution in the ${industry || "technology"} domain. To convert strong customer interest into paying accounts, leadership must simplify the billing interface and align subscription packages with active usage moments. Streamlining this purchase path unlocks unearned revenue and accelerates business growth. This problem is highly legit and systemic for the given market stage.
 
----SECTION 2: KEY BOTTLENECKS---
+---SECTION 2: KEY SYSTEMIC GAPS---
 1. Multi-Step Purchase Paths
 Description: Customers encounter multiple screen redirects and forms when attempting to buy, causing them to abandon purchases at the final decision point due to high checkout complexity.
 
@@ -257,15 +276,15 @@ Description: Funnel tracking only measures total visits and final transactions, 
 
 ---SECTION 3: OPPORTUNITIES---
 1. Single-Page Billing
-What: Transitioning from multi-step forms to a single-page checkout flow.
+What: Transitioning from multi-step forms to a single-page checkout flow, validated against customer value.
 Why: Removing buying hurdles turns existing user interest into paid sales immediately.
 
 2. Context-Based Prompts
-What: Presenting upgrade options contextually when resource caps are reached.
+What: Presenting upgrade options contextually when resource caps are reached, validated against customer value.
 Why: Prompting users at peak need increases trial-to-paid conversion rates.
 
 3. Differentiated Pricing Grid
-What: Simplifying pricing options down to three clearly differentiated plans.
+What: Simplifying pricing options down to three clearly differentiated plans, validated against customer value.
 Why: Reducing plan choices lowers buyer confusion and speeds up decisions.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
@@ -276,8 +295,8 @@ However, it isn't yet clear:
 • which payment method is most requested by abandoning visitors
 Answering these questions will optimize checkout and pricing structures for maximum lift.
 
----SECTION 5: THINGS I WOULD FOCUS ON---
-Things I would focus on - Consultant point of view
+---SECTION 5: WHERE TO FOCUS NEXT---
+Where to focus next - Consultant point of view
 I would focus entirely on replacing the multi-step checkout sequence with a highly streamlined single-page payment portal featuring standard quick-pay options. Eliminating final checkout complexity is the single most effective way to recover lost transaction volume, convert high-intent buyers, and immediately drive top-line revenue growth.`;
 }
 
@@ -356,57 +375,62 @@ Your output MUST use these EXACT delimiters '---SECTION X: NAME---' as they are 
 
 ---SECTION 1: EXECUTIVE SUMMARY---
 Provide a boardroom executive summary synopsis that is a 2-minute read (MUST be between 40 and 60 words).
-1. State what the business is about, based on the provided company name/website.
-2. Link the diagnosis between the company nature, problem statement, and expected result.
-This summary must be highly valuable for the user to relate to the console and have the desire to read further.
-Use straightforward, persuasive, factual language.
+1. Analyze and understand the company name/website and public availability details from the internet.
+2. Map the user's stated problem and expected result, articulating what the real problem is.
+3. SUCCESS METRIC: You MUST explicitly include a professional statement assessing whether the problem is legit enough (legitimate and systemic) for a company of this nature and scale.
 DO NOTS:
 - No assumptions of any kind.
 - No negative statements.
-- No percentage talk (e.g., % growth, % leaks).
 - No sugarcoating.
 
----SECTION 2: KEY BOTTLENECKS---
-List exactly FIVE major bottlenecks ranked by business impact.
-You MUST prioritize and rank these bottlenecks using the 60-20-10-10 data weighting:
-* Website Reality / Internet presence: 60%
-* Business Model: 20%
-* Industry: 10%
-* Problem + Desired Outcome: 10%
+---SECTION 2: KEY SYSTEMIC GAPS---
+Identify and list exactly FIVE major systemic gaps ranked by business impact.
+You MUST analyze, identify, and justify these gaps using these explicit weightings:
+* Relevance of Business: 30%
+* Industry Alignment: 10%
+* Problem Statement Alignment: 30%
+* Desired Outcome: 30%
 
-Every bottleneck must pass this filter:
-- Can this bottleneck reasonably explain the user's stated problem?
-- Can this bottleneck realistically exist for THIS company?
-- Would fixing it produce the desired outcome?
-- Can I justify it using the 60-20-10-10 weights?
-- Does it avoid relying on internal data that is unavailable?
-- Does it avoid assuming features or processes that cannot reasonably be inferred?
-If any answer is No, do not include it.
+For each gap, assess capabilities and benchmark maturity to frame the problem and form a solid hypothesis. Apply this Mindset Checklist in your diagnosis:
+- Benchmark
+- Maturity
+- Trends
+- Technology
+- Governance
+- Industry patterns
 
-For each bottleneck, use this EXACT format:
-1. [Bottleneck Title]
-Description: [A clear, concise bottleneck description explaining what it is, why it exists, and why it is critical to resolve, prioritized using the 60-20-10-10 data weighting. Keep it fully integrated in one paragraph. DO NOT separate it into "What:" or "Why:" fields, and do NOT include any subheaders or other fields]
+SUCCESS METRIC: Every gap description must contain no assumptions, relying instead on factual data backed with logical evidence drafted for valuable business outcomes.
+
+For each gap, use this EXACT format:
+1. [Gap Title]
+Description: [Factual explanation of the systemic gap, assessing capabilities, benchmark maturity, problem framing, and hypothesis, backed with logical evidence for valuable outcomes. Keep it fully integrated in one paragraph. DO NOT separate it into secondary fields, and do NOT include any subheaders or other fields]
 
 DO NOTS:
-- Keep it straightforward. Absolutely no consultant buzzwords or overly dramatic language (see banned words above). No shortforms, no technical/code language.
-- Strictly limit each bottleneck to a Title and Description block. Do NOT include separate "What:" and "Why:" fields.
-- No assumptions, no percentage talk, no negative statements, no sugarcoating.
+- Keep it straightforward. Absolutely no consultant buzzwords or overly dramatic language.
+- Strictly limit each gap to a Title and Description block. Do NOT include separate "What:" and "Why:" fields.
 - Reading time for this section should be at least 2-3 minutes.
 
 ---SECTION 3: OPPORTUNITIES---
-Provide exactly THREE realistic growth opportunities towards which the business can work, based on output from Sections 1 and 2.
-Predominantly, opportunities must stem from identified bottlenecks.
-The opportunities must be realistic and positive, demonstrating with evidence how tapping the opportunity helps the business grow. Consider product growth, people, revenue, or operations based on the outcome model.
+Provide exactly THREE realistic growth opportunities towards which the business can work, keeping the outcome model ("${bottleneck}") as the core winning item.
+Identify competitive advantages and consider strategic options based on market trends suitable to the business and industry.
+Apply this Mindset Checklist for every opportunity:
+- Practical
+- Client partnership
+- Execution
+- Measurable impact
+- Financial outcomes
+- Customer value
+
+You MUST validate every opportunity against customer value and simplify relentlessly.
 
 For each opportunity, use this EXACT format:
 1. [Opportunity Title]
-What: [A clear conclusion and diagnosis of what observation leads to this opportunity]
-Why: [Factual explanation of why tapping this opportunity helps the business grow. Talk positively about how the business is set to grow across product growth, people, revenue, or operations based on the outcome model. Every opportunity must lead to a NEW and UNIQUE growth aspect. DO NOT repeat the same growth angle or duplicate the reasons why it helps]
+What: [Clear conclusion and diagnosis of the opportunity, market trends, and strategic options, validated against customer value]
+Why: [Factual explanation of why tapping this opportunity helps the business grow. Address practical execution, financial outcomes, customer value, and measurable impact, keeping the core outcome model as the key winning item. DO NOT duplicate points or reasons]
 
 DO NOTS:
-- Every opportunity must lead to a NEW and UNIQUE growth aspect. DO NOT repeat the same growth angle or duplicate the reasons why it helps.
-- Keep it straightforward. Factual data only.
-- No consultant buzzwords (see banned words above), no shortforms, no technical/code language, no assumptions, no percentage talk, no negative statements, no sugarcoating.
+- Every opportunity must lead to a NEW and UNIQUE aspect.
+- No assumptions, no sugarcoating.
 - Reading time for this section should be at least 2-3 minutes.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
@@ -420,10 +444,7 @@ However, it isn't yet clear:
 • [third question about internal metric/behavior]
 Answering these three questions would likely change investment priorities significantly.
 
-DO NOTS:
-- No assumptions. No solutions or recommendations here.
-
----SECTION 5: THINGS I WOULD FOCUS ON---
+---SECTION 5: WHERE TO FOCUS NEXT---
 Provide a single, powerful "Consultant point of view" block of text describing ONE core thing to work on immediately to drive business.
 DO NOTS:
 - Absolutely no lists of recommendations here. Just a single observation of what is beneficial to the business immediately.
