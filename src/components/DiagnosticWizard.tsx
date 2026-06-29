@@ -1199,6 +1199,8 @@ ${result.blueprint}`;
 
   const handleOutcomeChange = (newOutcome: string) => {
     setBottleneck(newOutcome);
+    setProblemText("");
+    setExpectedResult("");
   };
 
   return (
