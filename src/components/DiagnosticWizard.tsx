@@ -387,6 +387,28 @@ const PROGRESS_STEPS = [
   "Preparing executive summary..."
 ];
 
+const getWordCount = (text: string) => {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+};
+
+const limitToMaxWords = (text: string, maxWords: number) => {
+  const parts = text.split(/(\s+)/);
+  let count = 0;
+  let result = [];
+  for (const part of parts) {
+    if (part.trim() !== "") {
+      count++;
+    }
+    if (count > maxWords) {
+      break;
+    }
+    result.push(part);
+  }
+  return result.join("");
+};
+
 export default function DiagnosticWizard() {
   const [companyName, setCompanyName] = useState(() => {
     if (typeof window !== "undefined") {
@@ -1335,13 +1357,12 @@ ${result.blueprint}`;
                   5. What's slowing your business?
                 </label>
                 <span className="text-[10px] font-mono text-primary/40">
-                  {problemText.length}/200
+                  {getWordCount(problemText)}/500 words
                 </span>
               </div>
               <textarea
                 value={problemText}
-                onChange={(e) => setProblemText(e.target.value.slice(0, 200))}
-                maxLength={200}
+                onChange={(e) => setProblemText(limitToMaxWords(e.target.value, 500))}
                 placeholder="Describe your current process, friction points, or specific challenges..."
                 rows={4}
                 className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg resize-none"
@@ -1354,15 +1375,14 @@ ${result.blueprint}`;
                   6. What does success look like?
                 </label>
                 <span className="text-[10px] font-mono text-primary/40">
-                  {expectedResult.length}/200
+                  {getWordCount(expectedResult)}/500 words
                 </span>
               </div>
               <textarea
                 required
                 placeholder="What is your desired outcome or standard of excellence?"
                 value={expectedResult}
-                onChange={(e) => setExpectedResult(e.target.value.slice(0, 200))}
-                maxLength={200}
+                onChange={(e) => setExpectedResult(limitToMaxWords(e.target.value, 500))}
                 rows={3}
                 className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg"
               />
