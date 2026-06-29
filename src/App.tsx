@@ -83,7 +83,7 @@ export default function App() {
       const caseStudyMatch = path.match(/^\/case-study\/([^/]+)/);
       if (caseStudyMatch) {
         setSelectedCaseStudyId(caseStudyMatch[1]);
-      } else if (path === "/diagnostic") {
+      } else if (path === "/northbound") {
         setSelectedCaseStudyId(null);
         setTimeout(() => {
           const el = document.getElementById("diagnostic");
@@ -108,9 +108,9 @@ export default function App() {
         window.history.pushState({ caseStudyId: selectedCaseStudyId }, "", targetPath);
       }
     } else {
-      const isDiag = window.location.pathname === "/diagnostic";
-      const targetPath = isDiag ? "/diagnostic" : "/";
-      if (currentPath !== "/" && currentPath !== "/diagnostic" && !currentPath.startsWith("/case-study/")) {
+      const isDiag = window.location.pathname === "/northbound";
+      const targetPath = isDiag ? "/northbound" : "/";
+      if (currentPath !== "/" && currentPath !== "/northbound" && !currentPath.startsWith("/case-study/")) {
         // preserve other custom subpages if any
       } else if (currentPath.startsWith("/case-study/")) {
         window.history.pushState(null, "", "/");
@@ -132,7 +132,7 @@ export default function App() {
         desc = `${study.description} [${study.metricLabel}: ${study.value}]`;
         type = "article";
       }
-    } else if (typeof window !== "undefined" && window.location.pathname === "/diagnostic") {
+    } else if (typeof window !== "undefined" && window.location.pathname === "/northbound") {
       title = "Northbound | Evangeline Joseph";
       desc = "Identify operational friction, tool integration issues, and pipeline latency. Generate a customized systems growth blueprint.";
     }
@@ -168,8 +168,8 @@ export default function App() {
     setSelectedCaseStudyId(null);
     setIsMobileMenuOpen(false);
     if (sectionId === "diagnostic") {
-      if (window.location.pathname !== "/diagnostic") {
-        window.history.pushState(null, "", "/diagnostic");
+      if (window.location.pathname !== "/northbound") {
+        window.history.pushState(null, "", "/northbound");
       }
     } else {
       if (window.location.pathname !== "/") {
