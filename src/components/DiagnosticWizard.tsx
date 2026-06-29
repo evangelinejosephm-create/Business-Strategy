@@ -420,15 +420,15 @@ export default function DiagnosticWizard() {
   });
   const [problemText, setProblemText] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("diag_problemText") || PROBLEM_OPTIONS["Revenue Growth"][0];
+      return localStorage.getItem("diag_problemText") || "";
     }
-    return PROBLEM_OPTIONS["Revenue Growth"][0];
+    return "";
   });
   const [expectedResult, setExpectedResult] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("diag_expectedResult") || EXPECTED_RESULT_MAP[PROBLEM_OPTIONS["Revenue Growth"][0]];
+      return localStorage.getItem("diag_expectedResult") || "";
     }
-    return EXPECTED_RESULT_MAP[PROBLEM_OPTIONS["Revenue Growth"][0]];
+    return "";
   });
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DiagnosticResult | null>(() => {
@@ -1197,67 +1197,8 @@ ${result.blueprint}`;
     }
   };
 
-  const toggleProblemCategory = (opt: string) => {
-    const trimmedText = problemText.trim();
-    const lowerText = trimmedText.toLowerCase();
-    const lowerOpt = opt.toLowerCase();
-    let nextProblemText = "";
-
-    if (lowerText.includes(lowerOpt)) {
-      const index = lowerText.indexOf(lowerOpt);
-      if (index !== -1) {
-        const exactMatch = trimmedText.substring(index, index + opt.length);
-        let newText = trimmedText.replace(exactMatch, "");
-        
-        newText = newText
-          .replace(/,\s*,/g, ",")
-          .replace(/^,\s*/, "")
-          .replace(/,\s*$/, "")
-          .trim();
-          
-        nextProblemText = newText;
-        setProblemText(newText);
-      }
-    } else {
-      if (trimmedText === "") {
-        nextProblemText = opt;
-        setProblemText(opt);
-      } else {
-        if (trimmedText.endsWith(",")) {
-          nextProblemText = `${trimmedText} ${opt}`;
-          setProblemText(`${trimmedText} ${opt}`);
-        } else {
-          nextProblemText = `${trimmedText}, ${opt}`;
-          setProblemText(`${trimmedText}, ${opt}`);
-        }
-      }
-    }
-
-    // Prefill expected result based on the categories currently present in nextProblemText
-    const activeOutcomes: string[] = [];
-    Object.keys(EXPECTED_RESULT_MAP).forEach((key) => {
-      if (nextProblemText.toLowerCase().includes(key.toLowerCase())) {
-        activeOutcomes.push(EXPECTED_RESULT_MAP[key]);
-      }
-    });
-
-    if (activeOutcomes.length > 0) {
-      setExpectedResult(activeOutcomes.join(", "));
-    } else {
-      setExpectedResult("");
-    }
-  };
-
   const handleOutcomeChange = (newOutcome: string) => {
     setBottleneck(newOutcome);
-    const options = PROBLEM_OPTIONS[newOutcome] || [];
-    if (options.length > 0) {
-      setProblemText(options[0]);
-      setExpectedResult(EXPECTED_RESULT_MAP[options[0]] || "");
-    } else {
-      setProblemText("");
-      setExpectedResult("");
-    }
   };
 
   return (
@@ -1356,27 +1297,39 @@ ${result.blueprint}`;
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest mb-2">
-                5. problem category
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest">
+                  5. problem category
+                </label>
+                <span className="text-[10px] font-mono text-primary/40">
+                  {problemText.length}/200
+                </span>
+              </div>
               <textarea
                 value={problemText}
-                onChange={(e) => setProblemText(e.target.value)}
+                onChange={(e) => setProblemText(e.target.value.slice(0, 200))}
+                maxLength={200}
                 placeholder="Describe your current process, friction points, or specific challenges..."
                 rows={4}
-                className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg mb-3 resize-none"
+                className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest mb-2">
-                6. Expected Result
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest">
+                  6. Expected Result
+                </label>
+                <span className="text-[10px] font-mono text-primary/40">
+                  {expectedResult.length}/200
+                </span>
+              </div>
               <textarea
                 required
                 placeholder="What is your desired outcome or standard of excellence?"
                 value={expectedResult}
-                onChange={(e) => setExpectedResult(e.target.value)}
+                onChange={(e) => setExpectedResult(e.target.value.slice(0, 200))}
+                maxLength={200}
                 rows={3}
                 className="w-full px-4 py-3 border border-outline-variant bg-surface-bright text-sm text-primary focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary font-sans rounded-lg"
               />
