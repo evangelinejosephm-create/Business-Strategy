@@ -490,11 +490,11 @@ DO NOTS:
 ==================================================
 Company Website:   ${companyName}
 Client Email:      ${emailAddress || "Not provided"}
-Industry Sector:   ${industry || "Not provided"}
-Outcome Model:     ${bottleneck}
+Industry:          ${industry || "Not provided"}
+Primary Business Goal: ${bottleneck}
 Ecosystem Phase:   ${ecosystemPhase || "Not provided"}
-Problem Category:  ${summarizeProblem}
-Expected Result:   ${expectedResult}
+What's slowing your business?: ${summarizeProblem}
+What does success look like?: ${expectedResult}
 
 --------------------------------------------------
 GENERATED BLUEPRINT REPORT
@@ -536,7 +536,7 @@ ${text}
                   <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #0b1215; font-size: 12px;">${industry || "Not provided"}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold; color: #475569; font-size: 12px;">Outcome Model:</td>
+                  <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold; color: #475569; font-size: 12px;">Primary Business Goal:</td>
                   <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #0b1215; font-size: 12px;">${bottleneck}</td>
                 </tr>
                 <tr>
@@ -545,12 +545,12 @@ ${text}
                 </tr>
               </table>
 
-              <h4 style="color: #475569; font-size: 12px; margin-top: 15px; margin-bottom: 5px;">Problem Category:</h4>
+              <h4 style="color: #475569; font-size: 12px; margin-top: 15px; margin-bottom: 5px;">What's slowing your business?:</h4>
               <div style="padding: 10px; background-color: #f8fafc; border-radius: 6px; font-size: 11px; color: #0b1215; border-left: 3px solid #8b9d83; margin-bottom: 15px;">
                 ${(summarizeProblem || "").replace(/\n/g, "<br/>")}
               </div>
 
-              <h4 style="color: #475569; font-size: 12px; margin-top: 10px; margin-bottom: 5px;">Expected Result:</h4>
+              <h4 style="color: #475569; font-size: 12px; margin-top: 10px; margin-bottom: 5px;">What does success look like?:</h4>
               <div style="padding: 10px; background-color: #f8fafc; border-radius: 6px; font-size: 11px; color: #0b1215; border-left: 3px solid #8b9d83;">
                 ${(expectedResult || "").replace(/\n/g, "<br/>")}
               </div>
@@ -1103,7 +1103,7 @@ Feedback Comment: ${feedbackComment || "No comment provided"}
 Company Website:   ${companyName || "Unspecified"}
 Client Email:      ${emailAddress || "Not provided"}
 Industry:          ${industry || "Not provided"}
-Outcome Model:     ${bottleneck || "Not provided"}
+Primary Business Goal: ${bottleneck || "Not provided"}
 
 --- GENERATED BLUEPRINT REPORT ---
 ${blueprint || "No blueprint generated"}
@@ -1165,7 +1165,7 @@ ${blueprint || "No blueprint generated"}
                 <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #0b1215; font-size: 12px;">${industry || "Not provided"}</td>
               </tr>
               <tr>
-                <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold; color: #475569; font-size: 12px;">Outcome Model:</td>
+                <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold; color: #475569; font-size: 12px;">Primary Business Goal:</td>
                 <td style="padding: 6px 0; border-bottom: 1px solid #f1f5f9; color: #0b1215; font-size: 12px;">${bottleneck || "Not provided"}</td>
               </tr>
             </table>

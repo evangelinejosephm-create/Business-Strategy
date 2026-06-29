@@ -893,7 +893,7 @@ export default function DiagnosticWizard() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 110);
-      doc.text("CORE SYSTEMIC BOTTLENECK:", leftColX, y + 38);
+      doc.text("PRIMARY BUSINESS GOAL:", leftColX, y + 38);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
@@ -903,7 +903,7 @@ export default function DiagnosticWizard() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("INDUSTRY SECTOR:", rightColX, y + 8);
+      doc.text("INDUSTRY:", rightColX, y + 8);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
@@ -912,7 +912,7 @@ export default function DiagnosticWizard() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("EXPECTED OPERATIONAL RESULT:", rightColX, y + 23);
+      doc.text("WHAT SUCCESS LOOKS LIKE:", rightColX, y + 23);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
@@ -1239,7 +1239,7 @@ ${result.blueprint}`;
 
             <div>
               <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest mb-2">
-                3. Industry Sector
+                3. Industry
               </label>
               {isOtherIndustry ? (
                 <div className="relative">
@@ -1285,7 +1285,7 @@ ${result.blueprint}`;
 
             <div>
               <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest mb-2">
-                4. outcome model
+                4. Primary Business Goal
               </label>
               <select
                 value={bottleneck}
@@ -1301,7 +1301,7 @@ ${result.blueprint}`;
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest">
-                  5. problem category
+                  5. What's slowing your business?
                 </label>
                 <span className="text-[10px] font-mono text-primary/40">
                   {problemText.length}/200
@@ -1320,7 +1320,7 @@ ${result.blueprint}`;
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-mono font-medium text-primary uppercase tracking-widest">
-                  6. Expected Result
+                  6. What does success look like?
                 </label>
                 <span className="text-[10px] font-mono text-primary/40">
                   {expectedResult.length}/200
