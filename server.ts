@@ -650,7 +650,7 @@ app.post("/api/chat", async (req, res) => {
       let fallbackText = "";
 
       if (lowerMsg.includes("pricing") || lowerMsg.includes("invest") || lowerMsg.includes("cost") || lowerMsg.includes("fee") || lowerMsg.includes("much")) {
-        fallbackText = `### 01 // ENGAGEMENT MODEL INVESTMENTS
+        fallbackText = `### 01 - ENGAGEMENT MODEL INVESTMENTS
 
 * **Discover Clarity Sprint**: Starts at $900 for diagnostics, trigger auditing, and pinpointing operational drag.
 
@@ -658,12 +658,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Sustain Strategic Advisory**: Starts at $1,800/month for fractional CTO checkpoints, engineering reviews, and scalability roadmaps.
 
-### 02 // ENGAGEMENT ALIGNMENT
+### 02 - ENGAGEMENT ALIGNMENT
 
 * **Direct Value**: Zero bloated agency overhead. Projects are scoped directly to your database and workflow requirements.`;
 
       } else if (lowerMsg.includes("timeline") || lowerMsg.includes("duration") || lowerMsg.includes("how long") || lowerMsg.includes("milestone")) {
-        fallbackText = `### 01 // TIME-SENSITIVE ENGAGEMENT CYCLES
+        fallbackText = `### 01 - TIME-SENSITIVE ENGAGEMENT CYCLES
 
 * **Discover Clarity Sprint (2 Weeks)**: Week 1 focuses on intake auditing and data constraints. Week 2 delivers the friction map and diagnostic blueprint.
 
@@ -671,12 +671,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Sustain Strategic Advisory (3+ Months)**: Structured in rolling monthly checkpoints aligned directly with your development backlog.
 
-### 02 // VELOCITY PRIORITIES
+### 02 - VELOCITY PRIORITIES
 
 * **Strict Schedules**: Fixed delivery milestones with 0% UAT runtime overhead.`;
 
       } else if (lowerMsg.includes("service") || lowerMsg.includes("offer") || lowerMsg.includes("package")) {
-        fallbackText = `### 01 // EXTRACTED SERVICE CAPABILITIES
+        fallbackText = `### 01 - EXTRACTED SERVICE CAPABILITIES
 
 * **Systems Auditing**: Mapping active schema issues, bottlebecks, and communication latency across CRM platforms.
 
@@ -686,12 +686,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Concept-to-Product Blueprints**: Drafting completely scalable cloud architecture blueprints and schemas before any code is written.
 
-### 02 // MEASURED OUTCOMES
+### 02 - MEASURED OUTCOMES
 
 * **Eliminated Drag**: Replaces manually maintained databases with reliable, automated synchronization layers.`;
 
       } else if (lowerMsg.includes("why hire") || lowerMsg.includes("why should i hire") || lowerMsg.includes("hire you") || lowerMsg.includes("expertise")) {
-        fallbackText = `### 01 // STRATEGIC VALUE & EXPERTISE WINNERS
+        fallbackText = `### 01 - STRATEGIC VALUE & EXPERTISE WINNERS
 
 * **Government of India (MSME)**: Product & Strategy Advisor mentoring founders on scalable growth blueprints and compliance.
 
@@ -701,14 +701,14 @@ app.post("/api/chat", async (req, res) => {
 
 * **Agile CRM**: Directed 8 SaaS micro-products, boosting development velocity by 30% and satisfaction by 40%.
 
-### 02 // DECISIONS BAKED BY DATA
+### 02 - DECISIONS BAKED BY DATA
 
 * **Data-Driven Roadmap**: Leveraged adoption signals and metrics to improve decision-making accuracy by 50%.
 
 * **Absolute Clarity**: Replacing ambiguity in product roadmaps with highly detailed architectural diagrams and backlogs.`;
 
       } else if (lowerMsg.includes("contact") || lowerMsg.includes("reach out") || lowerMsg.includes("get in touch") || lowerMsg.includes("email")) {
-        fallbackText = `### 01 // DIRECT CHANNELS FOR SECURING ENGAGEMENT
+        fallbackText = `### 01 - DIRECT CHANNELS FOR SECURING ENGAGEMENT
 
 * **Strategic Briefing Form**: Complete and submit the custom contact form at the bottom of the page.
 
@@ -716,12 +716,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Rapid SLA Turnaround**: Expect comprehensive, personalized responses within 24 business hours.
 
-### 02 // AUDITING INTAKE REQUIREMENTS
+### 02 - AUDITING INTAKE REQUIREMENTS
 
 * **Explicit Pain Points**: Share active system issues such as webhook lag or synchronization errors for faster custom analysis.`;
 
       } else if (lowerMsg.includes("availab") || lowerMsg.includes("slots")) {
-        fallbackText = `### 01 // CURRENT INTAKE & SCHEDULING STATUS
+        fallbackText = `### 01 - CURRENT INTAKE & SCHEDULING STATUS
 
 * **Monthly Cohort Slots**: Strictly limited to 2 new founders per month to guarantee high-attention engineering audits.
 
@@ -729,12 +729,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Architecture Sprints**: Requires booking 2–3 weeks in advance.
 
-### 02 // RESERVATION REQUIREMENTS
+### 02 - RESERVATION REQUIREMENTS
 
 * **Briefing Submission**: Submit your primary bottleneck via the contact form to lock in calendar priorities.`;
 
       } else if (lowerMsg.includes("categorize") || lowerMsg.includes("fall") || lowerMsg.includes("which one") || lowerMsg.includes("problem")) {
-        fallbackText = `### 01 // LOGICAL SERVICES MAPPING
+        fallbackText = `### 01 - LOGICAL SERVICES MAPPING
 
 * **Discover Sprints ($900)**: Best for product backlog prioritization, roadmap alignment, or unblocking team bottleneck velocity.
 
@@ -742,12 +742,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Sustain Retainers ($1,800/mo)**: Best for rolling fractional director advisories, weekly checks, and scaling audits.
 
-### 02 // IDENTIFYING YOUR PATHWAY
+### 02 - IDENTIFYING YOUR PATHWAY
 
 * **Active Bottleneck Check**: Describe your system's current error states, and I will instantly align it to a dedicated model.`;
 
       } else if (lowerMsg.includes("bottleneck") || lowerMsg.includes("unbottle") || lowerMsg.includes("friction") || lowerMsg.includes("slow")) {
-        fallbackText = `### 01 // SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
+        fallbackText = `### 01 - SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
 
 * **Core Technology Stack**: Identify tools/platforms active in the loop (e.g., CRM or PostgreSQL database).
 
@@ -755,12 +755,12 @@ app.post("/api/chat", async (req, res) => {
 
 * **Impact Metrics**: Quantify consequences (e.g., client drops, delays, lost developer velocity).
 
-### 02 // NEXT STEPS
+### 02 - NEXT STEPS
 
 * **Clear Action Plan**: State these 3 factors, and I will write a step-by-step unbottling roadmap instantly.`;
 
       } else {
-        fallbackText = `### 01 // CHOOSE A STRATEGIC CORE TOPIC
+        fallbackText = `### 01 - CHOOSE A STRATEGIC CORE TOPIC
 
 * **Pricing & Milestones**: "What is your pricing and engagement structure?"
 
@@ -768,7 +768,7 @@ app.post("/api/chat", async (req, res) => {
 
 * **Why Hire Evangeline**: "How does your Accenture and MSME background add value?"
 
-### 02 // INITIATE SYSTEM UNBOTTLING
+### 02 - INITIATE SYSTEM UNBOTTLING
 
 * **Submit Your Friction**: State your exact webhook or CRM bottleneck to receive an immediate mapped diagnostic pathway.`;
       }
@@ -794,9 +794,9 @@ When answering inquiries from prospect founders regarding scope, problem stateme
 
 1. PRICING & INVESTMENTS:
    - Provide highly detailed summaries of investments:
-     * '01 // Discover Clarity Sprint' starts at $900.
-     * '02 // Design Architecture Sprint' starts at $5,500.
-     * '03 // Sustain Strategic Advisory' starts at $1,800/month (Fractional Retainer).
+     * '01 - Discover Clarity Sprint' starts at $900.
+     * '02 - Design Architecture Sprint' starts at $5,500.
+     * '03 - Sustain Strategic Advisory' starts at $1,800/month (Fractional Retainer).
 
 2. DETAILED TIMELINES:
    - Discover Sprints last 2 weeks (Week 1: Intake & Parse, Week 2: Friction Mapping & Diagnostic delivery).
@@ -822,9 +822,9 @@ When answering inquiries from prospect founders regarding scope, problem stateme
 
 7. BOTTLENECK CATEGORIZATION:
    - Analyze user problem statements dynamically and assign them to the correct service tier:
-     * Integration, webhook spaghetti, database syncs -> 02 // Design Architecture.
-     * Churn, delivery roadblock, priority overhead -> 01 // Discover Sprints.
-     * Ongoing leadership, Fractional CTO advisory -> 03 // Sustain Strategic Advisory.
+     * Integration, webhook spaghetti, database syncs -> 02 - Design Architecture.
+     * Churn, delivery roadblock, priority overhead -> 01 - Discover Sprints.
+     * Ongoing leadership, Fractional CTO advisory -> 03 - Sustain Strategic Advisory.
 
 8. BOTTLEBECK UNBOTTLING:
    - When users describe friction, ask clarifying questions (What tools are involved? What is the trigger point? What is the impact?) and write clean, structured markdown unbottling sequences.
@@ -842,7 +842,7 @@ Tone, Formatting & Heading Rules:
       console.log("[GEMINI API INFO] Model generation fallback in Chat initialized. Utilizing high-competency match block.");
 
       if (lowerMsg.includes("pricing") || lowerMsg.includes("invest") || lowerMsg.includes("cost") || lowerMsg.includes("fee") || lowerMsg.includes("much")) {
-        replyText = `### 01 // ENGAGEMENT MODEL INVESTMENTS
+        replyText = `### 01 - ENGAGEMENT MODEL INVESTMENTS
 
 * **Discover Clarity Sprint**: Starts at $900 for diagnostics, trigger auditing, and pinpointing operational drag.
 
@@ -850,11 +850,11 @@ Tone, Formatting & Heading Rules:
 
 * **Sustain Strategic Advisory**: Starts at $1,800/month for fractional CTO checkpoints, engineering reviews, and scalability roadmaps.
 
-### 02 // ENGAGEMENT ALIGNMENT
+### 02 - ENGAGEMENT ALIGNMENT
 
 * **Direct Value**: Zero bloated agency overhead. Projects are scoped directly to your database and workflow requirements.`;
       } else if (lowerMsg.includes("timeline") || lowerMsg.includes("duration") || lowerMsg.includes("how long") || lowerMsg.includes("milestone")) {
-        replyText = `### 01 // TIME-SENSITIVE ENGAGEMENT CYCLES
+        replyText = `### 01 - TIME-SENSITIVE ENGAGEMENT CYCLES
 
 * **Discover Clarity Sprint (2 Weeks)**: Week 1 focuses on intake auditing and data constraints. Week 2 delivers the friction map and diagnostic blueprint.
 
@@ -862,11 +862,11 @@ Tone, Formatting & Heading Rules:
 
 * **Sustain Strategic Advisory (3+ Months)**: Structured in rolling monthly checkpoints aligned directly with your development backlog.
 
-### 02 // VELOCITY PRIORITIES
+### 02 - VELOCITY PRIORITIES
 
 * **Strict Schedules**: Fixed delivery milestones with 0% UAT runtime overhead.`;
       } else if (lowerMsg.includes("service") || lowerMsg.includes("offer") || lowerMsg.includes("package")) {
-        replyText = `### 01 // EXTRACTED SERVICE CAPABILITIES
+        replyText = `### 01 - EXTRACTED SERVICE CAPABILITIES
 
 * **Systems Auditing**: Mapping active schema issues, bottlenecks, and communication latency across CRM platforms.
 
@@ -876,11 +876,11 @@ Tone, Formatting & Heading Rules:
 
 * **Concept-to-Product Blueprints**: Drafting completely scalable cloud architecture blueprints and schemas before any code is written.
 
-### 02 // MEASURED OUTCOMES
+### 02 - MEASURED OUTCOMES
 
 * **Eliminated Drag**: Replaces manually maintained databases with reliable, automated synchronization layers.`;
       } else if (lowerMsg.includes("why hire") || lowerMsg.includes("why should i hire") || lowerMsg.includes("hire you") || lowerMsg.includes("expertise")) {
-        replyText = `### 01 // STRATEGIC VALUE & EXPERTISE WINNERS
+        replyText = `### 01 - STRATEGIC VALUE & EXPERTISE WINNERS
 
 * **Government of India (MSME)**: Product & Strategy Advisor mentoring founders on scalable growth blueprints and compliance.
 
@@ -890,13 +890,13 @@ Tone, Formatting & Heading Rules:
 
 * **Agile CRM**: Directed 8 SaaS micro-products, boosting development velocity by 30% and satisfaction by 40%.
 
-### 02 // DECISIONS BAKED BY DATA
+### 02 - DECISIONS BAKED BY DATA
 
 * **Data-Driven Roadmap**: Leveraged adoption signals and metrics to improve decision-making accuracy by 50%.
 
 * **Absolute Clarity**: Replacing ambiguity in product roadmaps with highly detailed architectural diagrams and backlogs.`;
       } else if (lowerMsg.includes("contact") || lowerMsg.includes("reach out") || lowerMsg.includes("get in touch") || lowerMsg.includes("email")) {
-        replyText = `### 01 // DIRECT CHANNELS FOR SECURING ENGAGEMENT
+        replyText = `### 01 - DIRECT CHANNELS FOR SECURING ENGAGEMENT
 
 * **Strategic Briefing Form**: Complete and submit the custom contact form at the bottom of the page.
 
@@ -904,11 +904,11 @@ Tone, Formatting & Heading Rules:
 
 * **Rapid SLA Turnaround**: Expect comprehensive, personalized responses within 24 business hours.
 
-### 02 // AUDITING INTAKE REQUIREMENTS
+### 02 - AUDITING INTAKE REQUIREMENTS
 
 * **Explicit Pain Points**: Share active system issues such as webhook lag or synchronization errors for faster custom analysis.`;
       } else if (lowerMsg.includes("availab") || lowerMsg.includes("slots")) {
-        replyText = `### 01 // CURRENT INTAKE & SCHEDULING STATUS
+        replyText = `### 01 - CURRENT INTAKE & SCHEDULING STATUS
 
 * **Monthly Cohort Slots**: Strictly limited to 2 new founders per month to guarantee high-attention engineering audits.
 
@@ -916,11 +916,11 @@ Tone, Formatting & Heading Rules:
 
 * **Architecture Sprints**: Requires booking 2–3 weeks in advance.
 
-### 02 // RESERVATION REQUIREMENTS
+### 02 - RESERVATION REQUIREMENTS
 
 * **Briefing Submission**: Submit your primary bottleneck via the contact form to lock in calendar priorities.`;
       } else if (lowerMsg.includes("categorize") || lowerMsg.includes("fall") || lowerMsg.includes("which one") || lowerMsg.includes("problem")) {
-        replyText = `### 01 // LOGICAL SERVICES MAPPING
+        replyText = `### 01 - LOGICAL SERVICES MAPPING
 
 * **Discover Sprints ($900)**: Best for product backlog prioritization, roadmap alignment, or unblocking team bottleneck velocity.
 
@@ -928,11 +928,11 @@ Tone, Formatting & Heading Rules:
 
 * **Sustain Retainers ($1,800/mo)**: Best for rolling fractional director advisories, weekly checks, and scaling audits.
 
-### 02 // IDENTIFYING YOUR PATHWAY
+### 02 - IDENTIFYING YOUR PATHWAY
 
 * **Active Bottleneck Check**: Describe your system's current error states, and I will instantly align it to a dedicated model.`;
       } else if (lowerMsg.includes("bottleneck") || lowerMsg.includes("unbottle") || lowerMsg.includes("friction") || lowerMsg.includes("slow")) {
-        replyText = `### 01 // SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
+        replyText = `### 01 - SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
 
 * **Core Technology Stack**: Identify tools/platforms active in the loop (e.g., CRM or PostgreSQL database).
 
@@ -940,11 +940,11 @@ Tone, Formatting & Heading Rules:
 
 * **Impact Metrics**: Quantify consequences (e.g., client drops, delays, lost developer velocity).
 
-### 02 // NEXT STEPS
+### 02 - NEXT STEPS
 
 * **Clear Action Plan**: State these 3 factors, and I will write a step-by-step unbottling roadmap instantly.`;
       } else {
-        replyText = `### 01 // CHOOSE A STRATEGIC CORE TOPIC
+        replyText = `### 01 - CHOOSE A STRATEGIC CORE TOPIC
 
 * **Pricing & Milestones**: "What is your pricing and engagement structure?"
 
@@ -952,7 +952,7 @@ Tone, Formatting & Heading Rules:
 
 * **Why Hire Evangeline**: "How does your Accenture and MSME background add value?"
 
-### 02 // INITIATE SYSTEM UNBOTTLING
+### 02 - INITIATE SYSTEM UNBOTTLING
 
 * **Submit Your Friction**: State your exact webhook or CRM bottleneck to receive an immediate mapped diagnostic pathway.`;
       }

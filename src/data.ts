@@ -6,7 +6,7 @@ export const OUTCOMES: OutcomeModel[] = [
     tabLabel: "Revenue Growth Modeling",
     focusTitle: "Goal A: Revenue Growth Modeling",
     focusDesc: "We find out exactly where your product is leaking money or slowing down, and we fix it.",
-    targetOutcome: "TARGETED OUTCOME // PLUG SYSTEM REVENUE LEAKS",
+    targetOutcome: "TARGETED OUTCOME: PLUG SYSTEM REVENUE LEAKS",
     streams: [
       {
         label: "Audit & Assess",
@@ -27,7 +27,7 @@ export const OUTCOMES: OutcomeModel[] = [
     tabLabel: "Product Strategy Architecture",
     focusTitle: "Goal B: Product Strategy Architecture",
     focusDesc: "We define the exact blueprint required to launch a successful product or enter a new market.",
-    targetOutcome: "TARGETED OUTCOME // ORCHESTRATE PRODUCT STRATEGY BLUEPRINTS",
+    targetOutcome: "TARGETED OUTCOME: ORCHESTRATE PRODUCT STRATEGY BLUEPRINTS",
     streams: [
       {
         label: "Foundation",
@@ -86,7 +86,7 @@ export const SERVICES: ServiceItem[] = [
 export const ENGAGEMENTS: EngagementModel[] = [
   {
     id: "discovery",
-    number: "01 // DISCOVERY",
+    number: "01 - DISCOVERY",
     name: "Discover Clarity Sprint",
     objective: "Unearth the actual structural issue behind your immediate growth symptoms through strict workflow parsing.",
     duration: "2 Weeks",
@@ -94,7 +94,7 @@ export const ENGAGEMENTS: EngagementModel[] = [
   },
   {
     id: "architecture",
-    number: "02 // ARCHITECTURE",
+    number: "02 - ARCHITECTURE",
     name: "Design Architecture Sprint",
     objective: "Draft clean API blueprints, database transaction architectures, and actionable transition roadmaps.",
     duration: "6-8 Weeks",
@@ -102,7 +102,7 @@ export const ENGAGEMENTS: EngagementModel[] = [
   },
   {
     id: "advisory",
-    number: "03 // ADVISORY",
+    number: "03 - ADVISORY",
     name: "Sustain Strategic Advisory",
     objective: "On-demand architectural checkups and executive strategy support during implementation sprints.",
     duration: "Monthly Retainer",
@@ -113,7 +113,7 @@ export const ENGAGEMENTS: EngagementModel[] = [
 export const CASE_STUDIES: CaseStudy[] = [
   {
     id: "case-01",
-    tag: "ENTERPRISE // PRICING PLATFORM",
+    tag: "ENTERPRISE - PRICING PLATFORM",
     value: "~40%",
     metricLabel: "LATENCY REDUCTION",
     title: "Enterprise Pricing Platform",
@@ -122,7 +122,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
   {
     id: "case-02",
-    tag: "LOGISTICS & INTEGRATION // SHADOWFAX",
+    tag: "LOGISTICS & INTEGRATION - SHADOWFAX",
     value: "100%",
     metricLabel: "OPERATIONAL CLARITY",
     title: "Ecosystem Integration & Visibility",
@@ -131,7 +131,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
   {
     id: "case-03",
-    tag: "B2B SAAS // BOTPATH",
+    tag: "B2B SAAS - BOTPATH",
     value: "+40%",
     metricLabel: "USER SIGN-UPS GROWTH",
     title: "Systems-First Transformation",

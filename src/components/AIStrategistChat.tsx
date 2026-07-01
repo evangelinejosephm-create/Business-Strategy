@@ -6,7 +6,7 @@ function getChatFallbackResponse(userMessage: string): string {
   const lowerMsg = userMessage.toLowerCase();
   
   if (lowerMsg.includes("pricing") || lowerMsg.includes("invest") || lowerMsg.includes("cost") || lowerMsg.includes("fee") || lowerMsg.includes("much")) {
-    return `### 01 // ENGAGEMENT MODEL INVESTMENTS
+    return `### 01 - ENGAGEMENT MODEL INVESTMENTS
 
 * **Discover Clarity Sprint**: Starts at $900 for diagnostics, trigger auditing, and pinpointing operational drag.
 
@@ -14,11 +14,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Sustain Strategic Advisory**: Starts at $1,800/month for fractional CTO checkpoints, engineering reviews, and scalability roadmaps.
 
-### 02 // ENGAGEMENT ALIGNMENT
+### 02 - ENGAGEMENT ALIGNMENT
 
 * **Direct Value**: Zero bloated agency overhead. Projects are scoped directly to your database and workflow requirements.`;
   } else if (lowerMsg.includes("timeline") || lowerMsg.includes("duration") || lowerMsg.includes("how long") || lowerMsg.includes("milestone")) {
-    return `### 01 // TIME-SENSITIVE ENGAGEMENT CYCLES
+    return `### 01 - TIME-SENSITIVE ENGAGEMENT CYCLES
 
 * **Discover Clarity Sprint (2 Weeks)**: Week 1 focuses on intake auditing and data constraints. Week 2 delivers the friction map and diagnostic blueprint.
 
@@ -26,11 +26,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Sustain Strategic Advisory (3+ Months)**: Structured in rolling monthly checkpoints aligned directly with your development backlog.
 
-### 02 // VELOCITY PRIORITIES
+### 02 - VELOCITY PRIORITIES
 
 * **Strict Schedules**: Fixed delivery milestones with 0% UAT runtime overhead.`;
   } else if (lowerMsg.includes("service") || lowerMsg.includes("offer") || lowerMsg.includes("package")) {
-    return `### 01 // EXTRACTED SERVICE CAPABILITIES
+    return `### 01 - EXTRACTED SERVICE CAPABILITIES
 
 * **Systems Auditing**: Mapping active schema issues, bottlenecks, and communication latency across CRM platforms.
 
@@ -40,11 +40,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Concept-to-Product Blueprints**: Drafting completely scalable cloud architecture blueprints and schemas before any code is written.
 
-### 02 // MEASURED OUTCOMES
+### 02 - MEASURED OUTCOMES
 
 * **Eliminated Drag**: Replaces manually maintained databases with reliable, automated synchronization layers.`;
   } else if (lowerMsg.includes("why hire") || lowerMsg.includes("why should i hire") || lowerMsg.includes("hire you") || lowerMsg.includes("expertise")) {
-    return `### 01 // STRATEGIC VALUE & EXPERTISE WINNERS
+    return `### 01 - STRATEGIC VALUE & EXPERTISE WINNERS
 
 * **Government of India (MSME)**: Product & Strategy Advisor mentoring founders on scalable growth blueprints and compliance.
 
@@ -54,13 +54,13 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Agile CRM**: Directed 8 SaaS micro-products, boosting development velocity by 30% and satisfaction by 40%.
 
-### 02 // DECISIONS BAKED BY DATA
+### 02 - DECISIONS BAKED BY DATA
 
 * **Data-Driven Roadmap**: Leveraged adoption signals and metrics to improve decision-making accuracy by 50%.
 
 * **Absolute Clarity**: Replacing ambiguity in product roadmaps with highly detailed architectural diagrams and backlogs.`;
   } else if (lowerMsg.includes("contact") || lowerMsg.includes("reach out") || lowerMsg.includes("get in touch") || lowerMsg.includes("email")) {
-    return `### 01 // DIRECT CHANNELS FOR SECURING ENGAGEMENT
+    return `### 01 - DIRECT CHANNELS FOR SECURING ENGAGEMENT
 
 * **Strategic Briefing Form**: Complete and submit the custom contact form at the bottom of the page.
 
@@ -68,11 +68,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Rapid SLA Turnaround**: Expect comprehensive, personalized responses within 24 business hours.
 
-### 02 // AUDITING INTAKE REQUIREMENTS
+### 02 - AUDITING INTAKE REQUIREMENTS
 
 * **Explicit Pain Points**: Share active system issues such as webhook lag or synchronization errors for faster custom analysis.`;
   } else if (lowerMsg.includes("availab") || lowerMsg.includes("slots")) {
-    return `### 01 // CURRENT INTAKE & SCHEDULING STATUS
+    return `### 01 - CURRENT INTAKE & SCHEDULING STATUS
 
 * **Monthly Cohort Slots**: Strictly limited to 2 new founders per month to guarantee high-attention engineering audits.
 
@@ -80,11 +80,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Architecture Sprints**: Requires booking 2–3 weeks in advance.
 
-### 02 // RESERVATION REQUIREMENTS
+### 02 - RESERVATION REQUIREMENTS
 
 * **Briefing Submission**: Submit your primary bottleneck via the contact form to lock in calendar priorities.`;
   } else if (lowerMsg.includes("categorize") || lowerMsg.includes("fall") || lowerMsg.includes("which one") || lowerMsg.includes("problem")) {
-    return `### 01 // LOGICAL SERVICES MAPPING
+    return `### 01 - LOGICAL SERVICES MAPPING
 
 * **Discover Sprints ($900)**: Best for product backlog prioritization, roadmap alignment, or unblocking team bottleneck velocity.
 
@@ -92,11 +92,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Sustain Retainers ($1,800/mo)**: Best for rolling fractional director advisories, weekly checks, and scaling audits.
 
-### 02 // IDENTIFYING YOUR PATHWAY
+### 02 - IDENTIFYING YOUR PATHWAY
 
 * **Active Bottleneck Check**: Describe your system's current error states, and I will instantly align it to a dedicated model.`;
   } else if (lowerMsg.includes("bottleneck") || lowerMsg.includes("unbottle") || lowerMsg.includes("friction") || lowerMsg.includes("slow")) {
-    return `### 01 // SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
+    return `### 01 - SYSTEM DIAGNOSTIC BRIEFING REQUIREMENTS
 
 * **Core Technology Stack**: Identify tools/platforms active in the loop (e.g., CRM or PostgreSQL database).
 
@@ -104,11 +104,11 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Impact Metrics**: Quantify consequences (e.g., client drops, delays, lost developer velocity).
 
-### 02 // NEXT STEPS
+### 02 - NEXT STEPS
 
 * **Clear Action Plan**: State these 3 factors, and I will write a step-by-step unbottling roadmap instantly.`;
   } else {
-    return `### 01 // CHOOSE A STRATEGIC CORE TOPIC
+    return `### 01 - CHOOSE A STRATEGIC CORE TOPIC
 
 * **Pricing & Milestones**: "What is your pricing and engagement structure?"
 
@@ -116,7 +116,7 @@ function getChatFallbackResponse(userMessage: string): string {
 
 * **Why Hire Evangeline**: "How does your Accenture and MSME background add value?"
 
-### 02 // INITIATE SYSTEM UNBOTTLING
+### 02 - INITIATE SYSTEM UNBOTTLING
 
 * **Submit Your Friction**: State your exact webhook or CRM bottleneck to receive an immediate mapped diagnostic pathway.`;
   }

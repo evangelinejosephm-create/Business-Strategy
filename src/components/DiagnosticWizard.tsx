@@ -168,7 +168,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         <div className="flex items-center gap-2 mb-3.5">
           <Sparkles size={18} className="text-amber-400" />
           <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-            01 // EXECUTIVE SUMMARY
+            01 - EXECUTIVE SUMMARY
           </h4>
         </div>
         <p className="text-sm text-slate-100 leading-relaxed whitespace-pre-line font-medium">
@@ -182,7 +182,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <ShieldAlert size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              02 // KEY SYSTEMIC GAPS
+              02 - KEY SYSTEMIC GAPS
             </h4>
           </div>
 
@@ -218,7 +218,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <Zap size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              03 // STRATEGIC GROWTH OPPORTUNITIES
+              03 - STRATEGIC GROWTH OPPORTUNITIES
             </h4>
           </div>
 
@@ -255,7 +255,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
           <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
             <Award size={18} className="text-amber-400" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-              04 // QUESTIONS WORTH INVESTIGATING
+              04 - QUESTIONS WORTH INVESTIGATING
             </h4>
           </div>
 
@@ -271,7 +271,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
           <div className="flex items-center gap-2 border-b border-amber-500/10 pb-3">
             <Target size={18} className="text-amber-600" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-amber-900 font-bold">
-              05 // WHERE TO FOCUS NEXT
+              05 - WHERE TO FOCUS NEXT
             </h4>
           </div>
 
@@ -1064,7 +1064,7 @@ export default function DiagnosticWizard() {
         doc.setFont("Helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(115, 125, 115);
-        doc.text(`STRICTION CONSOLE // EXECUTIVE BLUEPRINT FOR ${companyName.toUpperCase()}`, margin, 12);
+        doc.text(`STRICTION CONSOLE - EXECUTIVE BLUEPRINT FOR ${companyName.toUpperCase()}`, margin, 12);
         doc.text(`PAGE ${pageNum}`, pageWidth - margin, 12, { align: "right" });
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.3);
@@ -1084,7 +1084,7 @@ export default function DiagnosticWizard() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(148, 163, 184); // Cool slate text
-      doc.text("STRICTION ADVISORY STRATEGY SUITE // V2.0", margin + 8, y + 10);
+      doc.text("STRICTION ADVISORY STRATEGY SUITE - V2.0", margin + 8, y + 10);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(14);

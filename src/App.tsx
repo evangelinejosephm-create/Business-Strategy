@@ -624,7 +624,7 @@ export default function App() {
 
               {/* Coordinate Watermark Accent */}
               <div className="absolute bottom-6 right-6 font-mono text-[10px] text-outline/65 hidden md:block">
-                LAT: 40.7128° N // LON: 74.0060° W — BROOKLYN WORKSPACE
+                LAT: 40.7128° N - LON: 74.0060° W — BROOKLYN WORKSPACE
               </div>
             </section>
 
@@ -640,7 +640,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl mb-12">
               <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
-                01 // Automated Strategy Checkpoint
+                01 - Automated Strategy Checkpoint
               </span>
               <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-4">
                 Northbound
@@ -679,7 +679,7 @@ export default function App() {
             {/* Header block with outcome narrative */}
             <div className="max-w-3xl mx-auto text-center mb-16">
               <span className="font-mono text-xs text-secondary tracking-[0.25em] uppercase block mb-3 font-bold">
-                02 // OUTCOME-DRIVEN PARTNERSHIPS
+                02 - OUTCOME-DRIVEN PARTNERSHIPS
               </span>
               <h2 className="font-serif font-medium text-3xl md:text-5xl text-primary tracking-tight mb-6">
                 Engineered Outcomes
@@ -717,7 +717,7 @@ export default function App() {
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-[10px] tracking-widest text-secondary font-extrabold uppercase">
-                          PATHWAY A // REVENUE RECOVERY
+                          PATHWAY A - REVENUE RECOVERY
                         </span>
                         {selectedOutcomePathway === "revenue" && (
                           <span className="bg-secondary/15 text-secondary font-mono text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest leading-none">
@@ -779,7 +779,7 @@ export default function App() {
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-[10px] tracking-widest text-slate-300 font-bold uppercase">
-                          PATHWAY B // PRODUCT STRATEGY
+                          PATHWAY B - PRODUCT STRATEGY
                         </span>
                         {selectedOutcomePathway === "product" && (
                           <span className="bg-white/15 text-white font-mono text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-widest leading-none">
@@ -1080,7 +1080,7 @@ export default function App() {
               {/* Pitch layout */}
               <div className="lg:col-span-7">
                 <span className="font-mono text-xs text-secondary tracking-[0.2em] uppercase mb-4 block font-bold">
-                  03 // ABOUT THE STRATEGIST
+                  03 - ABOUT THE STRATEGIST
                 </span>
                 <h2 className="font-serif font-medium text-3xl md:text-4xl text-primary tracking-tight mb-6">
                   Your Partner in Scaling with Clarity and Confidence
@@ -1172,7 +1172,7 @@ export default function App() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
               <div>
                 <span className="font-mono text-xs text-secondary tracking-widest uppercase block mb-3 font-bold">
-                  04 // METRICS & EVIDENCE
+                  04 - METRICS & EVIDENCE
                 </span>
                 <h2 className="font-serif font-medium text-3xl md:text-4xl text-slate-100 tracking-tight leading-none">
                   Tangible outcomes from systemic shifts.

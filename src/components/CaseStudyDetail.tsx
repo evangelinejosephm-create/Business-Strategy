@@ -102,7 +102,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
               BACK TO PORTFOLIO
             </button>
             <span className="font-mono text-[10px] text-secondary tracking-widest uppercase font-bold">
-              01 // ENTERPRISE PRICING PLATFORM API OPTIMIZATION
+              01 - ENTERPRISE PRICING PLATFORM API OPTIMIZATION
             </span>
           </div>
 
@@ -146,7 +146,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center gap-3">
                 <span className="w-2.5 h-6 bg-secondary" />
-                <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">OBJECTIVE // 01 / CHALLENGES</span>
+                <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">OBJECTIVE - CHALLENGES</span>
               </div>
               <p className="font-sans text-base md:text-lg text-on-surface-variant leading-relaxed">
                 At Accenture, I led the optimization of an enterprise platform responsible for calculating resource pricing using complex cost factors. By auditing API architecture and strengthening security controls, we accelerated pricing workflows and eliminated hundreds of hours of manual data handling.
@@ -175,7 +175,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
           <div className="space-y-10 pt-6">
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-6 bg-secondary" />
-              <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">METHODOLOGY // 02 / ARCHITECTURAL STRATEGY</span>
+              <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">METHODOLOGY - ARCHITECTURAL STRATEGY</span>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -223,7 +223,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
           <div className="space-y-8 pt-6">
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-6 bg-secondary" />
-              <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">RESULTS // 03 / QUANTIFIABLE IMPACT</span>
+              <span className="font-mono text-xs text-secondary tracking-widest uppercase font-extrabold">RESULTS - QUANTIFIABLE IMPACT</span>
             </div>
 
             <div className="grid lg:grid-cols-12 gap-12 items-center">
@@ -318,7 +318,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
               BACK TO PORTFOLIO
             </button>
             <span className="font-mono text-[10px] text-secondary tracking-widest uppercase font-bold">
-              02 // CASE STUDY — LOGISTICS & INTEGRATION
+              02 - CASE STUDY — LOGISTICS & INTEGRATION
             </span>
           </div>
 
@@ -498,7 +498,7 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
               BACK TO PORTFOLIO
             </button>
             <span className="font-mono text-[10px] text-secondary tracking-widest uppercase font-bold">
-              03 // CASE STUDY: BOTPATH
+              03 - CASE STUDY: BOTPATH
             </span>
           </div>
 
