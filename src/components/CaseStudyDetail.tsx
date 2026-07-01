@@ -263,13 +263,9 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
               {/* Right Side: Big Insight Quote */}
               <div className="lg:col-span-6 bg-white border border-outline p-8 md:p-12 rounded-lg relative shadow-[0_4px_24px_rgba(28,34,22,0.03)]">
                 <span className="absolute top-6 right-8 text-6xl text-secondary/15 font-serif leading-none select-none">”</span>
-                <p className="font-sans text-lg md:text-xl text-primary leading-relaxed italic mb-6">
+                <p className="font-sans text-lg md:text-xl text-primary leading-relaxed italic">
                   "APIs in enterprise environments are not just integration layers — they directly dictate business decision speed, data security, and operational efficiency."
                 </p>
-                <div className="border-t border-outline-variant pt-4">
-                  <span className="font-mono text-[9px] text-secondary tracking-widest block uppercase mb-1 font-bold">KEY STRATEGIC INSIGHT</span>
-                  <span className="text-xs uppercase tracking-wide font-extrabold text-primary">CROSS-FUNCTIONAL API STRATEGY</span>
-                </div>
               </div>
             </div>
           </div>
@@ -451,8 +447,6 @@ export default function CaseStudyDetail({ caseId, onBack, onNavigate, onDiscuss 
               <h3 className="font-sans font-bold text-xl md:text-2xl text-primary leading-relaxed italic max-w-3xl mx-auto">
                 "Operational workflows cannot exist in isolation from communication structures. For a system to scale, the flow of information must be as robust as the movement of goods—otherwise, growth simply scales friction."
               </h3>
-              <div className="h-px w-20 bg-secondary mx-auto opacity-40 mt-4" />
-              <span className="font-mono text-[9px] text-secondary tracking-widest block uppercase font-bold">SYSTEMS INTEGRATION FORMULA</span>
             </div>
           </div>
 
