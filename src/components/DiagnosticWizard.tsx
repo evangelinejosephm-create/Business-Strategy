@@ -1734,9 +1734,9 @@ ${result.blueprint}`;
           {!result && !isLoading && (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
               <FileText size={48} className="text-secondary/40 mb-4" />
-              <h4 className="font-sans font-semibold text-lg text-primary mb-2">AI-Generated Strategic Assessment</h4>
+              <h4 className="font-sans font-semibold text-lg text-primary mb-2">Northbound</h4>
               <p className="text-sm text-on-surface-variant max-w-md">
-                Complete the assessment to generate a customized overview of potential opportunities, constraints, and strategic focus areas relevant to your business.
+                Reason through your next business decision
               </p>
             </div>
           )}

@@ -13,22 +13,29 @@ app.use(express.json());
 
 // Lazy-initialize Gemini client to avoid crashes on startup if key is missing
 let aiClient: GoogleGenAI | null = null;
+let cachedKey: string = "";
+
 function getAi(): GoogleGenAI | null {
   try {
-    if (!aiClient) {
-      const key = process.env.GEMINI_API_KEY;
-      if (!key) {
-        console.warn("Warning: GEMINI_API_KEY environment variable is not set. The portal will operate in fallback mode.");
-        return null;
-      }
-      aiClient = new GoogleGenAI({
-        apiKey: key,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
+    const rawKey = (
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      process.env.VITE_GEMINI_API_KEY ||
+      process.env.GEMINI_KEY ||
+      process.env.API_KEY ||
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+      ""
+    );
+    const key = rawKey.replace(/^["']|["']$/g, "").trim();
+
+    if (!key) {
+      console.warn("Warning: GEMINI_API_KEY environment variable is not set. The portal will operate in fallback mode.");
+      return null;
+    }
+
+    if (!aiClient || cachedKey !== key) {
+      aiClient = new GoogleGenAI({ apiKey: key });
+      cachedKey = key;
     }
     return aiClient;
   } catch (err) {
@@ -49,7 +56,9 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
     throw new Error("Missing Gemini Client / API Key.");
   }
 
-  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-2.5-flash"];
+  const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
+  const baseModels = ["gemini-3.5-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
+  const modelsToTry = customModel ? [customModel, ...baseModels.filter(m => m !== customModel)] : baseModels;
   let lastError: any = null;
 
   for (let i = 0; i < modelsToTry.length; i++) {
@@ -94,12 +103,12 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
         // Abort immediately if we detect a credential/API key error to prevent serverless execution timeout
         const errMsg = String(err.message || "").toLowerCase();
         if (
-          errMsg.includes("api key") || 
-          errMsg.includes("invalid") || 
+          errMsg.includes("api_key_invalid") || 
+          errMsg.includes("invalid api key") || 
+          errMsg.includes("api key not valid") || 
           errMsg.includes("unauthorized") || 
-          errMsg.includes("permission") || 
-          errMsg.includes("403") || 
-          errMsg.includes("400")
+          errMsg.includes("permission denied") || 
+          errMsg.includes("403")
         ) {
           console.log("[GEMINI API INFO] Detected credential or authorization issue. Aborting retry loop immediately.");
           throw err;
@@ -108,7 +117,7 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
         // If it's not a 503/429/unavailable transient error, we can stop retrying this specific model and move to the next one
         const isTransient = errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("demand") || errMsg.includes("limit") || errMsg.includes("overloaded") || errMsg.includes("429");
         if (!isTransient) {
-          console.log(`[GEMINI API INFO] Non-transient status encountered. Moving to next model.`);
+          console.log(`[GEMINI API INFO] Non-transient status encountered on ${activeModel}. Moving to next model.`);
           break; // Break inner loop, move to next model
         }
       }
@@ -485,6 +494,7 @@ DO NOTS:
           }
         });
       } catch (apiError: any) {
+        console.error("[GEMINI AUDIT ERROR] Gemini generation failed. Root cause:", apiError?.message || apiError, apiError?.stack || "");
         console.log("[GEMINI API INFO] Model generation fallback in Audit initialized. Utilizing dynamic offline template block.");
         text = getFallbackBlueprint(companyName, ecosystemPhase, industry, bottleneck, summarizeProblem, expectedResult);
       }
@@ -839,6 +849,7 @@ Tone, Formatting & Heading Rules:
         }
       });
     } catch (apiError: any) {
+      console.error("[GEMINI CHAT ERROR] Gemini generation failed. Root cause:", apiError?.message || apiError, apiError?.stack || "");
       console.log("[GEMINI API INFO] Model generation fallback in Chat initialized. Utilizing high-competency match block.");
 
       if (lowerMsg.includes("pricing") || lowerMsg.includes("invest") || lowerMsg.includes("cost") || lowerMsg.includes("fee") || lowerMsg.includes("much")) {
