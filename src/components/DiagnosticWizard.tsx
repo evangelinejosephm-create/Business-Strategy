@@ -46,9 +46,18 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       return foundKey ? sectionsMap[foundKey] : "";
     };
 
+    const cleanMd = (str: string): string => {
+      if (!str) return "";
+      return str
+        .replace(/\*\*/g, "")
+        .replace(/^\*+|\*+$/g, "")
+        .replace(/^[#:\s-]+|[:\s-]+$/g, "")
+        .trim();
+    };
+
     // SECTION 1: EXECUTIVE SUMMARY
     const summaryText = getSectionText("EXECUTIVE SUMMARY") || getSectionText("EXECUTIVE DIAGNOSIS") || rawParts[1] || "";
-    const executiveSummary = summaryText.trim();
+    const executiveSummary = cleanMd(summaryText);
 
     // SECTION 2: KEY SYSTEMIC GAPS
     const bottlenecksText = getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
@@ -56,7 +65,7 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
     const bottlenecks = bottlenecksRaw.slice(0, 5).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Gap ${idx + 1}`;
-      title = title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, "").trim();
+      title = cleanMd(title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, ""));
 
       const rawTextLines: string[] = [];
       lines.slice(1).forEach(line => {
@@ -72,10 +81,10 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
         }
       });
 
-      const description = rawTextLines.join(" ").trim();
+      const description = cleanMd(rawTextLines.join(" "));
 
       return {
-        title,
+        title: title || `Gap ${idx + 1}`,
         description: description || "Unresolved strategic constraint slowing growth down."
       };
     });
@@ -93,7 +102,7 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
     const opportunities = oppRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Opportunity ${idx + 1}`;
-      title = title.replace(/^(\d+[\s.-]*|opportunity\s*\d+[\s.-]*)/i, "").trim();
+      title = cleanMd(title.replace(/^(\d+[\s.-]*|opportunity\s*\d+[\s.-]*)/i, ""));
 
       let what = "";
       let why = "";
@@ -124,9 +133,9 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       });
 
       return {
-        title,
-        what: what.trim() || "Identified growth driver.",
-        why: why.trim() || "Tapping on this opportunity accelerates performance metrics."
+        title: title || `Opportunity ${idx + 1}`,
+        what: cleanMd(what) || "Identified growth driver.",
+        why: cleanMd(why) || "Tapping on this opportunity accelerates performance metrics."
       };
     });
 
@@ -140,11 +149,11 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
 
     // SECTION 4: QUESTIONS WORTH INVESTIGATING
     const questionsText = getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[4] || "";
-    const questions = questionsText.trim();
+    const questions = cleanMd(questionsText);
 
     // SECTION 5: WHERE TO FOCUS NEXT
     const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[5] || "";
-    const focusPoint = focusText.trim();
+    const focusPoint = cleanMd(focusText);
 
     return {
       executiveSummary,

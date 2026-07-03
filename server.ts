@@ -29,7 +29,7 @@ function getAi(): GoogleGenAI | null {
     const key = rawKey.replace(/^["']|["']$/g, "").trim();
 
     if (!key) {
-      console.warn("Warning: GEMINI_API_KEY environment variable is not set. The portal will operate in fallback mode.");
+      console.warn("Warning: Neither GEMINI_API_KEY nor GOOGLE_API_KEY environment variable is set. The portal will operate in fallback mode.");
       return null;
     }
 
@@ -89,6 +89,10 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
         const response = await ai.models.generateContent({
           ...params,
           model: activeModel,
+          config: {
+            ...(params.config || {}),
+            temperature: 0.2, // Use low temperature for consistent, structured analytical blueprints across environments
+          },
         });
 
         if (response && response.text) {
