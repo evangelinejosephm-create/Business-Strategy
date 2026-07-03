@@ -57,7 +57,18 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
   }
 
   const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
-  const baseModels = ["gemini-3.5-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite", "gemini-flash-latest"];
+  const baseModels = [
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-pro",
+    "gemini-pro",
+    "gemini-3.5-flash",
+    "gemini-3.1-pro-preview",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-latest"
+  ];
   const modelsToTry = customModel ? [customModel, ...baseModels.filter(m => m !== customModel)] : baseModels;
   let lastError: any = null;
 
@@ -125,6 +136,21 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
   }
 
   throw lastError || new Error("Failed to generate content with any available Gemini Model.");
+}
+
+// Safe serverless SMTP dispatcher: awaits email delivery with a clean timeout safeguard so Vercel serverless functions don't terminate prematurely or hang indefinitely
+async function sendEmailSafely(transporter: any, mailOptions: any): Promise<boolean> {
+  try {
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("SMTP delivery timed out after 4500ms")), 4500);
+    });
+    await Promise.race([sendPromise, timeoutPromise]);
+    return true;
+  } catch (err: any) {
+    console.log("[INFO] Optional SMTP transport channel has not dispatched live email, failing back smoothly:", err.message || err);
+    return false;
+  }
 }
 
 function getFallbackBlueprint(
@@ -531,7 +557,7 @@ ${text}
     console.log(emailBodyText);
 
     if (host && user && pass) {
-      const toEmail = "evangelinejoseph.m@gmail.com";
+      const toEmail = process.env.SMTP_TO || user || "evangelinejoseph.m@gmail.com";
       const mailOptions = {
         from,
         to: toEmail,
@@ -594,28 +620,28 @@ ${text}
         `,
       };
 
-      // Execute SMTP in the background without awaiting to prevent Vercel serverless function timeouts
-      (async () => {
-        try {
-          const nodemailer = await import("nodemailer");
-          const transporter = nodemailer.createTransport({
-            host,
-            port,
-            secure: port === 465,
-            auth: {
-              user,
-              pass,
-            },
-            connectionTimeout: 2000,
-            greetingTimeout: 2000,
-            socketTimeout: 3000,
-          });
-          await transporter.sendMail(mailOptions);
+      // Await SMTP dispatch safely so Vercel serverless functions do not freeze/terminate prematurely
+      try {
+        const nodemailer = await import("nodemailer");
+        const transporter = nodemailer.createTransport({
+          host,
+          port,
+          secure: port === 465,
+          auth: {
+            user,
+            pass,
+          },
+          connectionTimeout: 2000,
+          greetingTimeout: 2000,
+          socketTimeout: 3000,
+        });
+        const sent = await sendEmailSafely(transporter, mailOptions);
+        if (sent) {
           console.log(`Diagnostic report email dispatched successfully to ${toEmail}`);
-        } catch (smtpError: any) {
-          console.log("[INFO] Optional SMTP transport channel for audit has not dispatched live email, failing back smoothly:", smtpError.message || smtpError);
         }
-      })();
+      } catch (smtpError: any) {
+        console.log("[INFO] Optional SMTP transport channel for audit has not dispatched live email, failing back smoothly:", smtpError.message || smtpError);
+      }
     } else {
       console.log("[INFO] SMTP credentials not fully configured. Email report dispatch skipped (logged to console above).");
     }
@@ -1081,9 +1107,10 @@ Context:    ${context || "None provided"}
         socketTimeout: 3000,
       });
 
-      await transporter.sendMail(mailOptions);
-      console.log(`Strategic email successfully dispatched to ${toEmail}.`);
-      smtpSuccess = true;
+      smtpSuccess = await sendEmailSafely(transporter, mailOptions);
+      if (smtpSuccess) {
+        console.log(`Strategic email successfully dispatched to ${toEmail}.`);
+      }
     } catch (smtpError: any) {
       // Log as structured info line instead of console.error stack trace to prevent automated test runner alerts
       console.log("[INFO] Optional SMTP transport channel has not dispatched live email, failing back smoothly:", smtpError.message || smtpError);
@@ -1148,7 +1175,7 @@ ${blueprint || "No blueprint generated"}
       });
     }
 
-    const toEmail = "evangelinejoseph.m@gmail.com";
+    const toEmail = process.env.SMTP_TO || user || "evangelinejoseph.m@gmail.com";
 
     const mailOptions = {
       from,
@@ -1211,30 +1238,28 @@ ${blueprint || "No blueprint generated"}
     };
 
     let smtpSuccess = false;
-    // Execute SMTP in the background without awaiting to prevent Vercel serverless function timeouts
-    (async () => {
-      try {
-        const nodemailer = await import("nodemailer");
-        const transporter = nodemailer.createTransport({
-          host,
-          port,
-          secure: port === 465,
-          auth: {
-            user,
-            pass,
-          },
-          connectionTimeout: 2000,
-          greetingTimeout: 2000,
-          socketTimeout: 3000,
-        });
+    try {
+      const nodemailer = await import("nodemailer");
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: {
+          user,
+          pass,
+        },
+        connectionTimeout: 2000,
+        greetingTimeout: 2000,
+        socketTimeout: 3000,
+      });
 
-        await transporter.sendMail(mailOptions);
+      smtpSuccess = await sendEmailSafely(transporter, mailOptions);
+      if (smtpSuccess) {
         console.log(`Strategic feedback and report email successfully dispatched to ${toEmail}.`);
-        smtpSuccess = true;
-      } catch (smtpError: any) {
-        console.log("[INFO] Optional SMTP transport channel has not dispatched feedback email, failing back smoothly:", smtpError.message || smtpError);
       }
-    })();
+    } catch (smtpError: any) {
+      console.log("[INFO] Optional SMTP transport channel has not dispatched feedback email, failing back smoothly:", smtpError.message || smtpError);
+    }
 
     res.json({
       success: true,
