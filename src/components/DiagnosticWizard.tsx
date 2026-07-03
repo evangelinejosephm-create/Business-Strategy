@@ -171,27 +171,13 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
 function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) {
   return (
     <div className="space-y-10 select-text text-primary font-sans">
-      
-      {/* SECTION 1: EXECUTIVE SUMMARY */}
-      <div className="bg-slate-900 border-l-4 border-amber-500 rounded-xl p-6 border border-slate-800 shadow-md">
-        <div className="flex items-center gap-2 mb-3.5">
-          <Sparkles size={18} className="text-amber-400" />
-          <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-            01 - EXECUTIVE SUMMARY
-          </h4>
-        </div>
-        <p className="text-sm text-slate-100 leading-relaxed whitespace-pre-line font-medium">
-          {parsed.executiveSummary || "No executive summary compiled."}
-        </p>
-      </div>
-
-      {/* SECTION 2: KEY SYSTEMIC GAPS */}
+      {/* SECTION 1: KEY SYSTEMIC GAPS */}
       {parsed.bottlenecks && parsed.bottlenecks.length > 0 && (
         <div className="space-y-5">
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <ShieldAlert size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              02 - KEY SYSTEMIC GAPS
+              01 - KEY SYSTEMIC GAPS
             </h4>
           </div>
 
@@ -221,13 +207,13 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </div>
       )}
 
-      {/* SECTION 3: OPPORTUNITIES */}
+      {/* SECTION 2: OPPORTUNITIES */}
       {parsed.opportunities && parsed.opportunities.length > 0 && (
         <div className="space-y-5">
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <Zap size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              03 - STRATEGIC GROWTH OPPORTUNITIES
+              02 - STRATEGIC GROWTH OPPORTUNITIES
             </h4>
           </div>
 
@@ -258,13 +244,13 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </div>
       )}
 
-      {/* SECTION 4: QUESTIONS WORTH INVESTIGATING */}
+      {/* SECTION 3: QUESTIONS WORTH INVESTIGATING */}
       {parsed.questions && (
         <div className="bg-slate-900 text-white rounded-xl p-6 border border-slate-800 shadow-md space-y-5">
           <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
             <Award size={18} className="text-amber-400" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-              04 - QUESTIONS WORTH INVESTIGATING
+              03 - QUESTIONS WORTH INVESTIGATING
             </h4>
           </div>
 
@@ -274,13 +260,13 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </div>
       )}
 
-      {/* SECTION 5: WHERE TO FOCUS NEXT */}
+      {/* SECTION 4: WHERE TO FOCUS NEXT */}
       {parsed.focusPoint && (
         <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-amber-500/10 pb-3">
             <Target size={18} className="text-amber-600" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-amber-900 font-bold">
-              05 - WHERE TO FOCUS NEXT
+              04 - WHERE TO FOCUS NEXT
             </h4>
           </div>
 
@@ -375,7 +361,7 @@ const PROGRESS_STEPS = [
   "Benchmarking industry...",
   "Building issue tree...",
   "Prioritizing bottlenecks...",
-  "Preparing executive summary..."
+  "Compiling strategic blueprint..."
 ];
 
 const getWordCount = (text: string) => {
