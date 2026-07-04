@@ -65,7 +65,7 @@ export default function App() {
 
     const timer = setTimeout(() => {
       setIsCondensed(true);
-    }, 2500); // collapse after 2.5 seconds for snappier load
+    }, 3500); // collapse after 3.5 seconds for snappier load
     
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -606,7 +606,7 @@ export default function App() {
                             setIsCondensed(false);
                             setTimeout(() => {
                               setIsCondensed(true);
-                            }, 2500); // exactly 2.5 seconds
+                            }, 3500); // exactly 3.5 seconds
                           }}
                           className="border border-outline-variant/60 hover:border-secondary text-on-surface-variant hover:text-secondary px-5 py-3.5 font-mono text-xs uppercase tracking-widest bg-white rounded-xl transition-all cursor-pointer flex items-center gap-2"
                         >
