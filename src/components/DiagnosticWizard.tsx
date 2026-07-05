@@ -348,6 +348,108 @@ const INDUSTRY_OPTIONS = [
   "Logistics"
 ];
 
+const PROBLEM_EXAMPLES_MAP: Record<string, Record<string, string>> = {
+  "E-commerce": {
+    "Revenue Growth": "Traffic is growing, but too few visitors complete a purchase and cancellations are increasing.",
+    "Product Strategy": "Customers struggle to discover the right products, and feature requests make roadmap decisions difficult.",
+    "Customer Retention": "Repeat purchases are declining despite regular promotions and email campaigns.",
+    "Operational Efficiency": "Order processing and fulfillment delays are increasing delivery times and operational costs."
+  },
+  "B2B SaaS/Enterprise": {
+    "Revenue Growth": "We generate qualified leads, but too few convert into paying customers because sales cycles are long.",
+    "Product Strategy": "Customers request features from multiple directions, making roadmap prioritization difficult.",
+    "Customer Retention": "Customers adopt the product initially but usage drops after onboarding, leading to higher churn.",
+    "Operational Efficiency": "Engineering teams spend too much time on support and maintenance instead of building new features."
+  },
+  "Education": {
+    "Revenue Growth": "Learner enrollments are high, but course completion and paid certification rates remain low.",
+    "Product Strategy": "Students struggle to discover relevant learning paths, making product adoption slower than expected.",
+    "Customer Retention": "Learners stop engaging after the first few weeks and subscription renewals are declining.",
+    "Operational Efficiency": "Content updates and course publishing take too long due to manual review processes."
+  },
+  "Healthcare": {
+    "Revenue Growth": "Patient demand is growing, but appointment bookings and treatment conversions remain low.",
+    "Product Strategy": "Patients struggle to navigate our digital services, making new healthcare offerings difficult to adopt.",
+    "Customer Retention": "Patients do not return for follow-up care despite reminders and outreach efforts.",
+    "Operational Efficiency": "Administrative work and manual documentation reduce the time clinicians spend with patients."
+  },
+  "Energy": {
+    "Revenue Growth": "Commercial customers show interest in our renewable solutions, but too few projects convert into signed contracts.",
+    "Product Strategy": "Customers struggle to understand which energy solutions fit their needs, slowing adoption of new offerings.",
+    "Customer Retention": "Existing customers are slow to adopt additional energy services and contract renewals are declining.",
+    "Operational Efficiency": "Project approvals involve multiple teams, delaying execution and increasing operational costs."
+  },
+  "Logistics": {
+    "Revenue Growth": "Shipment demand is increasing, but delivery delays and lost opportunities limit revenue growth.",
+    "Product Strategy": "Customers find it difficult to use shipment planning tools, resulting in low adoption of new services.",
+    "Customer Retention": "Customers are switching to competitors because delivery reliability is inconsistent.",
+    "Operational Efficiency": "Route planning and warehouse coordination require too much manual effort, reducing efficiency."
+  },
+  "Other": {
+    "Revenue Growth": "Revenue isn't growing as expected despite steady customer interest.",
+    "Product Strategy": "We're struggling to prioritize product improvements and decide what to build next.",
+    "Customer Retention": "Existing customers are leaving faster than we'd like, and engagement is declining.",
+    "Operational Efficiency": "Internal processes are slowing execution and reducing team productivity."
+  }
+};
+
+const SUCCESS_EXAMPLES_MAP: Record<string, Record<string, string>> = {
+  "E-commerce": {
+    "Revenue Growth": "Increase completed purchases, improve checkout conversion, and reduce cancellations.",
+    "Product Strategy": "Improve product discovery, prioritize high-impact features, and increase adoption.",
+    "Customer Retention": "Increase repeat purchases, improve customer loyalty, and reduce churn.",
+    "Operational Efficiency": "Speed up order fulfillment, reduce operational delays, and improve delivery performance."
+  },
+  "B2B SaaS/Enterprise": {
+    "Revenue Growth": "Increase qualified conversions, shorten sales cycles, and grow recurring revenue.",
+    "Product Strategy": "Build a clearer product roadmap with faster customer adoption and higher-impact releases.",
+    "Customer Retention": "Increase product adoption, improve customer engagement, and reduce churn.",
+    "Operational Efficiency": "Reduce engineering overhead, improve delivery speed, and increase team productivity."
+  },
+  "Education": {
+    "Revenue Growth": "Increase course completions, improve paid certifications, and grow subscription revenue.",
+    "Product Strategy": "Improve learning discovery, increase product adoption, and build a focused roadmap.",
+    "Customer Retention": "Increase learner engagement, improve course completion, and boost subscription renewals.",
+    "Operational Efficiency": "Reduce publishing time, streamline content operations, and improve delivery efficiency."
+  },
+  "Healthcare": {
+    "Revenue Growth": "Increase appointment bookings, improve treatment conversions, and grow patient revenue.",
+    "Product Strategy": "Improve adoption of digital healthcare services and prioritize patient needs.",
+    "Customer Retention": "Increase follow-up visits, improve patient engagement, and strengthen long-term care.",
+    "Operational Efficiency": "Reduce administrative effort, improve clinician productivity, and shorten patient wait times."
+  },
+  "Energy": {
+    "Revenue Growth": "Increase project conversions, shorten sales cycles, and grow renewable energy revenue.",
+    "Product Strategy": "Simplify product offerings, improve customer adoption, and prioritize the right investments.",
+    "Customer Retention": "Increase contract renewals, expand customer adoption, and strengthen long-term relationships.",
+    "Operational Efficiency": "Shorten project approvals, reduce operational delays, and improve execution speed."
+  },
+  "Logistics": {
+    "Revenue Growth": "Increase shipment conversions, improve delivery performance, and grow revenue.",
+    "Product Strategy": "Increase adoption of logistics services and build a more customer-focused roadmap.",
+    "Customer Retention": "Improve delivery reliability, strengthen customer loyalty, and reduce churn.",
+    "Operational Efficiency": "Optimize route planning, reduce manual effort, and improve fulfillment efficiency."
+  },
+  "Other": {
+    "Revenue Growth": "Increase revenue by improving customer conversion and business performance.",
+    "Product Strategy": "Build a focused roadmap that delivers greater customer value.",
+    "Customer Retention": "Improve customer engagement, strengthen retention, and reduce churn.",
+    "Operational Efficiency": "Improve execution speed, reduce manual work, and increase team productivity."
+  }
+};
+
+const getProblemExample = (ind: string, outcome: string): string => {
+  const normInd = ind === "B2B SaaS / Enterprise" ? "B2B SaaS/Enterprise" : (ind || "Other");
+  const indMap = PROBLEM_EXAMPLES_MAP[normInd] || PROBLEM_EXAMPLES_MAP["Other"];
+  return indMap[outcome] || PROBLEM_EXAMPLES_MAP["Other"]["Revenue Growth"];
+};
+
+const getSuccessExample = (ind: string, outcome: string): string => {
+  const normInd = ind === "B2B SaaS / Enterprise" ? "B2B SaaS/Enterprise" : (ind || "Other");
+  const indMap = SUCCESS_EXAMPLES_MAP[normInd] || SUCCESS_EXAMPLES_MAP["Other"];
+  return indMap[outcome] || SUCCESS_EXAMPLES_MAP["Other"]["Revenue Growth"];
+};
+
 const PROGRESS_STEPS = [
   "Analyzing company website...",
   "Understanding business model...",
@@ -1581,7 +1683,7 @@ ${result.blueprint}`;
 
             {/* What's slowing your business? */}
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
                   What's slowing your business?
                 </label>
@@ -1592,7 +1694,7 @@ ${result.blueprint}`;
               <textarea
                 value={problemText}
                 onChange={(e) => setProblemText(limitToMaxWords(e.target.value, 500))}
-                placeholder="Describe current process bottlenecks or specific friction points..."
+                placeholder={`e.g., "${getProblemExample(industry, bottleneck)}"`}
                 rows={3}
                 className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg resize-none transition-all duration-150"
               />
@@ -1600,7 +1702,7 @@ ${result.blueprint}`;
 
             {/* What does success look like? */}
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
                   What does success look like?
                 </label>
@@ -1610,7 +1712,7 @@ ${result.blueprint}`;
               </div>
               <textarea
                 required
-                placeholder="What is your desired standard of excellence or key objective?"
+                placeholder={`e.g., "${getSuccessExample(industry, bottleneck)}"`}
                 value={expectedResult}
                 onChange={(e) => setExpectedResult(limitToMaxWords(e.target.value, 500))}
                 rows={3}
