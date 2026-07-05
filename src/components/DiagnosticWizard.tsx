@@ -1454,34 +1454,35 @@ ${result.blueprint}`;
         {/* Left Interactive Input Form */}
         <div className="lg:col-span-5 space-y-6">
           <form onSubmit={runDiagnostic} className="space-y-6">
-            {/* Company Website */}
-            <div>
-              <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
-                Company Website
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. www.company.com"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
-              />
-            </div>
+            {/* Company Website & Email Address */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
+                  Company Website
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. www.company.com"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
+                />
+              </div>
 
-            {/* Email Address */}
-            <div>
-              <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
-                Email Address
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="e.g. you@company.com"
-                value={emailAddress}
-                onChange={(e) => setEmailAddress(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
-              />
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. you@company.com"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
+                />
+              </div>
             </div>
 
             {/* Market Vertical */}
@@ -1725,7 +1726,7 @@ ${result.blueprint}`;
                 <div>
                   <p className="text-sm font-sans font-semibold text-slate-800">Strategy Matrix for {bottleneck}</p>
                   <h4 className="font-sans font-bold text-xl text-primary mt-1">{companyName || "Unspecified"}</h4>
-                  <p className="text-xs text-on-surface-variant font-mono mt-0.5">{emailAddress} • {industry}</p>
+                  <p className="text-xs text-on-surface-variant font-mono mt-0.5">{industry}</p>
                 </div>
                 
                 <div className="flex justify-end items-center gap-2.5 self-start pt-1">
