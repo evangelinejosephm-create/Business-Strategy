@@ -340,19 +340,12 @@ const EXPECTED_RESULT_MAP: Record<string, string> = {
 };
 
 const INDUSTRY_OPTIONS = [
-  "Automobile",
-  "B2B SaaS",
+  "B2B SaaS/Enterprise",
   "E-commerce",
   "Education",
   "Energy",
-  "Finance",
   "Healthcare",
-  "Logistics",
-  "Manufacturing",
-  "Media & Marketing",
-  "Professional Services",
-  "Real Estate",
-  "Semiconductor"
+  "Logistics"
 ];
 
 const PROGRESS_STEPS = [
@@ -1553,20 +1546,15 @@ ${result.blueprint}`;
                 {OUTCOME_OPTIONS.map((opt) => {
                   const isSelected = bottleneck === opt;
                   let icon = <TrendingUp size={13} className={isSelected ? "text-amber-600" : "text-slate-400"} />;
-                  let desc = "";
                   
                   if (opt === "Revenue Growth") {
                     icon = <TrendingUp size={13} className={isSelected ? "text-amber-600" : "text-slate-400"} />;
-                    desc = "Funnel & checkout lift";
                   } else if (opt === "Product Strategy") {
                     icon = <Target size={13} className={isSelected ? "text-amber-600" : "text-slate-400"} />;
-                    desc = "Value-path onboarding";
                   } else if (opt === "Customer Retention") {
                     icon = <Award size={13} className={isSelected ? "text-amber-600" : "text-slate-400"} />;
-                    desc = "Stop subscription churn";
                   } else if (opt === "Operational Efficiency") {
                     icon = <Zap size={13} className={isSelected ? "text-amber-600" : "text-slate-400"} />;
-                    desc = "Automate work hand-offs";
                   }
 
                   return (
@@ -1574,21 +1562,16 @@ ${result.blueprint}`;
                       key={opt}
                       type="button"
                       onClick={() => handleOutcomeChange(opt)}
-                      className={`flex flex-col items-start text-left p-3 border rounded-xl transition-all duration-200 cursor-pointer group hover:shadow-[0_2px_8px_rgba(0,0,0,0.02)] active:scale-95 ${
+                      className={`flex items-center gap-2 p-3 border rounded-xl transition-all duration-200 cursor-pointer group hover:shadow-[0_2px_8px_rgba(0,0,0,0.02)] active:scale-95 ${
                         isSelected
                           ? "border-amber-500 bg-amber-50/45 shadow-xs ring-1 ring-amber-500/20"
                           : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 mb-1">
-                        {icon}
-                        <span className={`text-[11px] font-sans font-bold tracking-tight ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
-                          {opt}
-                        </span>
-                      </div>
-                      <p className={`text-[10px] leading-tight font-sans ${isSelected ? "text-slate-600" : "text-slate-400"}`}>
-                        {desc}
-                      </p>
+                      {icon}
+                      <span className={`text-[11px] font-sans font-bold tracking-tight ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
+                        {opt}
+                      </span>
                     </button>
                   );
                 })}
