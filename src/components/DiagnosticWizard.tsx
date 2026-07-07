@@ -724,15 +724,9 @@ export default function DiagnosticWizard() {
     }
     return OUTCOME_OPTIONS[0];
   });
-  const [problemText, setProblemText] = useState(() => {
+  const [businessUsecase, setBusinessUsecase] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("diag_problemText") || "";
-    }
-    return "";
-  });
-  const [expectedResult, setExpectedResult] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("diag_expectedResult") || "";
+      return localStorage.getItem("diag_businessUsecase") || "";
     }
     return "";
   });
@@ -961,15 +955,9 @@ export default function DiagnosticWizard() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("diag_problemText", problemText);
+      localStorage.setItem("diag_businessUsecase", businessUsecase);
     }
-  }, [problemText]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("diag_expectedResult", expectedResult);
-    }
-  }, [expectedResult]);
+  }, [businessUsecase]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1240,13 +1228,13 @@ export default function DiagnosticWizard() {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("WHAT SUCCESS LOOKS LIKE:", rightColX, y + 23);
+      doc.text("BUSINESS USE CASE:", rightColX, y + 23);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      // Let's wrap long expected result text
-      const wrappedResult = doc.splitTextToSize(expectedResult || "N/A", (contentWidth / 2) - 8);
-      doc.text(wrappedResult, rightColX, y + 28);
+      // Let's wrap long business usecase text
+      const wrappedUsecase = doc.splitTextToSize(businessUsecase || "N/A", (contentWidth / 2) - 8);
+      doc.text(wrappedUsecase, rightColX, y + 28);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
@@ -1480,12 +1468,8 @@ ${result.blueprint}`;
       setError("Email Address is required to finalize system diagnostic.");
       return;
     }
-    if (!problemText.trim()) {
-      setError("Please enter or select at least one problem category.");
-      return;
-    }
-    if (!expectedResult.trim()) {
-      setError("Expected result is required.");
+    if (!businessUsecase.trim()) {
+      setError("Business Use Case is required to finalize system diagnostic.");
       return;
     }
 
@@ -1506,8 +1490,8 @@ ${result.blueprint}`;
           ecosystemPhase,
           industry,
           bottleneck,
-          summarizeProblem: problemText,
-          expectedResult
+          summarizeProblem: businessUsecase,
+          expectedResult: businessUsecase
         })
       });
 
@@ -1531,8 +1515,8 @@ ${result.blueprint}`;
           ecosystemPhase,
           industry,
           bottleneck,
-          problemText,
-          expectedResult
+          businessUsecase,
+          businessUsecase
         );
         setResult(localData);
       } catch (localErr: any) {
@@ -1546,8 +1530,6 @@ ${result.blueprint}`;
 
   const handleOutcomeChange = (newOutcome: string) => {
     setBottleneck(newOutcome);
-    setProblemText("");
-    setExpectedResult("");
   };
 
   return (
@@ -1681,42 +1663,19 @@ ${result.blueprint}`;
               </div>
             </div>
 
-            {/* What's slowing your business? */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
-                  What's slowing your business?
-                </label>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {getWordCount(problemText)}/500 words
-                </span>
-              </div>
+            {/* Business Use Case */}
+            <div id="business-usecase-field" className="space-y-1.5">
+              <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
+                Business Use Case
+              </label>
               <textarea
-                value={problemText}
-                onChange={(e) => setProblemText(limitToMaxWords(e.target.value, 500))}
-                placeholder={`e.g., "${getProblemExample(industry, bottleneck)}"`}
-                rows={3}
-                className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg resize-none transition-all duration-150"
-              />
-            </div>
-
-            {/* What does success look like? */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
-                  What does success look like?
-                </label>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {getWordCount(expectedResult)}/500 words
-                </span>
-              </div>
-              <textarea
+                id="business-usecase-textarea"
                 required
-                placeholder={`e.g., "${getSuccessExample(industry, bottleneck)}"`}
-                value={expectedResult}
-                onChange={(e) => setExpectedResult(limitToMaxWords(e.target.value, 500))}
-                rows={3}
-                className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg resize-none transition-all duration-150"
+                value={businessUsecase}
+                onChange={(e) => setBusinessUsecase(e.target.value)}
+                placeholder="Describe your business scenario, the challenges you want to solve, and your expected outcomes..."
+                rows={6}
+                className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg resize-y transition-all duration-150"
               />
             </div>
 
