@@ -494,16 +494,19 @@ Description: Product alignment remains anchored to a static roadmap rather than 
 
 ---SECTION 3: OPPORTUNITIES---
 1. Focus Core Capabilities
-What: Analyze current engagement to focus development and support around the top three high-adoption features. We estimate the business value as very high, with a medium-to-low execution complexity.
-Why: This initiative leverages your current user engagement strengths and addresses the weakness of feature bloating. It captures the opportunity for product focus while mitigating the threat of simpler competitor alternatives.
+Recommendation: Analyze current user engagement telemetry to focus product development and support around the top three highest-adoption features, clearing out low-traction capabilities. This directly addresses the diluted feature prioritizations gap by concentrating the engineering team's bandwidth on validated customer demands.
+Why it matters: This focused alignment significantly accelerates delivery velocity and speeds time-to-market. It reduces development overhead while maximizing product value, thereby improving trial-to-paid conversion and long-term customer retention.
+Why now: This opportunity represents exceptional business value with medium-to-low execution complexity since it repurposes existing features. It offers high strategic leverage by stabilizing the core product before scaling marketing.
 
 2. Clickable Prototyping
-What: Introduce lightweight clickable mockups to gauge active user interest and collect feedback prior to writing code. We estimate the business value as high, with a very low execution complexity.
-Why: This leverages your design agility and addresses the weakness of unverified validation latency. It captures immediate user feedback opportunities while mitigating the threat of wasted developer hours.
+Recommendation: Establish a rapid prototyping workflow using lightweight clickable mockups to systematically test feature demand and validate interest prior to writing code. This initiative directly solves the unverified user feedback gap, ensuring developer cycles are never wasted.
+Why it matters: This proactive process dramatically reduces engineering waste and avoids costly post-launch reworks. It ensures future product capital expenditure is directed exclusively towards highly coveted features, protecting margins.
+Why now: This initiative delivers high business value with extremely low implementation effort. It enables agile, evidence-based roadmap planning with zero initial infrastructural changes required.
 
 3. Goal-Oriented Welcomes
-What: Tailor the first-user setup experience based on the primary job-to-be-done they select. We estimate the business value as high, with a medium execution complexity.
-Why: This leverages your unique value proposition and addresses onboarding friction weaknesses. It captures higher initial trial conversion while mitigating the threat of early customer churn.
+Recommendation: Restructure the initial sign-up and onboarding sequence to trigger a tailored first-user experience based on the primary job-to-be-done selected by the registrant. This directly addresses the broad and unprioritized feature plans gap by personalizing early user exposure.
+Why it matters: Guiding users directly to their specific goal eliminates early choice fatigue and confusion. This drastically boosts first-week product adoption and customer lifetime value while establishing sticky retention habits.
+Why now: This provides substantial strategic leverage by protecting user acquisition spend and converting casual sign-ups into highly engaged users at a moderate technical complexity.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While your website outlines a compelling product vision, optimizing your strategy requires verifying internal product behaviors:
@@ -535,16 +538,19 @@ Description: Retention initiatives are reactive, launching only after a user ini
 
 ---SECTION 3: OPPORTUNITIES---
 1. Streamlined Signups
-What: Restructure your registration flow to collect only essential credentials first, saving detailed fields for later. We estimate the business value as high, with low execution complexity.
-Why: This leverages initial user momentum and addresses signup-form weaknesses. It captures higher session activation rates while mitigating the threat of competitor alternative trials.
+Recommendation: Re-engineer the user registration sequence to implement progressive profile building, capturing essential credentials first and deferring administrative profile fields to subsequent user sessions. This capability directly resolves the high-friction onboarding forms gap.
+Why it matters: Reducing friction at the front gate significantly improves sign-up-to-activation conversion rates and minimizes day-one user abandonment. This secures more paying accounts from existing traffic, optimizing customer acquisition economics.
+Why now: This delivers immediate business value with very low technical execution complexity since it focuses strictly on registration form restructuring, making it an ideal high-leverage starting point.
 
 2. Contextual Guided Tours
-What: Implement bite-sized, interactive tips that trigger at key moments during a user's first active session. We estimate the business value as very high, with medium execution complexity.
-Why: This leverages your unique product capabilities and addresses early confusion weaknesses. It captures early product habituation opportunities while mitigating trial-to-paid drop-off threats.
+Recommendation: Design and deploy a modern digital adoption capability featuring context-aware interactive walkthroughs and goal-oriented tooltips to guide users to their first successful action. This systematically addresses the self-guided first sessions gap.
+Why it matters: Actively guiding newly registered users to core features during their high-intent initial session accelerates their "aha" moment. This reduces early user frustration and prevents trial-to-paid drop-offs.
+Why now: This represents high business value with moderate complexity by utilizing existing visual assets, building a scalable self-serve enablement engine that supports rapid user growth.
 
 3. Early-Warning Systems
-What: Set up automated internal alerts when high-value accounts show zero activity for more than five consecutive days. We estimate the business value as high, with medium execution complexity.
-Why: This leverages customer success capabilities and addresses reactive intervention weaknesses. It captures account renewal opportunities while mitigating the threat of silent churn.
+Recommendation: Build a proactive customer health monitoring capability that tracks real-time user engagement telemetry and flags accounts that demonstrate zero activity for more than five consecutive days. This directly solves the reactive churn engagement gap.
+Why it matters: Transitioning from reactive support to proactive intervention allows customer success teams to re-engage drifting accounts before they cancel. This protects recurring revenue streams and elevates lifetime value.
+Why now: This opportunity offers high strategic leverage with moderate complexity by connecting basic product usage telemetry to automated internal slack or email alerts.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While your website represents a high-standard service commitment, securing long-term retention depends on internal metrics:
@@ -576,16 +582,19 @@ Description: Deliverable handoffs between development, sales, and operations lac
 
 ---SECTION 3: OPPORTUNITIES---
 1. Centralized Workflow View
-What: Create a single, shared master pipeline to trace client deliverables across departmental lines. We estimate the business value as high, with medium execution complexity.
-Why: This leverages cross-functional expertise and addresses coordination weaknesses. It captures delivery acceleration opportunities while mitigating client escalation threats.
+Recommendation: Implement a centralized collaborative workflow capability that integrates disconnected tracking software into a single, automated master pipeline, providing full real-time visibility over client deliverables. This capability directly resolves the disconnected team workflows gap.
+Why it matters: Eliminating departmental tracking silos prevents cost overruns, secures delivery timelines, and improves client retention. It enables leadership to allocate resource capacity dynamically based on active project demands.
+Why now: This opportunity represents high business value with moderate execution complexity by optimizing existing tools, establishing a scalable foundation that supports increased volume without adding administrative headcount.
 
 2. Automated Data Syncs
-What: Map high-frequency contact points between systems to automate data transfer via webhooks. We estimate the business value as high, with medium-to-low execution complexity.
-Why: This leverages your current digital stack and addresses manual transfer weaknesses. It captures administrative hours back while mitigating human entry error threats.
+Recommendation: Establish a modern data-to-delivery automation capability that connects internal databases and third-party software using robust API webhooks to automate high-frequency data transfer. This directly addresses the manual data duplication gap.
+Why it matters: Automating repetitive tasks reclaims valuable expert hours, allowing the team to focus on core client deliverables. It eliminates manual input fatigue and dramatically reduces transaction-level human entry errors.
+Why now: This delivers high business value with low-to-moderate implementation effort using standard webhook connections, providing immediate strategic leverage by accelerating workflow velocity.
 
 3. Standardized Handoff Checklists
-What: Introduce uniform, lightweight quality checklists for project transitions. We estimate the business value as high, with very low execution complexity.
-Why: This leverages team accountability and addresses transitional friction weaknesses. It captures consistent deliverable quality while mitigating rework threats.
+Recommendation: Create a standardized quality handoff capability with mandatory entry and exit criteria for transition phases between sales, development, and operations. This quality-assurance framework directly addresses the informal transition guidelines gap.
+Why it matters: Standardizing transitions ensures that incomplete client specifications never pass down the delivery pipeline, eliminating expensive project reworks and reducing friction between cross-functional teams.
+Why now: This opportunity delivers high business value with extremely low implementation complexity since it relies on process documentation, instantly protecting service-level margins from day one.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 Your website shows you handle complex, high-value delivery work. But to streamline it, we need to know:
@@ -618,16 +627,19 @@ Description: Upgrade prompts are sent strictly based on fixed trial durations (e
 
 ---SECTION 3: OPPORTUNITIES---
 1. Unified Checkout Flow
-What: Consolidate billing fields into a single streamlined screen. We estimate the business value as very high, with low execution complexity.
-Why: This leverages purchase momentum and addresses multi-page form weaknesses. It captures immediate conversion gains while mitigating competitor checkout alternatives.
+Recommendation: Re-engineer the transactional path by consolidating checkout pages and redundant billing fields into a single, high-speed purchase gateway with express digital wallet options. This capability directly resolves the friction-heavy checkout paths gap.
+Why it matters: Streamlining the checkout flow captures purchasing momentum when buyer intent is highest, drastically reducing transaction abandonment. This directly elevates conversion rates and drives immediate top-line revenue growth.
+Why now: This represents exceptional business value with low technical implementation complexity. It offers massive strategic leverage by instantly converting existing user interest into cash flow.
 
 2. Behavioral Upsell Triggers
-What: Display upgrade prompts at the exact moment a user hits a basic feature limit. We estimate the business value as high, with medium execution complexity.
-Why: This leverages contextual user need and addresses fixed timing weaknesses. It captures customer expansion revenue while mitigating active churn threats.
+Recommendation: Create a dynamic customer-expansion capability that triggers contextual plan upgrade prompts at the exact moment a user hits a basic feature limit or usage capacity ceiling. This directly addresses the calendar-based trial closes gap.
+Why it matters: Engaging trial users when product utility and value are highly apparent yields significantly higher upgrade conversion rates. This drives organic expansion revenue and naturally increases customer lifetime value.
+Why now: This opportunity delivers very high business value with moderate technical complexity as it links usage telemetry with in-app triggers, unlocking revenue from highly active customers.
 
 3. Simplified Plan Comparisons
-What: Re-structure the pricing page to contrast distinct packages built for separate audiences. We estimate the business value as high, with low execution complexity.
-Why: This leverages value transparency and addresses choice fatigue weaknesses. It captures faster purchase cycles while mitigating option confusion threats.
+Recommendation: Restructure the digital pricing page to display clear, segment-aligned tier distinctions and a transparent plan comparison matrix mapping distinct plans directly to clear buyer personas. This addresses the pricing dissonance gap.
+Why it matters: Replacing internal cost metrics with human-readable value comparisons eliminates choice fatigue and buyer confusion. It improves decision velocity and guides prospective customers to higher-margin packages.
+Why now: This opportunity offers high business value with low implementation complexity because it is limited to visual content adjustments, maximizing self-serve conversion efficiency.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 Your website presents a strong set of product options. But to maximize your revenue, we need to answer:
@@ -1120,7 +1132,7 @@ export default function DiagnosticWizard() {
         doc.setFont("Helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(115, 125, 115);
-        doc.text(`STRICTION CONSOLE - EXECUTIVE BLUEPRINT FOR ${companyName.toUpperCase()}`, margin, 12);
+        doc.text(`NORTHBOUND CONSOLE - EXECUTIVE BLUEPRINT FOR ${companyName.toUpperCase()}`, margin, 12);
         doc.text(`PAGE ${pageNum}`, pageWidth - margin, 12, { align: "right" });
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.3);
@@ -1138,92 +1150,106 @@ export default function DiagnosticWizard() {
 
       // Text inside banner
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(10);
-      doc.setTextColor(148, 163, 184); // Cool slate text
-      doc.text("STRICTION ADVISORY STRATEGY SUITE - V2.0", margin + 8, y + 10);
-
-      doc.setFont("Helvetica", "bold");
       doc.setFontSize(14);
       doc.setTextColor(255, 255, 255); // White text
-      doc.text("SYSTEMATIC BOTTLENECK AUDIT", margin + 8, y + 19);
+      doc.text("NORTHBOUND STRATEGIC DIAGNOSIS", margin + 8, y + 13);
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10.5);
+      doc.setTextColor(203, 213, 225); // Light slate text
+      doc.text("Executive Strategy Report", margin + 8, y + 21);
 
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(203, 213, 225); // Slate-300
-      doc.text("CONFIDENTIAL STRATEGIC ADVISORY BLUEPRINT", margin + 8, y + 26);
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184); // Cool slate
+      doc.text("CONFIDENTIAL STRATEGIC ADVISORY BLUEPRINT", margin + 8, y + 27);
 
       y += 42;
 
       // Metadata card with background
-      doc.setFillColor(251, 251, 250); // Warm light gray #FBFBFA
-      doc.setDrawColor(226, 232, 240); 
-      doc.setLineWidth(0.4);
-      doc.rect(margin, y, contentWidth, 48, "FD");
-
-      // Metadata key/values
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 110, 100);
-      
       const leftColX = margin + 6;
       const rightColX = margin + (contentWidth / 2) + 2;
 
-      // Left column
-      doc.text("COMPANY WEBSITE:", leftColX, y + 8);
+      // Wrap values that can be long
+      const wrappedUsecase = doc.splitTextToSize(businessUsecase || "N/A", (contentWidth / 2) - 8);
+      const wrappedBottleneck = doc.splitTextToSize(bottleneck, (contentWidth / 2) - 8);
+
+      const row1LabelY = 8;
+      const row1ValueY = 13;
+
+      const row2LabelY = 21;
+      const row2ValueY = 26;
+      const row2Height = Math.max(wrappedUsecase.length * 4.2, 5); // height of row 2 value
+
+      const row3LabelY = row2ValueY + row2Height + 3;
+      const row3ValueY = row3LabelY + 5;
+      const row3Height = Math.max(wrappedBottleneck.length * 4.2, 5); // height of row 3 value
+
+      const cardHeight = row3ValueY + row3Height + 2;
+
+      doc.setFillColor(251, 251, 250); // Warm light gray #FBFBFA
+      doc.setDrawColor(226, 232, 240); 
+      doc.setLineWidth(0.4);
+      doc.rect(margin, y, contentWidth, cardHeight, "FD");
+
+      // Row 1: Company Website & Industry
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 110, 100);
+      doc.text("COMPANY WEBSITE:", leftColX, y + row1LabelY);
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(34, 46, 38);
-      doc.text(companyName || "Unspecified", leftColX, y + 13);
+      doc.text(companyName || "Unspecified", leftColX, y + row1ValueY);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("EMAIL ADDRESS:", leftColX, y + 23);
+      doc.text("INDUSTRY:", rightColX, y + row1LabelY);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      doc.text(emailAddress || "Unspecified", leftColX, y + 28);
+      doc.text(industry, rightColX, y + row1ValueY);
 
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 110, 110);
-      doc.text("PRIMARY BUSINESS GOAL:", leftColX, y + 38);
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(30, 41, 59);
-      doc.text(bottleneck, leftColX, y + 43);
-
-      // Right column
+      // Row 2: Email Address & Business Use Case
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("INDUSTRY:", rightColX, y + 8);
+      doc.text("EMAIL ADDRESS:", leftColX, y + row2LabelY);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      doc.text(industry, rightColX, y + 13);
+      doc.text(emailAddress || "Unspecified", leftColX, y + row2ValueY);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("BUSINESS USE CASE:", rightColX, y + 23);
+      doc.text("BUSINESS USE CASE:", rightColX, y + row2LabelY);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      // Let's wrap long business usecase text
-      const wrappedUsecase = doc.splitTextToSize(businessUsecase || "N/A", (contentWidth / 2) - 8);
-      doc.text(wrappedUsecase, rightColX, y + 28);
+      doc.text(wrappedUsecase, rightColX, y + row2ValueY);
+
+      // Row 3: Primary Business Goal & Date of Compile
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 110, 100);
+      doc.text("PRIMARY BUSINESS GOAL:", leftColX, y + row3LabelY);
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(30, 41, 59);
+      doc.text(wrappedBottleneck, leftColX, y + row3ValueY);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("DATE OF COMPILE:", rightColX, y + 38);
+      doc.text("DATE OF COMPILE:", rightColX, y + row3LabelY);
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(30, 41, 59);
-      doc.text(new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), rightColX, y + 43);
+      doc.text(new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), rightColX, y + row3ValueY);
 
-      y += 60;
+      y += cardHeight + 10;
 
       // Section Head
       doc.setFont("Helvetica", "bold");
@@ -1384,7 +1410,7 @@ export default function DiagnosticWizard() {
       doc.text("All strategic compiled criteria, structures, and checklists are issued under strict performance architecture protocols.", margin, y + 4);
 
       // Save document
-      const fileName = `Striction_Diagnostic_Report_${companyName.replace(/\s+/g, "_") || "Executive"}.pdf`;
+      const fileName = `Northbound_Diagnostic_Report_${companyName.replace(/\s+/g, "_") || "Executive"}.pdf`;
       doc.save(fileName);
     } catch (err) {
       console.error("PDF download failed", err);
