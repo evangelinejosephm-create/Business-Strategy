@@ -10,12 +10,14 @@ interface ParsedStrategicReport {
   executiveSummary: string;
   bottlenecks: {
     title: string;
-    description: string;
+    diagnosis: string;
+    whereToInvestigate: string;
   }[];
   opportunities: {
     title: string;
-    what: string;
-    why: string;
+    recommendation: string;
+    expectedImpact: string;
+    whyPrioritize: string;
   }[];
   questions: string;
   focusPoint: string;
@@ -62,37 +64,51 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
     // SECTION 2: KEY SYSTEMIC GAPS
     const bottlenecksText = getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
     const bottlenecksRaw = bottlenecksText.split(/(?=^\d+\.\s+)/m).map(b => b.trim()).filter(b => b.length > 0);
-    const bottlenecks = bottlenecksRaw.slice(0, 5).map((block, idx) => {
+    const bottlenecks = bottlenecksRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Gap ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, ""));
 
-      const rawTextLines: string[] = [];
+      let diagnosis = "";
+      let whereToInvestigate = "";
+
+      let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("description:") || lower.startsWith("gap:") || lower.startsWith("problem:")) {
-          rawTextLines.push(line.replace(/^(description|gap|problem):\s*/i, "").trim());
-        } else if (lower.startsWith("what:")) {
-          rawTextLines.push(line.replace(/^what:\s*/i, "").trim());
-        } else if (lower.startsWith("why:")) {
-          rawTextLines.push(line.replace(/^why:\s*/i, "").trim());
+        if (lower.startsWith("diagnosis:") || lower.startsWith("diagnose:") || lower.startsWith("diagnostic:")) {
+          diagnosis = line.replace(/^(diagnosis|diagnose|diagnostic):\s*/i, "").trim();
+          currentField = "diagnosis";
+        } else if (lower.startsWith("where leadership should investigate:") || lower.startsWith("where to investigate:") || lower.startsWith("investigate:")) {
+          whereToInvestigate = line.replace(/^(where leadership should investigate|where to investigate|investigate):\s*/i, "").trim();
+          currentField = "whereToInvestigate";
         } else {
-          rawTextLines.push(line);
+          if (currentField === "diagnosis") {
+            diagnosis += "\n" + line;
+          } else if (currentField === "whereToInvestigate") {
+            whereToInvestigate += "\n" + line;
+          } else {
+            if (!diagnosis) {
+              diagnosis = line;
+              currentField = "diagnosis";
+            } else {
+              diagnosis += "\n" + line;
+            }
+          }
         }
       });
 
-      const description = cleanMd(rawTextLines.join(" "));
-
       return {
         title: title || `Gap ${idx + 1}`,
-        description: description || "Unresolved strategic constraint slowing growth down."
+        diagnosis: cleanMd(diagnosis) || "Unresolved strategic constraint slowing growth.",
+        whereToInvestigate: cleanMd(whereToInvestigate) || "Underlying process gaps and resource constraints."
       };
     });
 
-    while (bottlenecks.length < 5) {
+    while (bottlenecks.length < 3) {
       bottlenecks.push({
         title: "Growth Pipeline Leaks",
-        description: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals."
+        diagnosis: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals.",
+        whereToInvestigate: "Friction-heavy onboarding states and unoptimized checkout sequences."
       });
     }
 
@@ -104,29 +120,35 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       let title = lines[0] || `Opportunity ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|opportunity\s*\d+[\s.-]*)/i, ""));
 
-      let what = "";
-      let why = "";
+      let recommendation = "";
+      let expectedImpact = "";
+      let whyPrioritize = "";
 
       let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("what:")) {
-          what = line.replace(/^what:\s*/i, "").trim();
-          currentField = "what";
-        } else if (lower.startsWith("why:")) {
-          why = line.replace(/^why:\s*/i, "").trim();
-          currentField = "why";
+        if (lower.startsWith("recommendation:") || lower.startsWith("initiative:") || lower.startsWith("what:")) {
+          recommendation = line.replace(/^(recommendation|initiative|what):\s*/i, "").trim();
+          currentField = "recommendation";
+        } else if (lower.startsWith("expected business impact and growth:") || lower.startsWith("expected impact and growth:") || lower.startsWith("expected business impact:") || lower.startsWith("expected impact:") || lower.startsWith("growth:") || lower.startsWith("why:") || lower.startsWith("why it matters:")) {
+          expectedImpact = line.replace(/^(expected business impact and growth|expected impact and growth|expected business impact|expected impact|growth|why|why it matters):\s*/i, "").trim();
+          currentField = "expectedImpact";
+        } else if (lower.startsWith("why prioritize:") || lower.startsWith("prioritize:") || lower.startsWith("why prioritize one sentence:") || lower.startsWith("priority rationale:") || lower.startsWith("rationale:") || lower.startsWith("why now:")) {
+          whyPrioritize = line.replace(/^(why prioritize|prioritize|why prioritize one sentence|priority rationale|rationale|why now):\s*/i, "").trim();
+          currentField = "whyPrioritize";
         } else {
-          if (currentField === "what") {
-            what += "\n" + line;
-          } else if (currentField === "why") {
-            why += "\n" + line;
+          if (currentField === "recommendation") {
+            recommendation += "\n" + line;
+          } else if (currentField === "expectedImpact") {
+            expectedImpact += "\n" + line;
+          } else if (currentField === "whyPrioritize") {
+            whyPrioritize += "\n" + line;
           } else {
-            if (!what) {
-              what = line;
-              currentField = "what";
+            if (!recommendation) {
+              recommendation = line;
+              currentField = "recommendation";
             } else {
-              what += "\n" + line;
+              recommendation += "\n" + line;
             }
           }
         }
@@ -134,16 +156,18 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
 
       return {
         title: title || `Opportunity ${idx + 1}`,
-        what: cleanMd(what) || "Identified growth driver.",
-        why: cleanMd(why) || "Tapping on this opportunity accelerates performance metrics."
+        recommendation: cleanMd(recommendation) || "High-value strategic initiative.",
+        expectedImpact: cleanMd(expectedImpact) || "Accelerates market adoption and scale.",
+        whyPrioritize: cleanMd(whyPrioritize) || "Critical path to immediate value creation."
       };
     });
 
     while (opportunities.length < 3) {
       opportunities.push({
         title: "Strategic Growth Initiative",
-        what: "Tap into secondary channels to bolster active customer acquisition.",
-        why: "Expands the active customer base and strengthens revenue retention."
+        recommendation: "Tap into secondary channels to bolster active customer acquisition.",
+        expectedImpact: "Expands the active customer base and strengthens revenue retention.",
+        whyPrioritize: "Fastest way to lock down immediate retention improvements."
       });
     }
 
@@ -185,9 +209,9 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
             {parsed.bottlenecks.map((bottleneck, idx) => (
               <div
                 key={idx}
-                className="bg-white border border-outline-variant/60 rounded-xl p-5 hover:border-secondary/30 transition-all shadow-sm"
+                className="bg-white border border-outline-variant/60 rounded-xl p-5 hover:border-secondary/30 transition-all shadow-sm space-y-4"
               >
-                <div className="flex items-center gap-2.5 border-b border-outline-variant/40 pb-3 mb-4">
+                <div className="flex items-center gap-2.5 border-b border-outline-variant/40 pb-3">
                   <span className="bg-slate-900 text-white font-mono text-[10px] font-bold h-6 w-6 rounded-full flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
@@ -196,9 +220,18 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
                   </h5>
                 </div>
 
-                <div className="text-xs font-sans text-slate-700">
-                  <div className="bg-slate-50/50 border border-slate-100/80 p-4 rounded-xl space-y-1">
-                    <p className="text-slate-800 leading-relaxed font-sans text-sm whitespace-pre-wrap">{bottleneck.description}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs font-sans text-slate-700">
+                  <div className="md:col-span-2 bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-2">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                      Diagnosis
+                    </span>
+                    <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap text-[13px]">{bottleneck.diagnosis}</p>
+                  </div>
+                  <div className="md:col-span-1 bg-amber-50/40 p-4 rounded-lg border border-amber-100/60 space-y-2">
+                    <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
+                      Where Leadership Should Investigate
+                    </span>
+                    <p className="leading-relaxed font-sans text-slate-800 font-medium whitespace-pre-wrap text-[13px]">{bottleneck.whereToInvestigate}</p>
                   </div>
                 </div>
               </div>
@@ -227,14 +260,18 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
                   <h5 className="font-sans font-bold text-sm text-slate-900 mb-3 tracking-tight">
                     {opp.title}
                   </h5>
-                  <div className="space-y-3 text-xs text-slate-600">
+                  <div className="space-y-3.5 text-xs text-slate-600">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">What is the Opportunity</span>
-                      <p className="leading-relaxed font-sans whitespace-pre-wrap">{opp.what}</p>
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Recommendation</span>
+                      <p className="leading-relaxed font-sans whitespace-pre-wrap">{opp.recommendation}</p>
                     </div>
-                    <div className="space-y-1 pt-1.5 border-t border-slate-100">
-                      <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-widest block font-bold">Why Tapping This Helps Growth</span>
-                      <p className="leading-relaxed font-sans text-slate-700 font-medium whitespace-pre-wrap">{opp.why}</p>
+                    <div className="space-y-1 pt-2.5 border-t border-slate-100">
+                      <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-widest block font-bold">Why It Matters</span>
+                      <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap">{opp.expectedImpact}</p>
+                    </div>
+                    <div className="space-y-1 pt-2.5 border-t border-slate-100">
+                      <span className="text-[9px] font-mono text-amber-700 uppercase tracking-widest block font-bold">Why Now</span>
+                      <p className="leading-relaxed font-sans text-slate-700 font-medium whitespace-pre-wrap">{opp.whyPrioritize}</p>
                     </div>
                   </div>
                 </div>
@@ -447,39 +484,37 @@ The website for ${companyName} shows real potential in the ${industry || "indust
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. Broad Feature Plans
-Description: Your developers are juggling too many feature requests at once. Because they are split in five different directions, big product updates take too long to ship, and your main features never get the focus they need to be truly great.
+Description: Development bandwidth is spread too thin across an extensive, unprioritized feature list. This diluted focus slows down delivery velocity, meaning core features fail to reach product-market maturity and user acquisition stalls. The root cause is the lack of a strict customer validation framework.
 
-2. Unverified Feedback Windows
-Description: You only find out if customers actually want a feature after you fully build and launch it. This means you risk spending weeks of coding time on tools that end up sitting untouched.
+2. Unverified Feedback Loops
+Description: Feature additions are typically fully designed and built prior to user demand validation. This creates a high risk of wasting expensive engineering cycles on capabilities that see minimal post-launch adoption. The root cause lies in omitting rapid design-level prototyping.
 
-3. Uniform User Experience
-Description: Every person signing up gets the exact same generic welcome, even if they have totally different goals. When onboarding is one-size-fits-all, people get confused and leave before they see your product's magic.
-
-4. Unmeasured Setup Progression
-Description: You don't have tracking to see where people drop off during setup. If you can't see the exact screen where users get stuck and exit, you can't fix the friction that's costing you customers.
-
-5. Historical Product Paths
-Description: Your team is sticking strictly to an old, pre-planned roadmap instead of reacting to what your users are telling you right now. This keeps you busy building yesterday's ideas instead of solving today's real needs.
+3. Legacy Planning Rigidness
+Description: Product alignment remains anchored to a static roadmap rather than adapting dynamically to user signals. This reduces competitive agility, leaving you vulnerable to nimbler competitors. The root cause is traditional long-cycle project management planning.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Feature Consolidation
-What: Declutter your interface and double down on the top three tools your active users can't live without.
-Why: Focusing your energy on what already works boosts engagement and cuts your team's maintenance workload in half.
+1. Focus Core Capabilities
+What: Analyze current engagement to focus development and support around the top three high-adoption features. We estimate the business value as very high, with a medium-to-low execution complexity.
+Why: This initiative leverages your current user engagement strengths and addresses the weakness of feature bloating. It captures the opportunity for product focus while mitigating the threat of simpler competitor alternatives.
 
 2. Clickable Prototyping
-What: Put simple, clickable mockups in front of users to test demand before writing a single line of code.
-Why: Getting real user reactions early stops you from wasting expensive developer hours on features nobody wants.
+What: Introduce lightweight clickable mockups to gauge active user interest and collect feedback prior to writing code. We estimate the business value as high, with a very low execution complexity.
+Why: This leverages your design agility and addresses the weakness of unverified validation latency. It captures immediate user feedback opportunities while mitigating the threat of wasted developer hours.
 
-3. Context-Based Setup
-What: Personalize the onboarding walkthrough based on who the user is and what they are trying to solve.
-Why: When users get a tailored path to their first win, they stick around longer and upgrade much faster.
+3. Goal-Oriented Welcomes
+What: Tailor the first-user setup experience based on the primary job-to-be-done they select. We estimate the business value as high, with a medium execution complexity.
+Why: This leverages your unique value proposition and addresses onboarding friction weaknesses. It captures higher initial trial conversion while mitigating the threat of early customer churn.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
-Your website highlights some amazing features. But to unlock real growth, we need answers to three big questions:
-• What is the exact feature that makes customers open their wallets and buy?
-• Which specific type of user stays with you the longest?
-• Where exactly do people lose interest and close the tab?
-Knowing these answers lets you focus your team entirely on what brings in revenue.
+While your website outlines a compelling product vision, optimizing your strategy requires verifying internal product behaviors:
+The website suggests a strong, feature-rich offering.
+However, it isn't yet clear:
+• Which specific action or milestone corresponds to a user's decision to subscribe or upgrade?
+• What common traits define your highest-retention user cohort?
+• At what exact step in the creation or setup flow do visitors most frequently close the app?
+• How will the core product architecture scale if user acquisition grows tenfold?
+• What emerging AI-driven capabilities can be integrated to future-proof the roadmap?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -489,40 +524,38 @@ I highly recommend pausing all side-projects and secondary features for a moment
 The website for ${companyName} showcases a really strong set of ${industry || "digital"} offerings. But to keep users paying month after month, you have to guide them to a 'win' early. Waiting for them to ask support for help is too slow—you need to proactively lead them to value on day one so they never think about canceling. This is a crucial step for protecting your recurring revenue.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. Extensive Registration Fields
-Description: You are asking users for too much details and asking them to fill out long forms right after signing up. This high friction scares people away before they ever get to experience your actual product.
+1. High-Friction Onboarding Forms
+Description: Registration requirements are excessively heavy, requiring detailed user credentials before demonstrating value. This friction degrades sign-up-to-activation conversion rate and increases immediate abandonment. The root cause is an over-reliance on legacy compliance collection instead of progressive profile building.
 
-2. Self-Guided Feature Discovery
-Description: New users are left to explore your app on their own with zero guidance. When people have to hunt around to find your best tools, they get confused, lose interest, and quietly leave.
+2. Self-Guided First Sessions
+Description: Newly registered users are left to navigate the product with minimal structured guidance. This lack of active guidance prevents users from discovering core features during their high-intent initial session. The root cause is overestimating user intuition and omitting intuitive walkthrough triggers.
 
-3. Post-Cancellation Support
-Description: You only reach out to customers after they click 'cancel'. By that point, they have already checked out mentally and stopped using your app weeks ago, making them nearly impossible to win back.
-
-4. Restricted Basic Capabilities
-Description: You put your most basic, habit-building tools behind a paywall too soon. If free-trial users can't experience the core daily value of your app, they won't build the habit needed to pay for a subscription.
-
-5. Disconnected Usage Signals
-Description: Your user data is scattered across different tracking tools. Because there is no single place to see who is active and who is quiet, you can't spot unhappy users in time to save them.
+3. Reactive Churn Engagement
+Description: Retention initiatives are reactive, launching only after a user initiates cancellation. Analytics show that accounts typically stop engaging weeks before canceling, which means missing early-warning signals that would allow proactive intervention. The root cause is the lack of real-time account health monitoring.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Simplified Entry Flow
-What: Trim down your signup page to the absolute bare minimum, and ask extra profile questions only after they are set up.
-Why: Making the signup effortless dramatically increases the number of accounts that actually finish onboarding.
+1. Streamlined Signups
+What: Restructure your registration flow to collect only essential credentials first, saving detailed fields for later. We estimate the business value as high, with low execution complexity.
+Why: This leverages initial user momentum and addresses signup-form weaknesses. It captures higher session activation rates while mitigating the threat of competitor alternative trials.
 
-2. Contextual Walkthroughs
-What: Trigger helpful, bite-sized tooltips at the exact moment a user is about to try a key feature for the first time.
-Why: Directing people to value right when their intent is highest builds strong daily usage habits.
+2. Contextual Guided Tours
+What: Implement bite-sized, interactive tips that trigger at key moments during a user's first active session. We estimate the business value as very high, with medium execution complexity.
+Why: This leverages your unique product capabilities and addresses early confusion weaknesses. It captures early product habituation opportunities while mitigating trial-to-paid drop-off threats.
 
-3. Inactivity Alerts
-What: Set up automatic alerts to tell your customer success team when a high-value user stops logging in for more than 5 days.
-Why: Catching silent accounts early lets you reach out and solve their issues before they decide to cancel.
+3. Early-Warning Systems
+What: Set up automated internal alerts when high-value accounts show zero activity for more than five consecutive days. We estimate the business value as high, with medium execution complexity.
+Why: This leverages customer success capabilities and addresses reactive intervention weaknesses. It captures account renewal opportunities while mitigating the threat of silent churn.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
-Your website shows a strong commitment to supporting your users. But to keep them long-term, we need to know:
-• Which specific setup screen makes the most users close the window?
-• What exact action do your happiest, long-term renewing customers take in their first week?
-• Which customer group cancels without ever opening a support ticket?
-Answering these will show you exactly where to fix your leaky funnel.
+While your website represents a high-standard service commitment, securing long-term retention depends on internal metrics:
+The website suggests a highly valuable customer-facing service.
+However, it isn't yet clear:
+• At what exact point in your onboarding sequence do the majority of churned users drop off?
+• What specific milestone distinguishes your multi-year subscribers from those who leave in month one?
+• Which customer segment cancels their subscriptions without ever opening a support ticket?
+• How can we shift the business model to offer usage-based pricing that grows with customer value?
+• What strategic loyalty programs can we implement to drive word-of-mouth referral networks?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -532,40 +565,38 @@ I recommend putting all your energy into redesigning your registration and first
 The website for ${companyName} reveals a highly specialized way of delivering services in the ${industry || "business"} space. But to scale up without your overhead spiraling out of control, you need to centralize your operations and automate hand-offs between teams. Getting your experts out of manual coordination and spreadsheet-handling will instantly free up their time to focus on high-value client work.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. Disconnected Task Trackers
-Description: Different departments are using their own separate, unlinked tools to track projects. This creates informational walls and makes it impossible to get a single, real-time view of your operations.
+1. Disconnected Team Workflows
+Description: Separate departments utilize isolated software tracking tools with zero integration. This fragmentation degrades cross-department visibility, meaning deadlines are breached due to poor coordination. The root cause is decentralized software adoption with no single source of truth.
 
-2. Manual Information Duplication
-Description: Your team is spending hours manually copying and pasting information between different systems. This burns high-value expert hours on repetitive admin tasks and leads to costly errors.
+2. Manual Data Duplication
+Description: Staff frequently spend valuable hours manually copying project details between tools. This repetitive manual input leads to administrative fatigue and a high rate of human entry errors. The root cause is the lack of standardized API connections and webhooks.
 
-3. Late Delay Escalation
-Description: Delays and roadblocks are only spotted after a project deadline has already been missed. Without an early-warning trigger, you can't step in to help before the client notices.
-
-4. Undefined Transition Standards
-Description: Tasks handed off between teams lack clean, standardized requirements. When half-finished work is passed over, it leads to endless back-and-forth communication, rework, and missed timelines.
-
-5. Rigid Software Systems
-Description: Your primary operating systems are built on older software that doesn't easily connect with modern platforms. This makes automating your everyday data flows incredibly difficult.
+3. Informal Transition Guidelines
+Description: Deliverable handoffs between development, sales, and operations lack standardized quality checklists. This causes frequent clarifying back-and-forth loops, unexpected rework, and unpredictable client delivery timelines. The root cause is informal workflow documentation.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Centralized Pipeline
-What: Set up a single, shared master pipeline to track all client deliverables from initiation to completion.
-Why: Giving everyone full visibility lets your team spot and clear roadblocks before they delay client delivery.
+1. Centralized Workflow View
+What: Create a single, shared master pipeline to trace client deliverables across departmental lines. We estimate the business value as high, with medium execution complexity.
+Why: This leverages cross-functional expertise and addresses coordination weaknesses. It captures delivery acceleration opportunities while mitigating client escalation threats.
 
-2. Automated Webhooks
-What: Build automatic webhook connections to pass data between your main software platforms instantly.
-Why: Eliminating manual copying and pasting gives hours of focus time back to your team and stops administrative errors.
+2. Automated Data Syncs
+What: Map high-frequency contact points between systems to automate data transfer via webhooks. We estimate the business value as high, with medium-to-low execution complexity.
+Why: This leverages your current digital stack and addresses manual transfer weaknesses. It captures administrative hours back while mitigating human entry error threats.
 
-3. Standardized Checklists
-What: Introduce a mandatory quality checklist at every major team-to-team hand-off point.
-Why: Clear, agreed-upon standards mean work is done right the first time, keeping your project delivery predictable.
+3. Standardized Handoff Checklists
+What: Introduce uniform, lightweight quality checklists for project transitions. We estimate the business value as high, with very low execution complexity.
+Why: This leverages team accountability and addresses transitional friction weaknesses. It captures consistent deliverable quality while mitigating rework threats.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 Your website shows you handle complex, high-value delivery work. But to streamline it, we need to know:
-• Which specific step in your process has the longest wait time?
-• Which department is burning the most hours on manual data entry?
-• Which single software connection will save your team the most hours?
-Answering these will show you exactly where to automate first.
+The website suggests high competency in project delivery.
+However, it isn't yet clear:
+• Which specific phase in your delivery lifecycle currently experiences the longest idle time?
+• Which manual administrative tasks consume the highest percentage of your team's weekly hours?
+• Which single tool integration or connection would eliminate the most redundant data entries?
+• How will the delivery model handle a doubling of project volume without hiring new staff?
+• What workflow automation trends can be adopted to turn operational speed into a primary competitive advantage?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -576,40 +607,38 @@ I recommend bringing all operational tracking into one shared master pipeline ri
 The website for ${companyName} highlights a great solution in the ${industry || "technology"} space. But to convert that active visitor interest into paid accounts, you need to make upgrading effortless and prompt users when they are seeing your value. Streamlining this purchase path is the fastest way to capture unearned revenue and speed up your growth. This is a very common hurdle for growing SaaS companies.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. Multi-Step Purchase Paths
-Description: Prospects have to click through multiple pages and fill out several forms just to purchase. This extra friction causes high drop-off rates right at the final checkout step.
+1. Friction-Heavy Checkout Paths
+Description: Potential customers are forced to navigate multiple pages and form inputs to complete their purchase. This prolonged checkout sequence increases cart-abandonment rate among high-intent buyers, losing vital revenue. The root cause is excess compliance validation frontloading.
 
-2. Unclear Plan Differences
-Description: Potential buyers can't easily see the difference between your pricing plans. When visitors face choice confusion, they suffer from decision fatigue and end up leaving without choosing.
+2. Pricing Dissonance
+Description: Plan tiers and feature limits are poorly explained, leading to buyer hesitation. Choice-fatigue triggers cause visitors to leave without completing their transaction. The root cause is a lack of clear benefit framing and simple plan comparisons.
 
-3. Time-Based Upgrade Prompts
-Description: Your upgrade prompts are triggered by calendar days (like a 14-day trial end) rather than active user behavior, missing the exact moment of peak need when they are most likely to buy.
-
-4. Legacy Payment Portals
-Description: Your checkout page is slow and lacks modern, fast checkout options like Google Pay or Apple Pay. This added friction stops high-intent buyers from completing their purchase quickly.
-
-5. Restricted Funnel Analytics
-Description: Your tracking only measures basic homepage visits and completed checkouts. Without step-by-step metrics in between, you can't see the exact checkout screen where you are losing revenue.
+3. Calendar-Based Trial Closes
+Description: Upgrade prompts are sent strictly based on fixed trial durations (e.g., 14 days) rather than active product usage. This timing mismatch misses the user's peak purchasing intent. The root cause is outdated fixed-subscription model structures.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Single-Page Billing
-What: Transition your multi-step checkout into a single-page checkout flow.
-Why: Making the payment process as frictionless as possible turns existing customer interest into completed sales instantly.
+1. Unified Checkout Flow
+What: Consolidate billing fields into a single streamlined screen. We estimate the business value as very high, with low execution complexity.
+Why: This leverages purchase momentum and addresses multi-page form weaknesses. It captures immediate conversion gains while mitigating competitor checkout alternatives.
 
-2. Context-Based Prompts
-What: Show helpful upgrade offers right when a user hits a usage limit or premium feature boundary.
-Why: Prompting users to upgrade at their moment of peak need drastically increases your trial-to-paid conversion rate.
+2. Behavioral Upsell Triggers
+What: Display upgrade prompts at the exact moment a user hits a basic feature limit. We estimate the business value as high, with medium execution complexity.
+Why: This leverages contextual user need and addresses fixed timing weaknesses. It captures customer expansion revenue while mitigating active churn threats.
 
-3. Differentiated Pricing Grid
-What: Simplify your pricing page into three distinct, easily understood packages.
-Why: Eliminating confusion helps your potential buyers choose the right plan and complete their purchase much faster.
+3. Simplified Plan Comparisons
+What: Re-structure the pricing page to contrast distinct packages built for separate audiences. We estimate the business value as high, with low execution complexity.
+Why: This leverages value transparency and addresses choice fatigue weaknesses. It captures faster purchase cycles while mitigating option confusion threats.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 Your website presents a strong set of product options. But to maximize your revenue, we need to answer:
-• Which subscription tier has the fastest purchase turnaround?
-• Which specific usage limit or cap triggers the most upgrades?
-• Which payment options are visitors looking for when they abandon the checkout?
-Answering these will show you exactly how to structure your pricing for maximum lift.
+The website suggests solid marketing and user traffic.
+However, it isn't yet clear:
+• Which subscription package or tier experiences the highest cart-abandonment rate?
+• What specific usage volume or capability triggers the most voluntary plan upgrades?
+• What percentage of abandoned sessions occur due to a lack of preferred payment methods?
+• What strategic pricing tiers should we introduce to target enterprise-level buyers?
+• How can we implement a self-serve system that encourages product-led viral loops?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -1518,56 +1547,80 @@ ${result.blueprint}`;
               </div>
             </div>
 
-            {/* Market Vertical */}
-            <div>
-              <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
-                Market Vertical
-              </label>
-              {isOtherIndustry ? (
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Type your industry..."
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full pl-4 pr-16 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsOtherIndustry(false);
-                      setIndustry(INDUSTRY_OPTIONS[0]);
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-amber-600 hover:text-slate-900 transition-colors uppercase tracking-widest font-bold cursor-pointer"
-                  >
-                    Reset
-                  </button>
-                </div>
-              ) : (
+            {/* Market Vertical & Ecosystem Phase */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Market Vertical */}
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
+                  Market Vertical
+                </label>
+                {isOtherIndustry ? (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Type your industry..."
+                      value={industry}
+                      onChange={(e) => setIndustry(e.target.value)}
+                      className="w-full pl-4 pr-16 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOtherIndustry(false);
+                        setIndustry(INDUSTRY_OPTIONS[0]);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-amber-600 hover:text-slate-900 transition-colors uppercase tracking-widest font-bold cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={industry}
+                      onChange={(e) => {
+                        if (e.target.value === "Other") {
+                          setIsOtherIndustry(true);
+                          setIndustry("");
+                        } else {
+                          setIndustry(e.target.value);
+                        }
+                      }}
+                      className="w-full pl-4 pr-10 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg appearance-none transition-all cursor-pointer"
+                    >
+                      {INDUSTRY_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                      <option value="Other">Other</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Ecosystem Phase */}
+              <div>
+                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
+                  Ecosystem Phase
+                </label>
                 <div className="relative">
                   <select
-                    value={industry}
-                    onChange={(e) => {
-                      if (e.target.value === "Other") {
-                        setIsOtherIndustry(true);
-                        setIndustry("");
-                      } else {
-                        setIndustry(e.target.value);
-                      }
-                    }}
+                    value={ecosystemPhase}
+                    onChange={(e) => setEcosystemPhase(e.target.value)}
                     className="w-full pl-4 pr-10 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg appearance-none transition-all cursor-pointer"
                   >
-                    {INDUSTRY_OPTIONS.map((opt) => (
+                    {STAGE_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
-                    <option value="Other">Other</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                     <ChevronDown size={16} />
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Business Goal */}

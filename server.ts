@@ -59,15 +59,10 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
   const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
   const baseModels = [
     "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-pro",
     "gemini-3.5-flash",
-    "gemini-3.1-pro-preview",
     "gemini-3.1-flash-lite",
-    "gemini-flash-latest"
+    "gemini-flash-latest",
+    "gemini-3.1-pro-preview"
   ];
   const modelsToTry = customModel ? [customModel, ...baseModels.filter(m => m !== customModel)] : baseModels;
   let lastError: any = null;
@@ -80,7 +75,7 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
       try {
         if (attempt > 0) {
           const backoffDelay = attempt * 600; // 600ms, then 1200ms
-          console.log(`[GEMINI API] Attempt ${attempt + 1} for ${activeModel} after ${backoffDelay}ms transient error backoff.`);
+          console.log(`[GEMINI API] Attempt ${attempt + 1} for ${activeModel} after ${backoffDelay}ms transient status backoff.`);
           await new Promise((resolve) => setTimeout(resolve, backoffDelay));
         } else {
           console.log(`[GEMINI API] Attempting generation with model: ${activeModel}`);
@@ -172,40 +167,44 @@ function getFallbackBlueprint(
 The public presence for ${companyName} highlights a promising offering in the ${industry || "industry"} space. Based on standard product development benchmarks and the core bottleneck patterns you described, a primary challenge is often feature sprawl and prioritizing development efforts. By centering resource allocation around the specific features that active users engage with most, you can reduce noise, speed up development velocity, and build a more predictable path to growth.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. Feature Sprawl Risk
-Description: Based on typical patterns in similar organizations, developers are frequently asked to build or maintain a wide range of features simultaneously. Product strategy benchmarks show that when resources are divided across too many initiatives, core features often lack the concentrated focus needed to achieve product-market fit.
+1. Diluted Product Feature Prioritization
+Diagnosis: Development velocity has slowed because engineering efforts are spread thin across a broad, unprioritized roadmap. Rather than perfecting core interactions, the product team regularly introduces secondary capabilities, causing feature bloat. We believe this is happening because there is no rigorous pre-development validation gate to filter incoming requests. Product planning remains reactive to individual customer queries rather than structured usage analytics. This capability gap is the primary constraint because finite development resources are exhausted on low-impact tasks. Leadership should investigate the pre-development validation gate and customer advisory panel feedback cycles to resolve this.
+Where Leadership Should Investigate: Leadership should look first at the pre-development validation gate and the specific customer advisory panel feedback cycles. They need to investigate how user input is gathered, prioritized, and converted into concrete development requirements before engineering resources are formally assigned.
 
-2. Unverified Feedback Loops
-Description: In teams experiencing roadmap prioritization issues, new features are often fully developed before user interest is validated. This creates a risk of spending expensive engineering cycles on tools that see low adoption post-launch.
+2. Unverified User Feedback Integration
+Diagnosis: Features are frequently built to completion before their high-level demand or usability has been verified with active customers. This approach bypasses cheap, rapid feedback mechanisms, which increases the likelihood of shipping tools that fail to gain traction. This pattern suggests a systemic omission of design-level prototyping and low-fidelity user testing. Because the organization lacks standard validation pathways, the team relies on post-launch usage data to evaluate success, which is an expensive and slow feedback loop. This feedback latency represents the primary constraint since it delays critical pivots. Leadership should investigate the rapid prototyping workflow and early concept validation guidelines.
+Where Leadership Should Investigate: Leadership should investigate the rapid prototyping workflow and early concept validation guidelines. They must examine the existing methods for presenting lightweight designs or mockup iterations to active customers for rapid feedback prior to writing production code.
 
-3. Generic Welcome Workflows
-Description: When onboarding is styled identically for all users regardless of their distinct goals, conversion rates tend to drop. Industry trends suggest that a one-size-fits-all introduction often leads to early drop-offs before users realize the core value.
-
-4. Unmeasured Activation Milestones
-Description: Without detailed metrics tracking where users disengage during their initial setup, identifying friction points is difficult. Product strategy models indicate that missing these visibility points prevents targeted user-experience improvements.
-
-5. Legacy Planning Rigidness
-Description: Teams often follow a pre-planned product roadmap rather than continuously adapting to real-time feedback. Strategy benchmarks suggest that sticking strictly to static plans can prevent a company from capitalising on emergent customer needs.
+3. Static Roadmap Planning Rigidness
+Diagnosis: Product development plans remain locked into static, pre-scheduled cycles that do not dynamically adapt to incoming user signals or live market shifts. This rigidness reduces the product's overall market alignment and delays critical updates to the core experience. This occurs because roadmap scheduling is anchored to long-cycle, traditional delivery deadlines rather than agile, outcome-driven milestones. Consequently, the team continues executing planned features even when current feedback indicates an immediate need to pivot resources toward stabilizing existing user pathways. This structural rigidity is the primary constraint because it blocks market-responsive adjustments. Leadership should investigate the quarterly roadmapping process and product resource reallocation policies.
+Where Leadership Should Investigate: Leadership should look first at the quarterly roadmapping process and product resource reallocation policies. They need to investigate how resource allocation is reviewed mid-cycle and whether mechanisms exist to reallocate development capacity dynamically as market conditions shift.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Focus Core Capabilities
-What: Analyze current engagement to focus development and support around the three high-adoption features.
-Why: Concentrating efforts on proven user favorites enhances satisfaction while reducing the ongoing team maintenance overhead.
+1. Strengthen Product Discovery
+Recommendation: Introduce a continuous, evidence-based user validation framework to systematically screen and prioritize all features before allocating expensive engineering resources. By implementing structured pre-development feedback loops and lightweight user tests with early adopters, the organization can filter out low-value requests and concentrate on core high-adoption capabilities. This opportunity directly resolves the diluted feature prioritization gap by replacing reactive development with proactive, data-backed user signal validation. This significantly improves the overall product planning capability, ensuring the team only invests in high-impact workflows that align with validated demand.
+Why it matters: This capability will significantly drive conversion and customer retention by focusing bandwidth on high-value interactions. Restricting resource waste on unadopted features will reduce engineering overhead, improving overall operational efficiency. The resulting product focus accelerates market speed-to-market for new releases.
+Why now: This initiative offers high strategic leverage and massive business value with low execution complexity. It preserves expensive developer hours by validating features prior to writing production code, optimizing capital allocation.
 
-2. Lightweight Validation
-What: Introduce clickable mockups or simple feature-toggle signups to gauge active user interest before coding.
-Why: Validating demand early prevents the misallocation of expensive developer hours on unadopted features.
+2. Modernize Commercial Decision Making
+Recommendation: Establish agile, outcome-driven roadmap cycles that replace static, pre-scheduled delivery timelines with dynamic resource reallocation. This strategic capability allows leadership to pivot development capacity toward high-value, active customer pain points based on incoming usage telemetry rather than outdated calendar plans. This opportunity solves the rigid roadmap planning gap, enabling the organization to respond instantly to real-time product feedback. Building this adaptive planning framework directly elevates product agility, transforming resource management from a static administrative cost center into a responsive competitive driver.
+Why it matters: This transition will protect customer retention and lifetime value by swiftly addressing usability drop-offs and delivery blockers. By reallocating engineering talent away from low-traction items, the company will dramatically improve operational efficiency and ROI. This directly translates to faster time-to-market and increased long-term profitability.
+Why now: This opportunity represents high strategic leverage with moderate implementation effort because it utilizes existing engineering staff. Prioritizing this capability allows the organization to capture maximum revenue from current assets before requiring any further capital expenditure.
 
-3. Goal-Oriented Welcomes
-What: Tailor the first-user setup experience based on the primary job-to-be-done they select.
-Why: Guiding users on a direct path to their specific goals builds product habituation and drives upgrades.
+3. Establish Rapid Prototyping Workflows
+Recommendation: Build a dedicated rapid prototyping and concept validation workflow to test feature demand prior to full-scale software development. This strategic capability empowers product teams to deploy low-fidelity mockups and interactive wireframes to a curated customer advisory panel, collecting clear usability insights in days rather than months. By solving the unverified user feedback integration gap, this capability eliminates the expensive practice of building unverified features to completion. The business will gain a superior discovery mechanism, ensuring that future capital expenditure is exclusively directed toward highly coveted solutions.
+Why it matters: This initiative will significantly increase new feature adoption rates and customer lifetime value by aligning development directly with verified demand. It will dramatically reduce engineering waste and rework, thereby optimizing profitability and improving overall development velocity. Customer retention will rise as users see their direct feedback reflected.
+Why now: This initiative delivers high business value with low implementation complexity since it relies on lightweight wireframing tools. It offers strong strategic leverage by accelerating feedback cycles and preventing costly development errors before they occur.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While your website outlines a compelling product vision, optimizing your strategy requires verifying internal product behaviors:
+The website suggests a strong, feature-rich offering.
+However, it isn't yet clear:
 • Which specific action or milestone corresponds to a user's decision to subscribe or upgrade?
 • What common traits define your highest-retention user cohort?
 • At what exact step in the creation or setup flow do visitors most frequently close the app?
-Answering these questions provides the objective evidence needed to prioritize your development roadmap.
+• How will the core product architecture scale if user acquisition grows tenfold?
+• What emerging AI-driven capabilities can be integrated to future-proof the roadmap?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -217,40 +216,44 @@ Based on typical product strategy audits, we suggest pausing secondary feature e
 The online presence for ${companyName} showcases strong capabilities in the ${industry || "digital"} space. According to customer success benchmarks and the specific bottlenecks you've indicated, protecting recurring revenue requires guiding new users to their first "win" during their very first session. Relying purely on reactive customer support is often too late; proactive, data-driven onboarding is essential to prevent early drop-offs and build sticky, long-term habits.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. High-Friction Onboarding Forms
-Description: According to retention benchmarks, requiring users to fill out detailed forms immediately after signup increases drop-off rates. Industry trends show that front-loading non-essential questions before users experience core value leads to early churn.
+1. Weak Onboarding Lifecycle Activation
+Diagnosis: New users frequently abandon the platform during their very first session because the setup process is exceptionally heavy, demanding detailed profile configurations and administrative credentials before any actual product value is demonstrated. We believe this is happening because the onboarding sequence prioritizes administrative completeness over user-perceived speed-to-value. By placing high-friction forms directly at the front gate, the platform loses high-intent registrants before they can experience the core product value, leading to poor activation. This friction is the primary constraint since the earliest drop-offs prevent any long-term retention. Leadership should investigate the onboarding experience, specifically the step-by-step registration flow and sign-up requirements.
+Where Leadership Should Investigate: Leadership should look first at the onboarding experience, specifically the step-by-step registration flow and sign-up requirements. They must investigate how the product introduces value and whether progressive profile building can replace upfront setup forms.
 
-2. Self-Guided First Sessions
-Description: When new signups are left to explore a platform with zero structured guidance, activation rates drop. UX maturity models suggest that a lack of guided hand-holding prevents users from discovering key value-generating features.
+2. Unstructured Guided Navigation
+Diagnosis: Newly registered users are left to explore the platform completely unassisted, with no interactive walkthroughs or contextual tooltips to guide their path. This self-guided model relies heavily on user intuition, leading to early frustration and drop-offs. This occurs because product design operates under the assumption that platform layouts are self-explanatory, representing a key training capability gap. Lacking structured guided paths, the system fails to prompt new users toward completing their first successful action, making this the primary constraint to user activation. Leadership should investigate the first-session user experience and interactive walk-through triggers.
+Where Leadership Should Investigate: Leadership should investigate the first-session user experience and interactive walk-through triggers. They need to identify where new registrants stall during active navigation and map out optimal pathways that lead directly to core feature adoption.
 
-3. Reactive Churn Engagement
-Description: Reaching out to customers only after they initiate cancellation is rarely effective. Retention analytics show that accounts typically stop active engagement weeks before canceling, making early warning triggers essential.
-
-4. Early Paywalls on Core Habits
-Description: Placing essential, habit-building features behind a premium paywall too early can hinder conversion. Customer retention studies show that users must build a consistent habit with free or basic features before they are willing to upgrade.
-
-5. Fragmented Customer Data
-Description: When usage analytics are scattered across multiple tools, customer success teams cannot get a single view of account health. This makes it difficult to spot accounts that have gone silent and are at risk of churning.
+3. Reactive Churn Mitigation Mechanics
+Diagnosis: The organization lacks a proactive system to identify disengaged users, only launching retention campaigns or outreach after an account initiates a cancellation request. This delay means support teams are engaging at a point where the decision to leave has already been finalized. We believe this happens because the product does not monitor real-time user engagement or account health metrics. This telemetry gap is the primary constraint since customer success teams can only react after churn is imminent, completely missing prevention opportunities. Leadership should investigate the post-purchase customer journey and account health alert triggers.
+Where Leadership Should Investigate: Leadership should look first at the post-purchase customer journey and account health alert triggers. They must investigate how active user sessions are tracked and design early warning indicators to alert teams when usage drops below safety thresholds.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Streamlined Signups
-What: Restructure your initial registration to collect only the essential credentials first, saving detailed questions for later.
-Why: Minimizing setup friction has a direct, measurable impact on the percentage of registrants who complete their setup.
+1. Optimize Onboarding Conversion
+Recommendation: Re-engineer the user activation sequence to establish a progressive profile-building capability that demonstrates core value before requiring extensive setup forms. By deferring administrative questions to later sessions, the business can capture user momentum when intent is highest. This capability directly addresses the weak onboarding lifecycle activation gap by replacing a high-friction front gate with an intuitive, speed-to-value user experience. Building this progressive path improves initial trial activation and converts casual registrants into highly engaged long-term users of the platform.
+Why it matters: This optimized flow will drive immediate improvements in customer conversion, user retention, and lifetime value. Reducing sign-up friction will significantly lift first-session activation rates and trial-to-paid conversions. This translates to lower customer acquisition costs and stronger recurring revenue growth.
+Why now: This opportunity delivers high business value with low technical complexity because it centers on form restructuring. It offers immense strategic leverage by maximizing marketing spend and securing early retention before scaling acquisition.
 
-2. Contextual Guided Tours
-What: Implement bite-sized, interactive tips that trigger at key moments during a user's first active session.
-Why: Actively guiding users to key features helps them build daily habits and increases overall lifetime value.
+2. Strengthen Digital Adoption
+Recommendation: Develop an interactive digital adoption capability featuring context-aware walk-throughs and goal-oriented tooltips to guide new users to their first successful platform action. This self-paced navigation framework addresses the training capability gap, prompting active exploration instead of assuming the interface is self-explanatory. This directly solves the unstructured guided navigation gap, ensuring users achieve a rapid 'aha' moment. By elevating the product's self-serve adoption capability, the business reduces initial friction and establishes sticky, long-term habits without requiring hands-on support.
+Why it matters: Building this digital adoption framework will dramatically lower user churn rates and improve first-month customer retention. It will increase user feature exploration, raising customer lifetime value and expanding cross-sell opportunities. Additionally, self-guided enablement will reduce basic support ticket volumes, optimizing operational efficiency.
+Why now: This opportunity offers high business value with moderate execution complexity because it leverages existing visual assets. It provides strong strategic leverage by creating a highly scalable, self-serve onboarding engine that supports rapid user growth.
 
-3. Early-Warning Systems
-What: Set up automated internal alerts when a high-value account has zero logins for more than five consecutive days.
-Why: Detecting dropping usage levels early allows customer success to intervene and resolve issues before they lead to cancellation.
+3. Modernize Customer Success Operations
+Recommendation: Build a proactive customer health monitoring capability that tracks real-time user engagement telemetry and flags accounts showing declining usage frequency. Rather than executing reactive support after cancellation, this early-warning system triggers targeted outreach to re-engage drifting accounts before they churn. This capability directly solves the reactive churn mitigation gap by moving from delayed intervention to real-time, behavioral customer management. This strategic upgrade transforms the customer success department from an administrative cost center into a proactive retention driver.
+Why it matters: This proactive engine will directly safeguard recurring revenue by reducing customer churn by a measurable margin. It will increase average customer lifetime value and expand customer retention metrics across high-value tiers. It also empowers account managers to identify early risks, improving overall lifetime value.
+Why now: This initiative represents high business value with moderate complexity since it utilizes existing analytics tools. It provides exceptional strategic leverage by protecting recurring revenue streams and stabilizing the customer base before investing in further acquisition.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While your website represents a high-standard service commitment, securing long-term retention depends on internal metrics:
+The website suggests a highly valuable customer-facing service.
+However, it isn't yet clear:
 • At what exact point in your onboarding sequence do the majority of churned users drop off?
 • What specific milestone distinguishes your multi-year subscribers from those who leave in month one?
 • Which customer segment cancels their subscriptions without ever opening a support ticket?
-Addressing these questions provides the necessary evidence to identify and patch leaks in your customer journey.
+• How can we shift the business model to offer usage-based pricing that grows with customer value?
+• What strategic loyalty programs can we implement to drive word-of-mouth referral networks?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -262,40 +265,44 @@ Based on typical retention benchmarks, we recommend focusing your immediate effo
 The website and public presence for ${companyName} indicate a specialized approach to delivery in the ${industry || "business"} sector. Based on typical operational benchmarks for businesses at this scale and the specific bottleneck patterns you highlighted, establishing centralized tracking and automating standard team transitions is a key opportunity. Grounding coordination in structured digital workflows can help recover expert focus hours and minimize project delivery delays.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-1. Disconnected Team Workflows
-Description: Based on industry patterns for businesses experiencing operational bottlenecks, a common gap is the use of separate, unlinked tracking tools across departments. This typically limits real-time visibility and makes cross-functional performance tracking difficult without manual intervention.
+1. Fragmented Cross-Functional Execution
+Diagnosis: Internal teams operate in operational silos, using disconnected software trackers that have zero automation or shared data pipelines between them. This fragmentation destroys visibility, meaning cross-department delivery deadlines are regularly missed. We believe this is happening because software tools have been adopted in a decentralized, team-by-team manner without a centralized workflow governance policy. This lack of centralized visibility is the primary constraint because it blocks real-time tracking of deliverables, forcing teams to rely on manual syncs. Leadership should investigate the partner onboarding process and cross-departmental coordination workflows.
+Where Leadership Should Investigate: Leadership should look first at the partner onboarding process and cross-departmental coordination workflows. They need to investigate how communication rules are structured between teams and whether centralized tracking can replace fragmented manual updates.
 
-2. Risk of Manual Data Duplication
-Description: When separate operational tools are disconnected, teams frequently spend valuable hours manually transferring or replicating project data between systems. Standard industry diagnostics highlight this as a primary source of administrative fatigue and data entry errors.
+2. Inefficient Manual Data Syncing
+Diagnosis: Valuable staff hours are systematically spent copying client information and delivery specs manually between different databases and tools. This overhead is draining core staff energy and causing a high frequency of data-entry errors. This is happening because the current tech stack lacks robust API integrations, automated webhooks, or middleware connections to sync data. This integration gap is the primary constraint because manual synchronization absorbs significant operational capacity and inserts substantial latency into client delivery cycles. Leadership should investigate the internal database structures and third-party software integrations.
+Where Leadership Should Investigate: Leadership should investigate the internal database structures and third-party software integrations. They need to identify the highest frequency manual copy actions and map out automation opportunities using webhooks and sync tools to reclaim expert hours.
 
-3. Reactive Escalation Paths
-Description: In organizations with manual tracking workflows, delivery delays are often only identified after a deadline is missed. This suggests a potential lack of early-warning signals that would allow advisors or managers to step in preemptively.
-
-4. Informal Transition Guidelines
-Description: For firms scaling up client delivery, task hand-offs between separate teams often lack standardized criteria. This can result in frequent clarifying communications, unexpected re-work, and unpredictable project delivery timelines.
-
-5. Legacy Integration Constraints
-Description: High operational friction is frequently compounded by core business applications that lack modern APIs or webhooks. This typically prevents seamless automated data flows and keeps teams tethered to manual workarounds.
+3. Inconsistent Hand-Off Guidelines
+Diagnosis: Project transitions between sales, development, and operations are conducted without standardized quality checklists. This lack of criteria results in incomplete requirements passing between teams, triggering expensive rework and unpredictable timelines. We believe this stems from informal workflow documentation and the absence of a structured accountability framework for hand-offs. This transition gap is the primary constraint because it generates recurring, costly operational bottlenecks at every phase boundary, delaying project completion. Leadership should look first at the team hand-off checklists and quality assurance guidelines.
+Where Leadership Should Investigate: Leadership should look first at the team hand-off checklists and quality assurance guidelines. They need to investigate how deliverables are reviewed during transitions and establish mandatory entry and exit criteria for each operational phase.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Centralized Workflow View
-What: Assess the practicality of a single, shared master pipeline to trace client deliverables across departmental lines.
-Why: Providing cross-functional visibility allows teams to preemptively identify bottlenecks and coordinate hand-offs smoothly.
+1. Build a Centralized Workflow Engine
+Recommendation: Implement a centralized collaborative workflow capability that integrates disconnected tracking software into a single, automated master pipeline. This unified system provides full real-time visibility over client deliverables across all departments, resolving the fragmented cross-functional execution gap. By replacing team-specific operational silos with a standardized tracking governance policy, the organization establishes a single source of truth for project health. This capability eliminates coordination overhead, reduces missed delivery deadlines, and enables leadership to allocate resource capacity dynamically based on active project demands.
+Why it matters: Building this centralized workflow engine will significantly improve delivery timelines and client retention. Operational efficiency will surge by eliminating ad-hoc status meetings and manual coordination tasks. It prevents cost overruns and protects service-level margins by enabling early bottleneck identification, securing strong project-level profitability.
+Why now: This opportunity represents high business value with moderate execution complexity as it optimizes existing tools. It provides substantial strategic leverage by building a scalable operational foundation that can support increased transaction volumes without adding headcount.
 
-2. Automated Data Syncs
-What: Map the high-frequency touchpoints between your primary applications to identify integration or webhook opportunities.
-Why: Minimizing manual copy-pasting is a proven way to reduce human error rates and free up expert bandwidth for client delivery.
+2. Optimize Process Automation
+Recommendation: Establish a modern data-to-delivery automation capability that connects internal databases and third-party software using robust API webhooks and middleware integrations. This systematic data synchronization capability directly addresses the manual syncing gap, removing the costly overhead of copy-pasting client specifications across separate systems. By automating high-frequency administrative workflows, the organization reclaims valuable staff hours and redirects talent toward core client deliverables. Eliminating manual data entry also reduces human error, creating a highly resilient operational infrastructure.
+Why it matters: This automation capability will drive major gains in operational efficiency and delivery profitability by reducing task processing times. It will dramatically decrease transaction-level error rates, safeguarding delivery quality and improving customer retention. Reclaiming expert hours also lowers labor costs per project, amplifying overall profit margins.
+Why now: This initiative delivers high business value with low-to-moderate implementation complexity using standard webhooks. It offers immediate strategic leverage by accelerating workflow velocity and maximizing the productivity of high-cost professional staff.
 
-3. Standardized Handoff Checklists
-What: Introduce a clean quality checklist for project transitions between major departments.
-Why: Clear, uniform expectations ensure that deliverables meet quality standards on the first attempt, mitigating expensive re-work.
+3. Standardize Phase Handoffs
+Recommendation: Create a standardized quality handoff capability with mandatory entry and exit criteria for transition phases between sales, development, and operations. This quality-assurance framework directly addresses the inconsistent hand-off guidelines gap by establishing clear checklists and accountability requirements. By formalizing transition workflows, the organization ensures that incomplete client specifications never pass down the delivery pipeline. This systematic check eliminates costly project reworks, reduces friction between cross-functional teams, and introduces predictable project schedules across all phase boundaries.
+Why it matters: Establishing these handoff guidelines will significantly increase operational efficiency and speed-to-market. It will dramatically reduce project rework and delivery bottlenecks, preserving client profitability. Standardizing transition quality also improves overall deliverable consistency, fostering higher client satisfaction and retention.
+Why now: This opportunity offers high business value with extremely low implementation complexity, as it relies on process documentation. It provides immediate strategic leverage by eliminating operational friction and protecting service margins from day one.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While public observations highlight your specialized delivery capabilities, analyzing internal performance is necessary to verify exact friction points:
+The website suggests high competency in project delivery.
+However, it isn't yet clear:
 • Which specific phase in your delivery lifecycle currently experiences the longest idle time?
 • Which manual administrative tasks consume the highest percentage of your team's weekly hours?
 • Which single tool integration or connection would eliminate the most redundant data entries?
-Answering these questions provides the objective evidence needed to target your automation efforts.
+• How will the delivery model handle a doubling of project volume without hiring new staff?
+• What workflow automation trends can be adopted to turn operational speed into a primary competitive advantage?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -308,39 +315,43 @@ The digital footprint for ${companyName} highlights a valuable solution in the $
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. Friction-Heavy Checkout Paths
-Description: In organizations experiencing conversion bottlenecks, prospects are often required to navigate multiple checkout pages and forms. Industry data shows that each additional step increases drop-off rates among high-intent buyers.
+Diagnosis: High-intent website visitors routinely abandon their purchases during the final transaction phase. The checkout sequence is excessively complex, forcing potential buyers to navigate through multiple pages and fill out extensive, redundant form fields before complete order confirmation. This happens because the checkout pipeline was designed with a focus on comprehensive customer detail gathering rather than conversion velocity. This customer verification barrier is the primary constraint since it directly drives cart abandonment at the lowest funnel stage. Leadership should look first at the checkout experience and the pricing approval and payment gateway workflows.
+Where Leadership Should Investigate: Leadership should look first at the checkout experience and the pricing approval and payment gateway workflows. They must investigate how payment procedures are structured and whether simplified, single-page billing fields can replace the current multi-stage forms.
 
-2. Pricing Dissonance
-Description: When pricing tiers or feature differences are not immediately clear, prospective buyers experience choice fatigue. Optimization studies indicate that visitors who cannot easily choose the right package often leave without making a decision.
+2. Strategic Pricing Presentation Dissonance
+Diagnosis: The pricing page fails to clearly communicate the value distinctions between different tiers. Plan limits, target audiences, and unique premium features are poorly organized, causing purchase hesitation and choice fatigue for visiting prospects. We believe this is happening because pricing plans are structured around internal cost metrics rather than external customer segments. This lack of segment-aligned pricing clarity is the primary constraint because it stalls conversion momentum at the critical decision stage. Leadership should investigate the pricing tier structures and value proposition communication.
+Where Leadership Should Investigate: Leadership should investigate the pricing tier structures and value proposition communication. They need to analyze how pricing is presented to users and whether introducing self-serve tier comparisons can reduce decision delay and customer fatigue.
 
-3. Calendar-Based Trial Closes
-Description: Triggering upgrade prompts based strictly on time (like a 14-day limit) rather than user behavior often misses the peak purchase intent. Conversion models recommend aligning upsells with active usage milestones instead.
-
-4. Rigid Payment Infrastructure
-Description: Lacking modern fast-pay options (like mobile wallets or single-click checkouts) is a common hurdle. Modern transactional trends indicate that checkout speed is directly correlated with complete purchase cycles.
-
-5. Incomplete Funnel Visibility
-Description: Tracking only basic landing page views and final purchases leaves a critical blind spot. Conversion optimization requires tracking step-by-step drop-offs to pinpoint exactly where revenue is being lost.
+3. Outdated Calendar-Based Trial Closes
+Diagnosis: Subscription upgrade outreach and trial closure prompts are executed strictly based on fixed calendar intervals, regardless of how much or how little the customer has actually utilized the platform. This is happening because the conversion mechanism is tied to rigid, non-contextual billing clocks rather than real-time behavioral telemetry. This behavioral tracking gap is the primary constraint since the system regularly prompts customers at suboptimal engagement points, resulting in lost conversions. Leadership should look first at the onboarding experience and user activity tracking pathways.
+Where Leadership Should Investigate: Leadership should look first at the onboarding experience and user activity tracking pathways. They need to investigate how behavioral triggers can be used to send context-aware prompts instead of relying strictly on outdated calendar schedules.
 
 ---SECTION 3: OPPORTUNITIES---
-1. Unified Checkout Flow
-What: Consolidate multi-page billing forms into a single, highly optimized checkout screen.
-Why: Removing visual and input complexity allows high-intent visitors to finalize their payments instantly.
+1. Optimize Demand-to-Revenue Conversion
+Recommendation: Re-engineer the transactional path by consolidating checkout pages and redundant billing fields into a single, high-speed purchase gateway. This modernized checkout capability directly resolves the friction-heavy checkout paths gap by removing multi-page hurdles and administrative survey fields. By integrating express digital wallet solutions and standardizing entry forms, the organization can capture purchasing momentum when buyer intent is highest. This optimization transforms the lower-funnel experience, drastically reducing friction-induced transaction abandonment and improving checkout conversion speed.
+Why it matters: This streamlined checkout flow will directly elevate transaction conversion rates and drive immediate top-line revenue growth. Reducing billing abandonment secures more paying accounts from the existing pool of high-intent website traffic. This improves customer acquisition economics and optimizes sales efficiency.
+Why now: This opportunity represents exceptional business value with low technical implementation complexity since it focuses on interface optimization. It offers massive strategic leverage by instantly converting existing user interest into cash flow without requiring additional marketing investment.
 
-2. Behavioral Upsell Triggers
-What: Display personalized upgrade prompts at the exact moment a user hits a basic tier limit or utilizes a premium capability.
-Why: Presenting a paid option when the user has active, real-time need results in significantly higher conversion rates.
+2. Optimize Tier-to-Value Alignment
+Recommendation: Restructure the digital pricing page to display clear, segment-aligned tier distinctions and a transparent plan comparison matrix. This strategic capability addresses the pricing presentation dissonance gap by mapping distinct plans directly to clear buyer personas and specific utilization ceilings. By replacing internal cost metrics with human-readable value comparisons, the business eliminates choice fatigue and buyer confusion. This upgrade improves commercial decision-making velocity, guiding prospective customers to select the tier that matches their exact scale.
+Why it matters: This pricing modernization will accelerate purchase decision-making cycles and significantly increase conversion rates. Clearer tier separation drives a higher average order value by naturally encouraging users to select higher-margin packages. It also improves overall customer lifetime value by minimizing purchase-phase drop-offs.
+Why now: This opportunity offers high business value with low implementation complexity because it is limited to visual content adjustments. It provides strong strategic leverage by maximizing self-serve conversion efficiency and accelerating buyer acquisition timelines.
 
-3. Simplified Plan Comparisons
-What: Re-structure the pricing presentation to contrast three clear packages with highly distinct target audiences.
-Why: Reducing choice complexity allows prospective buyers to quickly identify the correct tier for their specific needs.
+3. Build a Customer Value Expansion Engine
+Recommendation: Create a dynamic customer-expansion capability that triggers subscription upgrade prompts based on real-time user engagement and feature limit telemetry. This behavioral system addresses the outdated calendar trial close gap, replacing fixed-time billing reminders with contextual, utility-driven prompts at high-value moments. By engaging trial users exactly when they reach peak usage or exceed capacity limits, the business captures expansion revenue when the product value is highly apparent. This strategic capability transforms account expansion from a passive schedule into an active, product-led engine.
+Why it matters: This behavioral upgrade engine will drive significant expansion revenue and increase customer lifetime value across high-value cohorts. By matching upsell prompts to active usage, the business will achieve higher conversion rates on plan transitions. This proactive model improves retention by ensuring users buy capacity exactly when they need it.
+Why now: This opportunity delivers very high business value with moderate technical complexity as it links telemetry data with in-app triggers. It offers exceptional strategic leverage by unlocking expansion revenue from highly active customers, accelerating organic growth.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
 While your website presents your offerings elegantly, maximizing conversions requires deep insights into transaction behaviors:
+The website suggests solid marketing and user traffic.
+However, it isn't yet clear:
 • Which subscription package or tier experiences the highest cart-abandonment rate?
 • What specific usage volume or capability triggers the most voluntary plan upgrades?
 • What percentage of abandoned sessions occur due to a lack of preferred payment methods?
-Answering these questions provides the objective evidence needed to optimize your pricing and checkout design.
+• What strategic pricing tiers should we introduce to target enterprise-level buyers?
+• How can we implement a self-serve system that encourages product-led viral loops?
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Where to focus next - Strategic Advisor Advice
@@ -387,12 +398,15 @@ CRITICAL NON-REPETITION RULE (MANDATORY - NO PARROTING INPUTS):
 - Do NOT use introductory phrases like "Based on your reported problem of...", "Given that your goal is to...", "Regarding your input...", or any phrasing that re-states what the user just typed.
 - Why: Parroting back the user's input text in the response console sounds robotic, repetitive, and uninsightful. You must synthesize the underlying root causes and sector dynamics in clean, fresh, analytical executive language without repeating the raw input strings.
 
-CRITICAL TONE & STYLE RULES: USE SIMPLE, HIGH-WEIGHT ENGLISH
-- Use clear, straightforward, conversational English that is very easy for founders to read.
+CRITICAL TONE & STYLE RULES: USE SIMPLE, HIGH-WEIGHT ENGLISH (CONSULTANT GRADE)
+- Use clear, straightforward, conversational, and highly persuasive English that makes people want to think and pursue more.
 - Avoid academic, dense, multi-syllable corporate-speak or high-flown consultant vocabulary.
 - Keep sentences short, active, and punchy. Talk to the founders directly ("you", "your team", "your product").
 - Re-frame complex technical or architectural concepts into clear human realities (e.g. use "spread too thin" instead of "resource dilution across decentralized priority queues").
 - Maintain high strategic weight, professional authority, and factual rigor, but simplify the vocabulary relentlessly.
+- Add strategic frameworks and structured thought processes implicitly (understanding problem -> creating diagnostic hypothesis -> making value-driven recommendations).
+- Language must be neat, clean, straight to the point, and professional.
+- Do NOT repeat the user's usecase or parameters in every single point unless you have something highly specific to highlight.
 
 Every section should drive data from this proportional weighting:
 * Problem Statement & Desired Outcome: 60%
@@ -405,8 +419,8 @@ CRITICAL DIAGNOSTIC PRIORITY (MANDATORY):
 - The Company Website / Internet context must be used strictly to VALIDATE or REFINE the problem diagnosis (e.g., verifying product complexity, pricing tiers, target audience, or platform mechanics).
 - NEVER let website features, marketing copy, or general business descriptions override, replace, or distract from the specific operational bottlenecks and problem statement logged by the user.
 
-CRITICAL WARNING: BANNED CONSULTANT JARGON & BUZZWORDS
-You are STRIDENLY FORBIDDEN from using any of the following terms, phrases, or high-flown jargon. Every single word must be clear, human, straightforward, and professional:
+CRITICAL WARNING: BANNED CONSULTANT JARGON, BUZZWORDS & PHRASES
+You are STRICTLY FORBIDDEN from using any of the following terms, phrases, or high-flown jargon. Every single word must be clear, human, straightforward, and professional:
 - synergy / synergistic / synergize
 - paradigm / paradigm shift
 - leverage / leveraging / leveraged
@@ -430,6 +444,7 @@ You are STRIDENLY FORBIDDEN from using any of the following terms, phrases, or h
 - frictionless / seamless / seamless integration
 - strategic alignment
 - deliverable / deliverables (except simple physical reports)
+- "according to industry" / "according to your industry" / "according to the usecase" / "as per your input"
 
 ---
 Adapt all diagnostic reasoning specifically for the selected primary outcome model: "${bottleneck}".
@@ -451,8 +466,10 @@ Your output MUST use these EXACT delimiters '---SECTION X: NAME---' as they are 
 ---SECTION 1: EXECUTIVE SUMMARY---
 Provide a boardroom executive summary synopsis that is a 2-minute read (MUST be between 40 and 60 words).
 1. Prioritize diagnosing the user's stated problem and expected outcome; use the company name/website and public internet details strictly to validate or refine the diagnosis, never to replace or override it.
-2. Diagnose the root structural friction and articulate what the real systemic problem is, using clean analytical language WITHOUT repeating or echoing the user's input problem statement or expected results.
-3. SUCCESS METRIC: You MUST explicitly include a professional statement assessing whether the problem is legit enough (legitimate and systemic) for a company of this nature and scale.
+2. Formulate your response using a clear strategy framework: understand the problem context (considering industry and products), build a diagnostic hypothesis, and set up a path to value-driven recommendations.
+3. Pull out the key symptoms from the user's usecase/problem statement without showing the raw user input on the screen.
+4. Diagnose the root structural friction and articulate what the real systemic problem is, using clean analytical language WITHOUT repeating or echoing the user's input problem statement or expected results.
+5. SUCCESS METRIC: You MUST explicitly include a professional statement assessing whether the problem is legit enough (legitimate and systemic) for a company of this nature, ecosystem phase, and scale.
 DO NOTS:
 - NEVER repeat, quote, or parrot back the user's raw input problem statement or expected results.
 - No assumptions of any kind.
@@ -460,66 +477,73 @@ DO NOTS:
 - No sugarcoating.
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
-Identify and list exactly FIVE major systemic gaps ranked by business impact.
-You MUST analyze, identify, and justify these gaps using these explicit weightings:
-* Problem Statement & Desired Outcome Alignment: 60%
-* Relevance of Business & Website Context (strictly to validate or refine the diagnosis): 30%
-* Industry Benchmarks & Alignment: 10%
+Identify and list exactly THREE strategic gaps (not 5) for why the user's problem is happening, ranked by business impact.
+Do not repeat or paraphrase the business use case. Instead, connect multiple signals from the business use case and infer the most likely organizational capability gap.
+Each gap should represent a missing business capability—not a symptom.
 
-For each gap, assess capabilities and benchmark maturity to frame the problem and form a solid hypothesis. Apply this Mindset Checklist in your diagnosis:
-- Benchmark
-- Maturity
-- Trends
-- Technology
-- Governance
-- Industry patterns
+CRITICAL GAP NAMING GUIDELINES:
+- Every gap title MUST be a concise capability-oriented title (e.g., "Weak Customer Lifecycle Personalization", "Inefficient Demand-to-Revenue Conversion", "Limited Product Portfolio Expansion", "Fragmented Commercial Execution", "Inconsistent Care Coordination").
+- You are STRICTLY FORBIDDEN from using symptoms as titles (avoid "Low Revenue", "Poor Customer Retention", "High Costs").
 
-SUCCESS METRIC: Every gap description must contain no assumptions, relying instead on factual data backed with logical evidence drafted for valuable business outcomes.
-
-For each gap, use this EXACT format:
+For each gap, you MUST output exactly this format:
 1. [Gap Title]
-Description: [Factual explanation of the systemic gap, assessing capabilities, benchmark maturity, problem framing, and hypothesis, backed with logical evidence for valuable outcomes. Keep it fully integrated in one paragraph. DO NOT separate it into secondary fields, and do NOT include any subheaders or other fields]
+Diagnosis: [Provide exactly one concise, highly analytical paragraph (80-120 words) explaining What is happening? and Why do we believe this is happening?. Before writing this paragraph, you MUST verify that it satisfies all of the following criteria:
+- Explains the underlying capability gap rather than restating symptoms.
+- Uses only evidence available from the business use case, website, business model, and industry.
+- Does not introduce unsupported assumptions.
+- Explains why this is likely the primary constraint.
+- Ends with a clear investigation area for leadership.
+Every sentence must contribute to the reasoning. Avoid repeating symptoms, explaining industry concepts, or teaching best practices. Focus only on the business-specific diagnosis and why it is the most likely explanation. The length MUST be strictly between 80 and 120 words.]
+Where Leadership Should Investigate: [Conclude with one highly specific, focused paragraph (exactly 30-50 words) describing where leadership should look first. Identify the area that deserves immediate investigation (such as "post-purchase customer journey", "physician scheduling and referral pathways", "pricing approval workflow", "onboarding experience", "merchandising strategy", "partner onboarding process"). Do NOT provide solutions yet, only identify the target area.]
 
 DO NOTS:
 - NEVER repeat, quote, or parrot back the user's raw input problem statement, gaps, or expected results. Explain the systemic mechanics in fresh language without regurgitating input strings.
 - Keep it straightforward. Absolutely no consultant buzzwords or overly dramatic language.
-- Strictly limit each gap to a Title and Description block. Do NOT include separate "What:" and "Why:" fields.
+- Strictly limit each gap to Title, Diagnosis, and Where Leadership Should Investigate. Do NOT include other fields.
 - Reading time for this section should be at least 2-3 minutes.
 
 ---SECTION 3: OPPORTUNITIES---
-Provide exactly THREE realistic growth opportunities towards which the business can work, keeping the outcome model ("${bottleneck}") as the core winning item.
-Identify competitive advantages and consider strategic options based on market trends suitable to the business and industry.
-Apply this Mindset Checklist for every opportunity:
-- Practical
-- Client partnership
-- Execution
-- Measurable impact
-- Financial outcomes
-- Customer value
+Provide exactly THREE realistic growth opportunities that directly address the diagnosed business gaps, keeping the outcome model ("${bottleneck}") as the core winning item.
+You are an experienced strategy consultant advising founders and executive teams. Your role is NOT to list ideas but to identify the three highest-impact strategic opportunities.
+Prioritize opportunities using: Estimated Business Value, Implementation Complexity, Strategic Leverage, and Expected Time to Impact.
+Do not recommend generic initiatives such as "improve marketing", "launch a loyalty program", or "use AI" unless they are clearly justified by the diagnosis.
+Each opportunity should feel like an executive investment decision rather than a product feature.
 
-You MUST validate every opportunity against customer value and simplify relentlessly.
+Writing Style: Write like a senior strategy consultant. Every recommendation should feel business-specific, evidence-driven, practical, and executive-friendly. Avoid generic business advice, long implementation plans, marketing buzzwords, or educational explanations.
+The founder should finish reading each opportunity with a clear understanding of what should be built, why it matters, and why it deserves investment now.
+Keep each opportunity STRICTLY between 150 and 200 words total.
 
 For each opportunity, use this EXACT format:
 1. [Opportunity Title]
-What: [Clear conclusion and diagnosis of the opportunity, market trends, and strategic options, validated against customer value]
-Why: [Factual explanation of why tapping this opportunity helps the business grow. Address practical execution, financial outcomes, customer value, and measurable impact, keeping the core outcome model as the key winning item. DO NOT duplicate points or reasons]
+Recommendation: [Explain the strategic capability that should be built and how it directly addresses the diagnosed gap. Keep this description strictly between 80 and 100 words.]
+Why it matters: [Explain the commercial impact on this business—not generic benefits. Keep this description strictly between 40 and 60 words.]
+Why now: [Explain why this should be prioritized over other initiatives based on business value, implementation effort, and current business stage. Keep this description strictly between 30 and 40 words.]
 
 DO NOTS:
 - NEVER repeat, quote, or parrot back the user's raw input problem statement, gaps, or expected results.
+- Do NOT use implementation-first titles such as "Send Email Campaigns", "Improve Checkout", or "Add Recommendations". Instead use strategic titles (e.g., "Build a Customer Value Expansion Engine", "Optimize Demand-to-Revenue Conversion", "Modernize Commercial Decision Making", "Strengthen Product Discovery", "Improve Capacity Planning").
 - Every opportunity must lead to a NEW and UNIQUE aspect.
 - No assumptions, no sugarcoating.
+- Absolutely NO SWOT terms (Strengths, Weaknesses, Opportunities, Threats) or framework labels.
 - Reading time for this section should be at least 2-3 minutes.
 
 ---SECTION 4: QUESTIONS WORTH INVESTIGATING---
-Provide exactly THREE critical questions worth investigating.
+Provide exactly FIVE critical questions worth investigating (instead of three) that are simple but deeply thought-provoking, avoiding basic "do this, do that" phrasing.
 This section must end with uncertainty. The report must intentionally stop exactly where internal business data becomes necessary, signaling where the founder needs further advisory or direct consultation.
+
+The questions must be divided as follows:
+- 3 questions addressing the current state, formulated from the current industry, website (the business), model, and business usecase.
+- 2 questions to shape the future of the business, which are industry-aware, evidence-based, forward-looking, and connect back to gaps, opportunities, and future trajectory. Combine general strategic thinking with domain expertise to surface the highest-leverage questions to validate assumptions and guide future strategy. Take the ecosystem phase into account to ensure high relevancy.
+
 You must write it exactly using this template style:
 The website suggests [observation about CRM, marketing, operations, etc.].
 However, it isn't yet clear:
-• [first question about internal metric/behavior]
-• [second question about internal metric/behavior]
-• [third question about internal metric/behavior]
-Answering these three questions would likely change investment priorities significantly.
+• [first question about current state metrics/behaviors]
+• [second question about current state metrics/behaviors]
+• [third question about current state metrics/behaviors]
+• [fourth question shaping the future, combining strategic thinking with domain expertise]
+• [fifth question shaping the future, combining strategic thinking with domain expertise]
+Answering these five questions would likely change investment priorities significantly.
 
 ---SECTION 5: WHERE TO FOCUS NEXT---
 Provide a single, powerful "Consultant point of view" block of text describing ONE core thing to work on immediately to drive business.
@@ -551,9 +575,9 @@ DO NOTS:
     const from = process.env.SMTP_FROM || `"Audit Registry" <no-reply@yourdomain.com>`;
 
     const emailBodyText = `
-==================================================
+**************************************************
       NEW SYSTEMS STRATEGIC AUDIT COMPLETED
-==================================================
+**************************************************
 Company Website:   ${companyName}
 Client Email:      ${emailAddress || "Not provided"}
 Industry:          ${industry || "Not provided"}
@@ -566,7 +590,7 @@ What does success look like?: ${expectedResult}
 GENERATED BLUEPRINT REPORT
 --------------------------------------------------
 ${text}
-==================================================
+**************************************************
     `;
 
     console.log("[SYSTEM AUDIT EMAIL PREVIEW]:");
