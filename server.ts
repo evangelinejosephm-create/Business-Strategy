@@ -58,9 +58,9 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
 
   const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
   const baseModels = [
-    "gemini-2.5-flash",
     "gemini-3.5-flash",
     "gemini-3.1-flash-lite",
+    "gemini-2.5-flash",
     "gemini-flash-latest",
     "gemini-3.1-pro-preview"
   ];
@@ -124,10 +124,10 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
           throw err;
         }
 
-        // If it's not a 503/429/unavailable transient error, we can stop retrying this specific model and move to the next one
-        const isTransient = errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("demand") || errMsg.includes("limit") || errMsg.includes("overloaded") || errMsg.includes("429");
+        // If it's not a 503/unavailable transient error, we can stop retrying this specific model and move to the next one
+        const isTransient = (errMsg.includes("503") || errMsg.includes("unavailable") || errMsg.includes("demand") || errMsg.includes("limit") || errMsg.includes("overloaded")) && !errMsg.includes("429") && !errMsg.includes("quota");
         if (!isTransient) {
-          console.log(`[GEMINI API INFO] Non-transient status encountered on ${activeModel}. Moving to next model.`);
+          console.log(`[GEMINI API INFO] Non-transient or exhausted status encountered on ${activeModel}. Moving to next model.`);
           break; // Break inner loop, move to next model
         }
       }
