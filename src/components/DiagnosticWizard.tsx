@@ -12,6 +12,9 @@ interface ParsedStrategicReport {
     title: string;
     diagnosis: string;
     whereToInvestigate: string;
+    whyThisMatters?: string;
+    businessImpact?: string;
+    rootCauses?: string;
   }[];
   opportunities: {
     title: string;
@@ -57,68 +60,82 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
         .trim();
     };
 
-    // SECTION 1: EXECUTIVE SUMMARY
-    const summaryText = getSectionText("EXECUTIVE SUMMARY") || getSectionText("EXECUTIVE DIAGNOSIS") || rawParts[1] || "";
-    const executiveSummary = cleanMd(summaryText);
-
-    // SECTION 2: KEY SYSTEMIC GAPS
-    const bottlenecksText = getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
+    // SECTION 1: KEY GAPS (or original KEY SYSTEMIC GAPS)
+    const bottlenecksText = getSectionText("KEY GAPS") || getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[1] || "";
     const bottlenecksRaw = bottlenecksText.split(/(?=^\d+\.\s+)/m).map(b => b.trim()).filter(b => b.length > 0);
     const bottlenecks = bottlenecksRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Gap ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, ""));
+      title = title.replace(/^\**|\**$/g, "").trim();
 
-      let diagnosis = "";
-      let whereToInvestigate = "";
+      let whyThisMatters = "";
+      let businessImpact = "";
+      let rootCauses = "";
 
       let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("diagnosis:") || lower.startsWith("diagnose:") || lower.startsWith("diagnostic:")) {
-          diagnosis = line.replace(/^(diagnosis|diagnose|diagnostic):\s*/i, "").trim();
-          currentField = "diagnosis";
-        } else if (lower.startsWith("where leadership should investigate:") || lower.startsWith("where to investigate:") || lower.startsWith("investigate:")) {
-          whereToInvestigate = line.replace(/^(where leadership should investigate|where to investigate|investigate):\s*/i, "").trim();
-          currentField = "whereToInvestigate";
+        if (lower.includes("why this matters:") || lower.includes("why matters:")) {
+          whyThisMatters = line.replace(/^[\s*-]*\**why\s+this\s+matters:\s*\**/i, "").trim();
+          currentField = "whyThisMatters";
+        } else if (lower.includes("business impact:")) {
+          businessImpact = line.replace(/^[\s*-]*\**business\s+impact:\s*\**/i, "").trim();
+          currentField = "businessImpact";
+        } else if (lower.includes("root causes:") || lower.includes("root cause:")) {
+          rootCauses = line.replace(/^[\s*-]*\**root\s+causes?:\s*\**/i, "").trim();
+          currentField = "rootCauses";
         } else {
-          if (currentField === "diagnosis") {
-            diagnosis += "\n" + line;
-          } else if (currentField === "whereToInvestigate") {
-            whereToInvestigate += "\n" + line;
+          if (currentField === "whyThisMatters") {
+            whyThisMatters += "\n" + line;
+          } else if (currentField === "businessImpact") {
+            businessImpact += "\n" + line;
+          } else if (currentField === "rootCauses") {
+            rootCauses += "\n" + line;
           } else {
-            if (!diagnosis) {
-              diagnosis = line;
-              currentField = "diagnosis";
+            if (!whyThisMatters) {
+              whyThisMatters = line;
+              currentField = "whyThisMatters";
             } else {
-              diagnosis += "\n" + line;
+              whyThisMatters += "\n" + line;
             }
           }
         }
       });
 
+      const cleanedMatters = cleanMd(whyThisMatters);
+      const cleanedImpact = cleanMd(businessImpact);
+      const cleanedCauses = cleanMd(rootCauses);
+
       return {
         title: title || `Gap ${idx + 1}`,
-        diagnosis: cleanMd(diagnosis) || "Unresolved strategic constraint slowing growth.",
-        whereToInvestigate: cleanMd(whereToInvestigate) || "Underlying process gaps and resource constraints."
+        whyThisMatters: cleanedMatters || "Strategic blocker requiring immediate resolution.",
+        businessImpact: cleanedImpact || "Disrupts operational execution and alignment.",
+        rootCauses: cleanedCauses || "Lacks systemic capability validation.",
+        diagnosis: cleanedMatters ? `Why This Matters: ${cleanedMatters}\n\nBusiness Impact: ${cleanedImpact}` : "Strategic constraint slowing development.",
+        whereToInvestigate: cleanedCauses || "Process and capability review."
       };
     });
 
     while (bottlenecks.length < 3) {
       bottlenecks.push({
         title: "Growth Pipeline Leaks",
+        whyThisMatters: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals.",
+        businessImpact: "Slows the overall scaling velocity and decreases marketing efficiency.",
+        rootCauses: "Friction-heavy onboarding states and unoptimized checkout sequences.",
         diagnosis: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals.",
         whereToInvestigate: "Friction-heavy onboarding states and unoptimized checkout sequences."
       });
     }
 
-    // SECTION 3: OPPORTUNITIES
-    const oppText = getSectionText("OPPORTUNITIES") || rawParts[3] || "";
+    // SECTION 2: OPPORTUNITIES
+    const oppText = getSectionText("OPPORTUNITIES") || rawParts[2] || "";
     const oppRaw = oppText.split(/(?=^\d+\.\s+)/m).map(o => o.trim()).filter(o => o.length > 0);
     const opportunities = oppRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Opportunity ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|opportunity\s*\d+[\s.-]*)/i, ""));
+      title = title.replace(/^\**|\**$/g, "").trim();
 
       let recommendation = "";
       let expectedImpact = "";
@@ -127,14 +144,20 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("recommendation:") || lower.startsWith("initiative:") || lower.startsWith("what:")) {
-          recommendation = line.replace(/^(recommendation|initiative|what):\s*/i, "").trim();
+        if (lower.includes("recommendation:") || lower.includes("initiative:") || lower.includes("what:")) {
+          recommendation = line.replace(/^[\s*-]*\**recommendation:\s*\**/i, "").trim();
           currentField = "recommendation";
-        } else if (lower.startsWith("expected business impact and growth:") || lower.startsWith("expected impact and growth:") || lower.startsWith("expected business impact:") || lower.startsWith("expected impact:") || lower.startsWith("growth:") || lower.startsWith("why:") || lower.startsWith("why it matters:")) {
-          expectedImpact = line.replace(/^(expected business impact and growth|expected impact and growth|expected business impact|expected impact|growth|why|why it matters):\s*/i, "").trim();
+        } else if (lower.includes("expected business impact & growth:") || lower.includes("expected business impact and growth:") || lower.includes("expected impact:") || lower.includes("why it matters:")) {
+          expectedImpact = line.replace(/^[\s*-]*\**expected\s+business\s+impact\s*(?:&\s*|\s+and\s+)\s*growth:\s*\**/i, "")
+                               .replace(/^[\s*-]*\**expected\s+impact:\s*\**/i, "")
+                               .replace(/^[\s*-]*\**why\s+it\s+matters:\s*\**/i, "")
+                               .trim();
           currentField = "expectedImpact";
-        } else if (lower.startsWith("why prioritize:") || lower.startsWith("prioritize:") || lower.startsWith("why prioritize one sentence:") || lower.startsWith("priority rationale:") || lower.startsWith("rationale:") || lower.startsWith("why now:")) {
-          whyPrioritize = line.replace(/^(why prioritize|prioritize|why prioritize one sentence|priority rationale|rationale|why now):\s*/i, "").trim();
+        } else if (lower.includes("why prioritize:") || lower.includes("prioritize:") || lower.includes("why now:")) {
+          whyPrioritize = line.replace(/^[\s*-]*\**why\s+prioritize:\s*\**/i, "")
+                               .replace(/^[\s*-]*\**prioritize:\s*\**/i, "")
+                               .replace(/^[\s*-]*\**why\s+now:\s*\**/i, "")
+                               .trim();
           currentField = "whyPrioritize";
         } else {
           if (currentField === "recommendation") {
@@ -171,16 +194,16 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       });
     }
 
-    // SECTION 4: QUESTIONS WORTH INVESTIGATING
-    const questionsText = getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[4] || "";
+    // SECTION 3: QUESTIONS WORTH EXPLORING
+    const questionsText = getSectionText("QUESTIONS WORTH EXPLORING") || getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[3] || "";
     const questions = cleanMd(questionsText);
 
-    // SECTION 5: WHERE TO FOCUS NEXT
-    const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[5] || "";
+    // SECTION 4: WHERE TO FOCUS NEXT
+    const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[4] || "";
     const focusPoint = cleanMd(focusText);
 
     return {
-      executiveSummary,
+      executiveSummary: "",
       bottlenecks,
       opportunities,
       questions,
@@ -195,13 +218,13 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
 function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) {
   return (
     <div className="space-y-10 select-text text-primary font-sans">
-      {/* SECTION 1: KEY SYSTEMIC GAPS */}
+      {/* SECTION 1: KEY GAPS */}
       {parsed.bottlenecks && parsed.bottlenecks.length > 0 && (
         <div className="space-y-5">
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <ShieldAlert size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              01 - KEY SYSTEMIC GAPS
+              01 - KEY GAPS
             </h4>
           </div>
 
@@ -221,17 +244,33 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs font-sans text-slate-700">
-                  <div className="md:col-span-2 bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-2">
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
-                      Diagnosis
-                    </span>
-                    <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap text-[13px]">{bottleneck.diagnosis}</p>
+                  <div className="md:col-span-2 bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-3">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                        Why This Matters
+                      </span>
+                      <p className="leading-relaxed font-sans text-slate-800 text-[13px]">
+                        {bottleneck.whyThisMatters || bottleneck.diagnosis}
+                      </p>
+                    </div>
+                    {bottleneck.businessImpact && (
+                      <div className="space-y-1 pt-2.5 border-t border-slate-200/60">
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                          Business Impact
+                        </span>
+                        <p className="leading-relaxed font-sans text-slate-800 text-[13px]">
+                          {bottleneck.businessImpact}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="md:col-span-1 bg-amber-50/40 p-4 rounded-lg border border-amber-100/60 space-y-2">
                     <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
-                      Where Leadership Should Investigate
+                      Root Causes
                     </span>
-                    <p className="leading-relaxed font-sans text-slate-800 font-medium whitespace-pre-wrap text-[13px]">{bottleneck.whereToInvestigate}</p>
+                    <p className="leading-relaxed font-sans text-slate-800 font-medium text-[13px]">
+                      {bottleneck.rootCauses || bottleneck.whereToInvestigate}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -246,7 +285,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
           <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
             <Zap size={18} className="text-secondary" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-              02 - STRATEGIC GROWTH OPPORTUNITIES
+              02 - STRATEGIC OPPORTUNITIES
             </h4>
           </div>
 
@@ -263,15 +302,15 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
                   <div className="space-y-3.5 text-xs text-slate-600">
                     <div className="space-y-1">
                       <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Recommendation</span>
-                      <p className="leading-relaxed font-sans whitespace-pre-wrap">{opp.recommendation}</p>
+                      <p className="leading-relaxed font-sans whitespace-pre-wrap text-[13px] text-slate-800">{opp.recommendation}</p>
                     </div>
                     <div className="space-y-1 pt-2.5 border-t border-slate-100">
-                      <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-widest block font-bold">Why It Matters</span>
-                      <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap">{opp.expectedImpact}</p>
+                      <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-widest block font-bold">Expected Business Impact & Growth</span>
+                      <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap text-[13px]">{opp.expectedImpact}</p>
                     </div>
                     <div className="space-y-1 pt-2.5 border-t border-slate-100">
-                      <span className="text-[9px] font-mono text-amber-700 uppercase tracking-widest block font-bold">Why Now</span>
-                      <p className="leading-relaxed font-sans text-slate-700 font-medium whitespace-pre-wrap">{opp.whyPrioritize}</p>
+                      <span className="text-[9px] font-mono text-amber-700 uppercase tracking-widest block font-bold">Why Prioritize</span>
+                      <p className="leading-relaxed font-sans text-slate-700 font-medium whitespace-pre-wrap text-[13px]">{opp.whyPrioritize}</p>
                     </div>
                   </div>
                 </div>
@@ -281,13 +320,13 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         </div>
       )}
 
-      {/* SECTION 3: QUESTIONS WORTH INVESTIGATING */}
+      {/* SECTION 3: QUESTIONS WORTH EXPLORING */}
       {parsed.questions && (
         <div className="bg-slate-900 text-white rounded-xl p-6 border border-slate-800 shadow-md space-y-5">
           <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
             <Award size={18} className="text-amber-400" />
             <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-              03 - QUESTIONS WORTH INVESTIGATING
+              03 - QUESTIONS WORTH EXPLORING
             </h4>
           </div>
 
@@ -1169,85 +1208,110 @@ export default function DiagnosticWizard() {
       // Metadata card with background
       const leftColX = margin + 6;
       const rightColX = margin + (contentWidth / 2) + 2;
+      const colWidth = (contentWidth / 2) - 8;
 
       // Wrap values that can be long
-      const wrappedUsecase = doc.splitTextToSize(businessUsecase || "N/A", (contentWidth / 2) - 8);
-      const wrappedBottleneck = doc.splitTextToSize(bottleneck, (contentWidth / 2) - 8);
+      const wrappedCompanyName = doc.splitTextToSize(companyName || "Unspecified", colWidth);
+      const wrappedIndustry = doc.splitTextToSize(industry || "Unspecified", colWidth);
+      const wrappedEmail = doc.splitTextToSize(emailAddress || "Unspecified", colWidth);
+      const compileDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      const wrappedDate = doc.splitTextToSize(compileDate, colWidth);
+      const wrappedBottleneck = doc.splitTextToSize(bottleneck || "N/A", contentWidth - 12);
+      const wrappedUsecase = doc.splitTextToSize(businessUsecase || "N/A", contentWidth - 12);
 
-      const row1LabelY = 8;
-      const row1ValueY = 13;
+      // Dynamically calculate the vertical positions of each row based on wrapped line counts
+      const cardY = y;
+      let curY = cardY + 6;
 
-      const row2LabelY = 21;
-      const row2ValueY = 26;
-      const row2Height = Math.max(wrappedUsecase.length * 4.2, 5); // height of row 2 value
+      const companyY = curY;
+      const companyHeight = Math.max(wrappedCompanyName.length * 4.5, wrappedIndustry.length * 4.5) + 6;
+      curY += companyHeight;
 
-      const row3LabelY = row2ValueY + row2Height + 3;
-      const row3ValueY = row3LabelY + 5;
-      const row3Height = Math.max(wrappedBottleneck.length * 4.2, 5); // height of row 3 value
+      const emailY = curY;
+      const emailHeight = Math.max(wrappedEmail.length * 4.5, wrappedDate.length * 4.5) + 6;
+      curY += emailHeight;
 
-      const cardHeight = row3ValueY + row3Height + 2;
+      const separatorY = curY + 1;
+      curY += 4;
+
+      const goalY = curY;
+      const goalHeight = (wrappedBottleneck.length * 4.5) + 6;
+      curY += goalHeight;
+
+      const usecaseY = curY;
+      const usecaseHeight = (wrappedUsecase.length * 4.5) + 6;
+      curY += usecaseHeight + 2;
+
+      const cardHeight = curY - cardY;
 
       doc.setFillColor(251, 251, 250); // Warm light gray #FBFBFA
       doc.setDrawColor(226, 232, 240); 
       doc.setLineWidth(0.4);
-      doc.rect(margin, y, contentWidth, cardHeight, "FD");
+      doc.rect(margin, cardY, contentWidth, cardHeight, "FD");
 
-      // Row 1: Company Website & Industry
+      // Draw text elements strictly at their calculated positions to avoid overlapping
+      // --- ROW 1 ---
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("COMPANY WEBSITE:", leftColX, y + row1LabelY);
+      doc.text("COMPANY WEBSITE:", leftColX, companyY + 2);
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setTextColor(34, 46, 38);
-      doc.text(companyName || "Unspecified", leftColX, y + row1ValueY);
+      doc.text(wrappedCompanyName, leftColX, companyY + 6);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("INDUSTRY:", rightColX, y + row1LabelY);
+      doc.text("INDUSTRY:", rightColX, companyY + 2);
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
+      doc.setFontSize(9.5);
       doc.setTextColor(30, 41, 59);
-      doc.text(industry, rightColX, y + row1ValueY);
+      doc.text(wrappedIndustry, rightColX, companyY + 6);
 
-      // Row 2: Email Address & Business Use Case
+      // --- ROW 2 ---
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("EMAIL ADDRESS:", leftColX, y + row2LabelY);
+      doc.text("EMAIL ADDRESS:", leftColX, emailY + 2);
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
+      doc.setFontSize(9.5);
       doc.setTextColor(30, 41, 59);
-      doc.text(emailAddress || "Unspecified", leftColX, y + row2ValueY);
-
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 110, 100);
-      doc.text("BUSINESS USE CASE:", rightColX, y + row2LabelY);
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(30, 41, 59);
-      doc.text(wrappedUsecase, rightColX, y + row2ValueY);
-
-      // Row 3: Primary Business Goal & Date of Compile
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(100, 110, 100);
-      doc.text("PRIMARY BUSINESS GOAL:", leftColX, y + row3LabelY);
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(30, 41, 59);
-      doc.text(wrappedBottleneck, leftColX, y + row3ValueY);
+      doc.text(wrappedEmail, leftColX, emailY + 6);
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(100, 110, 100);
-      doc.text("DATE OF COMPILE:", rightColX, y + row3LabelY);
+      doc.text("DATE OF COMPILE:", rightColX, emailY + 2);
       doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
+      doc.setFontSize(9.5);
       doc.setTextColor(30, 41, 59);
-      doc.text(new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), rightColX, y + row3ValueY);
+      doc.text(wrappedDate, rightColX, emailY + 6);
+
+      // Divider Line
+      doc.setDrawColor(241, 245, 249);
+      doc.setLineWidth(0.3);
+      doc.line(margin + 4, separatorY, margin + contentWidth - 4, separatorY);
+
+      // --- ROW 3 ---
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 110, 100);
+      doc.text("PRIMARY BUSINESS GOAL:", leftColX, goalY + 2);
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(wrappedBottleneck, leftColX, goalY + 6);
+
+      // --- ROW 4 ---
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 110, 100);
+      doc.text("BUSINESS USE CASE:", leftColX, usecaseY + 2);
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(wrappedUsecase, leftColX, usecaseY + 6);
 
       y += cardHeight + 10;
 
@@ -1338,7 +1402,7 @@ export default function DiagnosticWizard() {
 
         } else if (line.startsWith("-") || line.startsWith("*")) {
           // A List Item
-          const rawItem = line.substring(1).trim();
+          const rawItem = line.replace(/^[-*]\s*/, "").replace(/\*\*/g, "").trim();
           doc.setFont("Helvetica", "normal");
           doc.setFontSize(8.5);
           doc.setTextColor(51, 65, 85);
@@ -1364,11 +1428,12 @@ export default function DiagnosticWizard() {
           }
         } else {
           // Generic paragraph text
+          const cleanLine = line.replace(/\*\*/g, "");
           doc.setFont("Helvetica", "normal");
           doc.setFontSize(8.5);
           doc.setTextColor(51, 65, 85);
 
-          const wrappedPara = doc.splitTextToSize(line, contentWidth);
+          const wrappedPara = doc.splitTextToSize(cleanLine, contentWidth);
           for (let j = 0; j < wrappedPara.length; j++) {
             if (y > 270) {
               doc.addPage();
