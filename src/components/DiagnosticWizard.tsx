@@ -10,21 +10,32 @@ interface ParsedStrategicReport {
   executiveSummary: string;
   bottlenecks: {
     title: string;
-    diagnosis: string;
-    whereToInvestigate: string;
+    diagnosis?: string;
+    whereToInvestigate?: string;
+    whyThisMatters?: string;
+    businessImpact?: string;
+    rootCauses?: string;
+    beneathSurface?: string;
+    potentialWays?: string;
   }[];
   opportunities: {
     title: string;
-    recommendation: string;
-    expectedImpact: string;
-    whyPrioritize: string;
+    recommendation?: string;
+    expectedImpact?: string;
+    whyPrioritize?: string;
+    whyExists?: string;
+    howAchieved?: string;
+    whereLook?: string;
+    howValidate?: string;
   }[];
   questions: string;
   focusPoint: string;
+  focusSteps?: string[];
+  alternativeInterpretation?: string;
 }
 
 function parseStrategicReport(text: string): ParsedStrategicReport | null {
-  if (!text.includes("SECTION 1") && !text.includes("SECTION 2")) {
+  if (!text.includes("SECTION 1") && !text.includes("SECTION 2") && !text.includes("KEY GAPS") && !text.includes("GAPS")) {
     return null;
   }
 
@@ -53,54 +64,104 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       return str
         .replace(/\*\*/g, "")
         .replace(/^\*+|\*+$/g, "")
-        .replace(/^[#:\s-]+|[:\s-]+$/g, "")
+        .replace(/^[#:\s•-]+|[:\s•-]+$/g, "")
         .trim();
     };
 
-    // SECTION 1: EXECUTIVE SUMMARY
-    const summaryText = getSectionText("EXECUTIVE SUMMARY") || getSectionText("EXECUTIVE DIAGNOSIS") || rawParts[1] || "";
+    // SECTION 1: EXECUTIVE SUMMARY (May be empty/absent in 4-section format)
+    const summaryText = getSectionText("EXECUTIVE SUMMARY") || getSectionText("EXECUTIVE DIAGNOSIS") || "";
     const executiveSummary = cleanMd(summaryText);
 
     // SECTION 2: KEY SYSTEMIC GAPS
-    const bottlenecksText = getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[2] || "";
-    const bottlenecksRaw = bottlenecksText.split(/(?=^\d+\.\s+)/m).map(b => b.trim()).filter(b => b.length > 0);
+    const bottlenecksText = getSectionText("KEY GAPS") || getSectionText("KEY SYSTEMIC GAPS") || getSectionText("SYSTEMIC GAPS") || getSectionText("KEY BOTTLENECKS") || getSectionText("BOTTLENECKS") || rawParts[1] || "";
+    let bottlenecksRaw = bottlenecksText.split(/(?=^\d+[\s.-]+)/m).map(b => b.trim()).filter(b => b.length > 0);
+    if (bottlenecksRaw.length <= 1) {
+      bottlenecksRaw = bottlenecksText.split(/(?=^\*\*\w[^*]+\*\*)/m).map(b => b.trim()).filter(b => b.length > 0);
+    }
     const bottlenecks = bottlenecksRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Gap ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|gap\s*\d+[\s.-]*|bottleneck\s*\d+[\s.-]*)/i, ""));
 
+      let whyThisMatters = "";
+      let beneathSurface = "";
+      let potentialWays = "";
+      let businessImpact = "";
+      let rootCauses = "";
       let diagnosis = "";
       let whereToInvestigate = "";
 
       let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("diagnosis:") || lower.startsWith("diagnose:") || lower.startsWith("diagnostic:")) {
-          diagnosis = line.replace(/^(diagnosis|diagnose|diagnostic):\s*/i, "").trim();
+        if (lower.includes("why this matters:")) {
+          whyThisMatters = line.substring(line.toLowerCase().indexOf("why this matters:") + "why this matters:".length).trim();
+          currentField = "whyThisMatters";
+        } else if (lower.includes("beneath the surface:") || lower.includes("beneath surface:") || lower.includes("what may be happening beneath the surface:")) {
+          let label = "beneath the surface:";
+          if (lower.includes("what may be happening beneath the surface:")) label = "what may be happening beneath the surface:";
+          else if (lower.includes("beneath surface:")) label = "beneath surface:";
+          beneathSurface = line.substring(line.toLowerCase().indexOf(label) + label.length).trim();
+          currentField = "beneathSurface";
+        } else if (lower.includes("potential ways to address") || lower.includes("ways to address") || lower.includes("potential ways:")) {
+          let label = "potential ways to address it:";
+          if (lower.includes("potential ways to address this:")) label = "potential ways to address this:";
+          else if (lower.includes("potential ways to address:")) label = "potential ways to address:";
+          else if (lower.includes("ways to address:")) label = "ways to address:";
+          else if (lower.includes("potential ways:")) label = "potential ways:";
+          potentialWays = line.substring(line.toLowerCase().indexOf(label) + label.length).trim();
+          currentField = "potentialWays";
+        } else if (lower.includes("business impact:")) {
+          businessImpact = line.substring(line.toLowerCase().indexOf("business impact:") + "business impact:".length).trim();
+          currentField = "businessImpact";
+        } else if (lower.includes("root causes:")) {
+          rootCauses = line.substring(line.toLowerCase().indexOf("root causes:") + "root causes:".length).trim();
+          currentField = "rootCauses";
+        } else if (lower.includes("diagnosis:")) {
+          diagnosis = line.substring(line.toLowerCase().indexOf("diagnosis:") + "diagnosis:".length).trim();
           currentField = "diagnosis";
-        } else if (lower.startsWith("where leadership should investigate:") || lower.startsWith("where to investigate:") || lower.startsWith("investigate:")) {
-          whereToInvestigate = line.replace(/^(where leadership should investigate|where to investigate|investigate):\s*/i, "").trim();
+        } else if (lower.includes("where to investigate:") || lower.includes("where leadership should investigate:")) {
+          let label = "where to investigate:";
+          if (lower.includes("where leadership should investigate:")) label = "where leadership should investigate:";
+          whereToInvestigate = line.substring(line.toLowerCase().indexOf(label) + label.length).trim();
           currentField = "whereToInvestigate";
         } else {
-          if (currentField === "diagnosis") {
+          const cleanedLine = line.replace(/^[*•-\s\d.]+\s*/, "").trim();
+          if (currentField === "whyThisMatters") {
+            whyThisMatters += " " + cleanedLine;
+          } else if (currentField === "beneathSurface") {
+            beneathSurface += " " + cleanedLine;
+          } else if (currentField === "potentialWays") {
+            potentialWays += " " + cleanedLine;
+          } else if (currentField === "businessImpact") {
+            businessImpact += " " + cleanedLine;
+          } else if (currentField === "rootCauses") {
+            rootCauses += " " + cleanedLine;
+          } else if (currentField === "diagnosis") {
             diagnosis += "\n" + line;
           } else if (currentField === "whereToInvestigate") {
             whereToInvestigate += "\n" + line;
           } else {
-            if (!diagnosis) {
-              diagnosis = line;
-              currentField = "diagnosis";
-            } else {
-              diagnosis += "\n" + line;
-            }
+            diagnosis = diagnosis ? diagnosis + "\n" + line : line;
+            currentField = "diagnosis";
           }
         }
       });
 
+      const finalDiagnosis = cleanMd(diagnosis);
+      const finalWhere = cleanMd(whereToInvestigate);
+      const finalBeneath = cleanMd(beneathSurface) || finalDiagnosis;
+      const finalPotential = cleanMd(potentialWays) || finalWhere;
+
       return {
         title: title || `Gap ${idx + 1}`,
-        diagnosis: cleanMd(diagnosis) || "Unresolved strategic constraint slowing growth.",
-        whereToInvestigate: cleanMd(whereToInvestigate) || "Underlying process gaps and resource constraints."
+        diagnosis: finalDiagnosis,
+        whereToInvestigate: finalWhere,
+        whyThisMatters: cleanMd(whyThisMatters),
+        businessImpact: cleanMd(businessImpact),
+        rootCauses: cleanMd(rootCauses),
+        beneathSurface: finalBeneath,
+        potentialWays: finalPotential
       };
     });
 
@@ -108,18 +169,30 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       bottlenecks.push({
         title: "Growth Pipeline Leaks",
         diagnosis: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals.",
-        whereToInvestigate: "Friction-heavy onboarding states and unoptimized checkout sequences."
+        whereToInvestigate: "Friction-heavy onboarding states and unoptimized checkout sequences.",
+        whyThisMatters: "",
+        businessImpact: "",
+        rootCauses: "",
+        beneathSurface: "Conversion points fail to transition user interest to paid adoption, directly delaying revenue goals.",
+        potentialWays: "Streamline onboarding states and unoptimized checkout sequences."
       });
     }
 
-    // SECTION 3: OPPORTUNITIES
-    const oppText = getSectionText("OPPORTUNITIES") || rawParts[3] || "";
-    const oppRaw = oppText.split(/(?=^\d+\.\s+)/m).map(o => o.trim()).filter(o => o.length > 0);
+    // SECTION 2: OPPORTUNITIES
+    const oppText = getSectionText("OPPORTUNITIES") || getSectionText("STRATEGIC OPPORTUNITIES") || rawParts[2] || "";
+    let oppRaw = oppText.split(/(?=^\d+[\s.-]+)/m).map(o => o.trim()).filter(o => o.length > 0);
+    if (oppRaw.length <= 1) {
+      oppRaw = oppText.split(/(?=^\*\*\w[^*]+\*\*)/m).map(o => o.trim()).filter(o => o.length > 0);
+    }
     const opportunities = oppRaw.slice(0, 3).map((block, idx) => {
       const lines = block.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       let title = lines[0] || `Opportunity ${idx + 1}`;
       title = cleanMd(title.replace(/^(\d+[\s.-]*|opportunity\s*\d+[\s.-]*)/i, ""));
 
+      let whyExists = "";
+      let howAchieved = "";
+      let whereLook = "";
+      let howValidate = "";
       let recommendation = "";
       let expectedImpact = "";
       let whyPrioritize = "";
@@ -127,29 +200,51 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
       let currentField = "";
       lines.slice(1).forEach(line => {
         const lower = line.toLowerCase();
-        if (lower.startsWith("recommendation:") || lower.startsWith("initiative:") || lower.startsWith("what:")) {
-          recommendation = line.replace(/^(recommendation|initiative|what):\s*/i, "").trim();
+        if (lower.includes("why this opportunity exists:")) {
+          whyExists = line.substring(line.toLowerCase().indexOf("why this opportunity exists:") + "why this opportunity exists:".length).trim();
+          currentField = "whyExists";
+        } else if (lower.includes("how this could be achieved:") || lower.includes("how this can be achieved:") || lower.includes("how this could be achieved")) {
+          let label = "how this could be achieved:";
+          if (lower.includes("how this can be achieved:")) label = "how this can be achieved:";
+          howAchieved = line.substring(line.toLowerCase().indexOf(label) + label.length).trim();
+          currentField = "howAchieved";
+        } else if (lower.includes("where to look first:")) {
+          whereLook = line.substring(line.toLowerCase().indexOf("where to look first:") + "where to look first:".length).trim();
+          currentField = "whereLook";
+        } else if (lower.includes("how to validate:")) {
+          howValidate = line.substring(line.toLowerCase().indexOf("how to validate:") + "how to validate:".length).trim();
+          currentField = "howValidate";
+        } else if (lower.includes("recommendation:")) {
+          recommendation = line.substring(line.toLowerCase().indexOf("recommendation:") + "recommendation:".length).trim();
           currentField = "recommendation";
-        } else if (lower.startsWith("expected business impact and growth:") || lower.startsWith("expected impact and growth:") || lower.startsWith("expected business impact:") || lower.startsWith("expected impact:") || lower.startsWith("growth:") || lower.startsWith("why:") || lower.startsWith("why it matters:")) {
-          expectedImpact = line.replace(/^(expected business impact and growth|expected impact and growth|expected business impact|expected impact|growth|why|why it matters):\s*/i, "").trim();
+        } else if (lower.includes("expected impact:") || lower.includes("expected business impact:") || lower.includes("expected business impact & growth:")) {
+          let label = "expected impact:";
+          if (lower.includes("expected business impact & growth:")) label = "expected business impact & growth:";
+          else if (lower.includes("expected business impact:")) label = "expected business impact:";
+          expectedImpact = line.substring(line.toLowerCase().indexOf(label) + label.length).trim();
           currentField = "expectedImpact";
-        } else if (lower.startsWith("why prioritize:") || lower.startsWith("prioritize:") || lower.startsWith("why prioritize one sentence:") || lower.startsWith("priority rationale:") || lower.startsWith("rationale:") || lower.startsWith("why now:")) {
-          whyPrioritize = line.replace(/^(why prioritize|prioritize|why prioritize one sentence|priority rationale|rationale|why now):\s*/i, "").trim();
+        } else if (lower.includes("why prioritize:")) {
+          whyPrioritize = line.substring(line.toLowerCase().indexOf("why prioritize:") + "why prioritize:".length).trim();
           currentField = "whyPrioritize";
         } else {
-          if (currentField === "recommendation") {
-            recommendation += "\n" + line;
+          const cleanedLine = line.replace(/^[*•-\s\d.]+\s*/, "").trim();
+          if (currentField === "whyExists") {
+            whyExists += " " + cleanedLine;
+          } else if (currentField === "howAchieved") {
+            howAchieved += " " + cleanedLine;
+          } else if (currentField === "whereLook") {
+            whereLook += " " + cleanedLine;
+          } else if (currentField === "howValidate") {
+            howValidate += " " + cleanedLine;
+          } else if (currentField === "recommendation") {
+            recommendation += " " + cleanedLine;
           } else if (currentField === "expectedImpact") {
-            expectedImpact += "\n" + line;
+            expectedImpact += " " + cleanedLine;
           } else if (currentField === "whyPrioritize") {
-            whyPrioritize += "\n" + line;
+            whyPrioritize += " " + cleanedLine;
           } else {
-            if (!recommendation) {
-              recommendation = line;
-              currentField = "recommendation";
-            } else {
-              recommendation += "\n" + line;
-            }
+            recommendation = recommendation ? recommendation + "\n" + line : line;
+            currentField = "recommendation";
           }
         }
       });
@@ -158,7 +253,11 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
         title: title || `Opportunity ${idx + 1}`,
         recommendation: cleanMd(recommendation) || "High-value strategic initiative.",
         expectedImpact: cleanMd(expectedImpact) || "Accelerates market adoption and scale.",
-        whyPrioritize: cleanMd(whyPrioritize) || "Critical path to immediate value creation."
+        whyPrioritize: cleanMd(whyPrioritize) || "Critical path to immediate value creation.",
+        whyExists: cleanMd(whyExists),
+        howAchieved: cleanMd(howAchieved),
+        whereLook: cleanMd(whereLook),
+        howValidate: cleanMd(howValidate)
       };
     });
 
@@ -167,24 +266,54 @@ function parseStrategicReport(text: string): ParsedStrategicReport | null {
         title: "Strategic Growth Initiative",
         recommendation: "Tap into secondary channels to bolster active customer acquisition.",
         expectedImpact: "Expands the active customer base and strengthens revenue retention.",
-        whyPrioritize: "Fastest way to lock down immediate retention improvements."
+        whyPrioritize: "Fastest way to lock down immediate retention improvements.",
+        whyExists: "",
+        howAchieved: "",
+        whereLook: "",
+        howValidate: ""
       });
     }
 
-    // SECTION 4: QUESTIONS WORTH INVESTIGATING
-    const questionsText = getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[4] || "";
+    // SECTION 3: QUESTIONS WORTH EXPLORING
+    const questionsText = getSectionText("QUESTIONS WORTH EXPLORING") || getSectionText("QUESTIONS WORTH INVESTIGATING") || getSectionText("QUESTIONS") || rawParts[3] || "";
     const questions = cleanMd(questionsText);
 
-    // SECTION 5: WHERE TO FOCUS NEXT
-    const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[5] || "";
-    const focusPoint = cleanMd(focusText);
+    // SECTION 4: WHERE TO FOCUS NEXT
+    const focusText = getSectionText("WHERE TO FOCUS NEXT") || getSectionText("WHERE TO FOCUS") || getSectionText("THINGS I WOULD FOCUS ON") || getSectionText("THINGS I WOULD FOCUS ONE") || getSectionText("FOCUS POINT") || getSectionText("CONSULTANT POINT OF VIEW") || rawParts[4] || "";
+    let focusPoint = cleanMd(focusText);
+    let focusSteps: string[] = [];
+    if (focusPoint.includes("Suggested next steps:")) {
+      const parts = focusPoint.split(/Suggested next steps:\s*/i);
+      focusPoint = cleanMd(parts[0]);
+      if (parts[1]) {
+        focusSteps = parts[1]
+          .split("\n")
+          .map(l => l.replace(/^[*•••-\s✓]+/, "").trim())
+          .filter(l => l.length > 0);
+      }
+    } else if (focusPoint.includes("* Suggested next steps:")) {
+      const parts = focusPoint.split(/\*\s*Suggested next steps:\s*/i);
+      focusPoint = cleanMd(parts[0]);
+      if (parts[1]) {
+        focusSteps = parts[1]
+          .split("\n")
+          .map(l => l.replace(/^[*•••-\s✓]+/, "").trim())
+          .filter(l => l.length > 0);
+      }
+    }
+
+    // SECTION 5: ALTERNATIVE INTERPRETATION
+    const altText = getSectionText("ALTERNATIVE INTERPRETATION") || rawParts[5] || "";
+    const alternativeInterpretation = cleanMd(altText);
 
     return {
       executiveSummary,
       bottlenecks,
       opportunities,
       questions,
-      focusPoint
+      focusPoint,
+      focusSteps,
+      alternativeInterpretation
     };
   } catch (err) {
     console.error("Failed parsing structured strategic blueprint:", err);
@@ -202,6 +331,20 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
 
   return (
     <div className="space-y-6 select-text text-primary font-sans">
+      {/* Executive Summary Section (matching PDF layout) */}
+      {parsed.executiveSummary && (
+        <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-5 hover:border-slate-300 transition-all shadow-xs space-y-2">
+          <div className="flex items-center gap-2 border-b border-slate-200/50 pb-2">
+            <span className="font-mono text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+              Executive Diagnosis & Summary
+            </span>
+          </div>
+          <p className="text-slate-700 text-[13px] leading-relaxed font-sans font-medium">
+            {parsed.executiveSummary}
+          </p>
+        </div>
+      )}
+
       {/* Clickable tabs at the top of the response console */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
         <button
@@ -283,18 +426,22 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
                     </h5>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs font-sans text-slate-700">
-                    <div className="md:col-span-2 bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-2">
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
-                        Diagnosis
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-sans text-slate-700">
+                    <div className="bg-rose-50/40 p-4 rounded-lg border border-rose-100/60 space-y-1.5 flex flex-col">
+                      <span className="text-[10px] font-mono text-rose-800 uppercase tracking-wider block font-bold">
+                        Beneath the Surface (Systemic Cause)
                       </span>
-                      <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap text-[13px]">{bottleneck.diagnosis}</p>
+                      <p className="leading-relaxed font-sans text-slate-800 text-[13px] flex-1">
+                        {bottleneck.beneathSurface || "N/A"}
+                      </p>
                     </div>
-                    <div className="md:col-span-1 bg-amber-50/40 p-4 rounded-lg border border-amber-100/60 space-y-2">
-                      <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
-                        Where Leadership Should Investigate
+                    <div className="bg-emerald-50/40 p-4 rounded-lg border border-emerald-100/60 space-y-1.5 flex flex-col">
+                      <span className="text-[10px] font-mono text-emerald-800 uppercase tracking-wider block font-bold">
+                        Potential Interventions
                       </span>
-                      <p className="leading-relaxed font-sans text-slate-800 font-medium whitespace-pre-wrap text-[13px]">{bottleneck.whereToInvestigate}</p>
+                      <p className="leading-relaxed font-sans text-slate-800 text-[13px] flex-1">
+                        {bottleneck.potentialWays || "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -308,34 +455,83 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
             <div className="flex items-center gap-2 border-b border-outline-variant/50 pb-3">
               <Zap size={18} className="text-secondary" />
               <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-primary">
-                02 - STRATEGIC GROWTH OPPORTUNITIES
+                02 - STRATEGIC OPPORTUNITIES
               </h4>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {parsed.opportunities.map((opp, idx) => (
                 <div
                   key={idx}
-                  className="bg-white border border-outline-variant/60 rounded-xl p-5 shadow-sm hover:border-secondary/20 transition-all flex flex-col justify-between"
+                  className="bg-white border border-outline-variant/60 rounded-xl p-5 shadow-sm hover:border-secondary/20 transition-all space-y-4"
                 >
-                  <div>
-                    <h5 className="font-sans font-bold text-sm text-slate-900 mb-3 tracking-tight">
+                  <div className="flex items-center gap-2.5 border-b border-outline-variant/40 pb-3">
+                    <span className="bg-slate-900 text-white font-mono text-[10px] font-bold h-6 w-6 rounded-full flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <h5 className="font-sans font-bold text-sm text-slate-900 tracking-tight">
                       {opp.title}
                     </h5>
-                    <div className="space-y-3.5 text-xs text-slate-600">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Recommendation</span>
-                        <p className="leading-relaxed font-sans whitespace-pre-wrap">{opp.recommendation}</p>
-                      </div>
-                      <div className="space-y-1 pt-2.5 border-t border-slate-100">
-                        <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-widest block font-bold">Why It Matters</span>
-                        <p className="leading-relaxed font-sans text-slate-800 whitespace-pre-wrap">{opp.expectedImpact}</p>
-                      </div>
-                      <div className="space-y-1 pt-2.5 border-t border-slate-100">
-                        <span className="text-[9px] font-mono text-amber-700 uppercase tracking-widest block font-bold">Why Now</span>
-                        <p className="leading-relaxed font-sans text-slate-700 font-medium whitespace-pre-wrap">{opp.whyPrioritize}</p>
-                      </div>
-                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-sans text-slate-700">
+                    {opp.whyExists || opp.howAchieved || opp.whereLook || opp.howValidate ? (
+                      <>
+                        <div className="bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-1.5 flex flex-col">
+                          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                            Why This Opportunity Exists
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px] flex-1">
+                            {opp.whyExists}
+                          </p>
+                        </div>
+                        <div className="bg-emerald-50/40 p-4 rounded-lg border border-emerald-100/60 space-y-1.5 flex flex-col">
+                          <span className="text-[10px] font-mono text-emerald-800 uppercase tracking-wider block font-bold">
+                            How This Could Be Achieved
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px] flex-1">
+                            {opp.howAchieved}
+                          </p>
+                        </div>
+                        <div className="bg-amber-50/40 p-4 rounded-lg border border-amber-100/60 space-y-1.5 flex flex-col">
+                          <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
+                            Where to Look First
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px] flex-1">
+                            {opp.whereLook}
+                          </p>
+                        </div>
+                        <div className="bg-blue-50/40 p-4 rounded-lg border border-blue-100/60 space-y-1.5 flex flex-col">
+                          <span className="text-[10px] font-mono text-blue-800 uppercase tracking-wider block font-bold">
+                            How to Validate
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px] flex-1">
+                            {opp.howValidate}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="md:col-span-2 bg-slate-50/60 p-4 rounded-lg border border-slate-100/80 space-y-1.5">
+                          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                            Recommendation
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px]">{opp.recommendation}</p>
+                        </div>
+                        <div className="bg-emerald-50/40 p-4 rounded-lg border border-emerald-100/60 space-y-1.5">
+                          <span className="text-[10px] font-mono text-emerald-800 uppercase tracking-wider block font-bold">
+                            Expected Business Impact & Growth
+                          </span>
+                          <p className="leading-relaxed text-slate-800 text-[13px]">{opp.expectedImpact}</p>
+                        </div>
+                        <div className="bg-amber-50/40 p-4 rounded-lg border border-amber-100/60 space-y-1.5">
+                          <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider block font-bold">
+                            Why Prioritize
+                          </span>
+                          <p className="leading-relaxed text-slate-700 font-medium text-[13px]">{opp.whyPrioritize}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -349,7 +545,7 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
               <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
                 <Award size={18} className="text-amber-400" />
                 <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
-                  03 - QUESTIONS WORTH INVESTIGATING
+                  03 - QUESTIONS WORTH EXPLORING
                 </h4>
               </div>
 
@@ -361,8 +557,8 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
         )}
 
         {activeTab === "focus" && hasFocus && (
-          <div className="space-y-5 animate-in fade-in slide-in-from-top-1 duration-200">
-            <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-6 shadow-sm space-y-4">
+          <div className="space-y-6 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-6 shadow-sm space-y-5">
               <div className="flex items-center gap-2 border-b border-amber-500/10 pb-3">
                 <Target size={18} className="text-amber-600" />
                 <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-amber-900 font-bold">
@@ -373,7 +569,39 @@ function StructuredBlueprintView({ parsed }: { parsed: ParsedStrategicReport }) 
               <p className="text-slate-800 font-serif italic text-base leading-relaxed whitespace-pre-wrap">
                 "{parsed.focusPoint}"
               </p>
+
+              {parsed.focusSteps && parsed.focusSteps.length > 0 && (
+                <div className="pt-4 border-t border-amber-500/10 space-y-3">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
+                    Suggested Next Steps
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {parsed.focusSteps.map((step, sIdx) => (
+                      <div key={sIdx} className="bg-white/80 p-4 rounded-lg border border-amber-200/50 flex items-start gap-3">
+                        <span className="bg-amber-100 text-amber-900 font-mono text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                          ✓
+                        </span>
+                        <p className="text-slate-800 text-xs leading-relaxed font-sans">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+
+            {parsed.alternativeInterpretation && (
+              <div className="bg-slate-900 text-white rounded-xl p-6 border border-slate-800 shadow-md space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                  <Info size={18} className="text-slate-300" />
+                  <h4 className="font-mono font-bold text-xs tracking-wider uppercase text-slate-300">
+                    05 - ALTERNATIVE INTERPRETATION
+                  </h4>
+                </div>
+                <p className="text-slate-300 font-sans text-sm leading-relaxed whitespace-pre-wrap">
+                  {parsed.alternativeInterpretation}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -549,13 +777,16 @@ The website for ${companyName} shows real potential in the ${industry || "indust
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. Broad Feature Plans
-Description: Development bandwidth is spread too thin across an extensive, unprioritized feature list. This diluted focus slows down delivery velocity, meaning core features fail to reach product-market maturity and user acquisition stalls. The root cause is the lack of a strict customer validation framework.
+* **What may be happening beneath the surface:** Development bandwidth is spread too thin across an extensive, unprioritized feature list. This diluted focus slows down delivery velocity, meaning core features fail to reach product-market maturity and user acquisition stalls.
+* **Potential ways to address it:** Establish a strict customer validation framework and a lightweight prioritization gate for new features.
 
 2. Unverified Feedback Loops
-Description: Feature additions are typically fully designed and built prior to user demand validation. This creates a high risk of wasting expensive engineering cycles on capabilities that see minimal post-launch adoption. The root cause lies in omitting rapid design-level prototyping.
+* **What may be happening beneath the surface:** Feature additions are typically fully designed and built prior to user demand validation. This creates a high risk of wasting expensive engineering cycles on capabilities that see minimal post-launch adoption.
+* **Potential ways to address it:** Integrate rapid design-level prototyping and clickable wireframes with key users before coding.
 
 3. Legacy Planning Rigidness
-Description: Product alignment remains anchored to a static roadmap rather than adapting dynamically to user signals. This reduces competitive agility, leaving you vulnerable to nimbler competitors. The root cause is traditional long-cycle project management planning.
+* **What may be happening beneath the surface:** Product alignment remains anchored to a static roadmap rather than adapting dynamically to user signals. This reduces competitive agility, leaving you vulnerable to nimbler competitors.
+* **Potential ways to address it:** Transition to outcome-focused, theme-based roadmaps rather than date-driven feature lists.
 
 ---SECTION 3: OPPORTUNITIES---
 1. Focus Core Capabilities
@@ -593,13 +824,16 @@ The website for ${companyName} showcases a really strong set of ${industry || "d
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. High-Friction Onboarding Forms
-Description: Registration requirements are excessively heavy, requiring detailed user credentials before demonstrating value. This friction degrades sign-up-to-activation conversion rate and increases immediate abandonment. The root cause is an over-reliance on legacy compliance collection instead of progressive profile building.
+* **What may be happening beneath the surface:** Registration requirements are excessively heavy, requiring detailed user credentials before demonstrating value. This friction degrades sign-up-to-activation conversion rate and increases immediate abandonment.
+* **Potential ways to address it:** Build progressive profile forms and defer administrative configurations to subsequent user sessions.
 
 2. Self-Guided First Sessions
-Description: Newly registered users are left to navigate the product with minimal structured guidance. This lack of active guidance prevents users from discovering core features during their high-intent initial session. The root cause is overestimating user intuition and omitting intuitive walkthrough triggers.
+* **What may be happening beneath the surface:** Newly registered users are left to navigate the product with minimal structured guidance. This lack of active guidance prevents users from discovering core features during their high-intent initial session.
+* **Potential ways to address it:** Deploy context-aware interactive walkthroughs and goal-oriented tooltips to guide users.
 
 3. Reactive Churn Engagement
-Description: Retention initiatives are reactive, launching only after a user initiates cancellation. Analytics show that accounts typically stop engaging weeks before canceling, which means missing early-warning signals that would allow proactive intervention. The root cause is the lack of real-time account health monitoring.
+* **What may be happening beneath the surface:** Retention initiatives are reactive, launching only after a user initiates cancellation. Analytics show that accounts typically stop engaging weeks before canceling, which means missing early-warning signals that would allow proactive intervention.
+* **Potential ways to address it:** Establish automated, real-time customer health monitoring triggers to identify declining active usage early.
 
 ---SECTION 3: OPPORTUNITIES---
 1. Streamlined Signups
@@ -637,13 +871,16 @@ The website for ${companyName} reveals a highly specialized way of delivering se
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. Disconnected Team Workflows
-Description: Separate departments utilize isolated software tracking tools with zero integration. This fragmentation degrades cross-department visibility, meaning deadlines are breached due to poor coordination. The root cause is decentralized software adoption with no single source of truth.
+* **What may be happening beneath the surface:** Separate departments utilize isolated software tracking tools with zero integration. This fragmentation degrades cross-department visibility, meaning deadlines are breached due to poor coordination.
+* **Potential ways to address it:** Implement a centralized collaborative workflow pipeline that integrates disconnected tracking software into a single master dashboard.
 
 2. Manual Data Duplication
-Description: Staff frequently spend valuable hours manually copying project details between tools. This repetitive manual input leads to administrative fatigue and a high rate of human entry errors. The root cause is the lack of standardized API connections and webhooks.
+* **What may be happening beneath the surface:** Staff frequently spend valuable hours manually copying project details between tools. This repetitive manual input leads to administrative fatigue and a high rate of human entry errors.
+* **Potential ways to address it:** Establish automated data synchronization pipelines using secure API webhooks to automate data transfer.
 
 3. Informal Transition Guidelines
-Description: Deliverable handoffs between development, sales, and operations lack standardized quality checklists. This causes frequent clarifying back-and-forth loops, unexpected rework, and unpredictable client delivery timelines. The root cause is informal workflow documentation.
+* **What may be happening beneath the surface:** Deliverable handoffs between development, sales, and operations lack standardized quality checklists. This causes frequent clarifying back-and-forth loops, unexpected rework, and unpredictable client delivery timelines.
+* **Potential ways to address it:** Design structured hand-off checklists and enforce strict completion criteria at each team transition boundary.
 
 ---SECTION 3: OPPORTUNITIES---
 1. Centralized Workflow View
@@ -682,13 +919,16 @@ The website for ${companyName} highlights a great solution in the ${industry || 
 
 ---SECTION 2: KEY SYSTEMIC GAPS---
 1. Friction-Heavy Checkout Paths
-Description: Potential customers are forced to navigate multiple pages and form inputs to complete their purchase. This prolonged checkout sequence increases cart-abandonment rate among high-intent buyers, losing vital revenue. The root cause is excess compliance validation frontloading.
+* **What may be happening beneath the surface:** Potential customers are forced to navigate multiple pages and form inputs to complete their purchase. This prolonged checkout sequence increases cart-abandonment rate among high-intent buyers, losing vital revenue.
+* **Potential ways to address it:** Re-engineer the transactional path by consolidating checkout pages and redundant billing fields into a single, high-speed purchase gateway.
 
 2. Pricing Dissonance
-Description: Plan tiers and feature limits are poorly explained, leading to buyer hesitation. Choice-fatigue triggers cause visitors to leave without completing their transaction. The root cause is a lack of clear benefit framing and simple plan comparisons.
+* **What may be happening beneath the surface:** Plan tiers and feature limits are poorly explained, leading to buyer hesitation. Choice-fatigue triggers cause visitors to leave without completing their transaction.
+* **Potential ways to address it:** Restructure the pricing page to display clear, segment-aligned tier distinctions and a transparent plan comparison matrix.
 
 3. Calendar-Based Trial Closes
-Description: Upgrade prompts are sent strictly based on fixed trial durations (e.g., 14 days) rather than active product usage. This timing mismatch misses the user's peak purchasing intent. The root cause is outdated fixed-subscription model structures.
+* **What may be happening beneath the surface:** Upgrade prompts are sent strictly based on fixed trial durations rather than active product usage. This timing mismatch misses the user's peak purchasing intent.
+* **Potential ways to address it:** Create a dynamic customer-expansion capability that triggers contextual plan upgrade prompts when a user hits a feature limit.
 
 ---SECTION 3: OPPORTUNITIES---
 1. Unified Checkout Flow
@@ -1343,60 +1583,496 @@ export default function DiagnosticWizard() {
 
       let currentPage = 1;
 
-      // Split the blueprint into individual lines
-      const lines = result.blueprint.split("\n");
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line === "") {
-          y += 3;
-          continue;
-        }
-
-        // Check if page height boundary is exceeded
-        if (y > 270) {
+      const checkPageBoundary = (neededHeight: number) => {
+        if (y + neededHeight > 270) {
           doc.addPage();
           currentPage++;
           y = 25;
           addSubsequentHeader(currentPage);
           y += 5;
         }
+      };
 
-        if (line.startsWith("---SECTION")) {
-          // A Section Header delimiter
-          const titleText = line.replace(/---SECTION \d+:\s*([^-]+)---/i, "$1").trim();
+      const drawSectionTitle = (title: string) => {
+        checkPageBoundary(15);
+        doc.setFillColor(15, 23, 42); // Primary Slate-900
+        doc.rect(margin, y - 4, contentWidth, 7, "F");
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text(title.toUpperCase(), margin + 3, y + 1);
+        y += 8.5;
+      };
+
+      const parsed = parseStrategicReport(result.blueprint);
+
+      if (parsed) {
+        // --- SECTION 1: EXECUTIVE SUMMARY ---
+        if (parsed.executiveSummary) {
+          drawSectionTitle("EXECUTIVE DIAGNOSIS & SUMMARY");
           
-          if (y > 40) {
-            y += 5;
-          }
-
-          if (y > 260) {
-            doc.addPage();
-            currentPage++;
-            y = 25;
-            addSubsequentHeader(currentPage);
-            y += 5;
-          }
-
-          // Draw a solid rectangle banner in primary slate for SECTION headers
-          doc.setFillColor(15, 23, 42);
-          doc.rect(margin, y - 4, contentWidth, 6.5, "F");
-
-          doc.setFont("Helvetica", "bold");
+          doc.setFont("Helvetica", "normal");
           doc.setFontSize(9);
-          doc.setTextColor(255, 255, 255); // White text inside banner
-          doc.text(titleText, margin + 3, y + 0.5);
-          y += 8.5;
-        } else if (line.startsWith("###") || line.startsWith("##") || line.match(/^\d+\./)) {
-          // A Section Header
-          const titleText = line.replace(/###|##/g, "").trim();
+          doc.setTextColor(51, 65, 85); // Slate-700
           
-          // Let's add extra space before headers if not at the very top
-          if (y > 40) {
+          const wrappedSummary = doc.splitTextToSize(parsed.executiveSummary, contentWidth);
+          checkPageBoundary(wrappedSummary.length * 4.2 + 5);
+          for (let j = 0; j < wrappedSummary.length; j++) {
+            checkPageBoundary(4.5);
+            doc.text(wrappedSummary[j], margin, y);
+            y += 4.5;
+          }
+          y += 6; // spacing
+        }
+
+        // --- SECTION 2: KEY SYSTEMIC GAPS ---
+        if (parsed.bottlenecks && parsed.bottlenecks.length > 0) {
+          drawSectionTitle("01 - KEY SYSTEMIC GAPS");
+          
+          parsed.bottlenecks.forEach((bottleneck, idx) => {
+            checkPageBoundary(12);
+            // Draw Gap Title
+            doc.setFillColor(15, 23, 42);
+            doc.rect(margin, y - 3, 2, 4, "F");
+            
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(9.5);
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${idx + 1}. ${bottleneck.title}`, margin + 4, y);
+            y += 7;
+
+            // Now draw Beneath Surface and Potential Interventions side-by-side or Diagnosis and Where to Investigate
+            const hasSideBySide = !!(bottleneck.beneathSurface || bottleneck.potentialWays);
+            if (hasSideBySide) {
+              const colWidth = (contentWidth - 6) / 2; // ~82mm
+              const padding = 4;
+              const textWidth = colWidth - (padding * 2); // ~74mm
+
+              const wrappedBeneath = doc.splitTextToSize(bottleneck.beneathSurface || "N/A", textWidth);
+              const wrappedPotential = doc.splitTextToSize(bottleneck.potentialWays || "N/A", textWidth);
+
+              const beneathHeight = 6 + (wrappedBeneath.length * 4) + 4;
+              const potentialHeight = 6 + (wrappedPotential.length * 4) + 4;
+              const boxHeight = Math.max(beneathHeight, potentialHeight, 18);
+
+              checkPageBoundary(boxHeight + 6);
+
+              // Draw Beneath Surface Box (Left)
+              doc.setFillColor(254, 242, 242); // Rose-50
+              doc.setDrawColor(254, 226, 226); // Rose-100
+              doc.setLineWidth(0.3);
+              doc.rect(margin, y, colWidth, boxHeight, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(153, 27, 27); // Rose-800
+              doc.text("BENEATH THE SURFACE (SYSTEMIC CAUSE)", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59); // Slate-800
+              for (let j = 0; j < wrappedBeneath.length; j++) {
+                doc.text(wrappedBeneath[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              // Draw Potential Interventions Box (Right)
+              doc.setFillColor(240, 253, 244); // Green-50
+              doc.setDrawColor(209, 250, 229); // Green-100
+              doc.rect(margin + colWidth + 6, y, colWidth, boxHeight, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(6, 95, 70); // Green-800
+              doc.text("POTENTIAL INTERVENTIONS", margin + colWidth + 6 + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59); // Slate-800
+              for (let j = 0; j < wrappedPotential.length; j++) {
+                doc.text(wrappedPotential[j], margin + colWidth + 6 + padding, y + 10 + (j * 4));
+              }
+
+              y += boxHeight + 6;
+            } else {
+              // Older format: Diagnosis and Where Leadership Should Investigate
+              const colWidth = (contentWidth - 6) / 2;
+              const padding = 4;
+              const textWidth = colWidth - (padding * 2);
+
+              const wrappedDiagnosis = doc.splitTextToSize(bottleneck.diagnosis || "N/A", textWidth);
+              const wrappedInvestigate = doc.splitTextToSize(bottleneck.whereToInvestigate || "N/A", textWidth);
+
+              const diagnosisHeight = 6 + (wrappedDiagnosis.length * 4) + 4;
+              const investigateHeight = 6 + (wrappedInvestigate.length * 4) + 4;
+              const boxHeight = Math.max(diagnosisHeight, investigateHeight, 18);
+
+              checkPageBoundary(boxHeight + 6);
+
+              // Left Box
+              doc.setFillColor(248, 250, 252); // Slate-50
+              doc.setDrawColor(226, 232, 240); // Slate-100
+              doc.setLineWidth(0.3);
+              doc.rect(margin, y, colWidth, boxHeight, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(71, 85, 105); // Slate-600
+              doc.text("DIAGNOSIS", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedDiagnosis.length; j++) {
+                doc.text(wrappedDiagnosis[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              // Right Box
+              doc.setFillColor(254, 243, 199); // Amber-50
+              doc.setDrawColor(253, 230, 138); // Amber-100
+              doc.rect(margin + colWidth + 6, y, colWidth, boxHeight, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(146, 64, 14); // Amber-800
+              doc.text("WHERE LEADERSHIP SHOULD INVESTIGATE", margin + colWidth + 6 + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedInvestigate.length; j++) {
+                doc.text(wrappedInvestigate[j], margin + colWidth + 6 + padding, y + 10 + (j * 4));
+              }
+
+              y += boxHeight + 6;
+            }
+          });
+          y += 3;
+        }
+
+        // --- SECTION 3: STRATEGIC OPPORTUNITIES ---
+        if (parsed.opportunities && parsed.opportunities.length > 0) {
+          drawSectionTitle("02 - STRATEGIC OPPORTUNITIES");
+
+          parsed.opportunities.forEach((opp, idx) => {
+            checkPageBoundary(12);
+            doc.setFillColor(15, 23, 42);
+            doc.rect(margin, y - 3, 2, 4, "F");
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(9.5);
+            doc.setTextColor(15, 23, 42);
+            doc.text(`${idx + 1}. ${opp.title}`, margin + 4, y);
+            y += 7;
+
+            const hasGrid = !!(opp.whyExists || opp.howAchieved || opp.whereLook || opp.howValidate);
+            if (hasGrid) {
+              const colWidth = (contentWidth - 6) / 2; // ~82mm
+              const padding = 4;
+              const textWidth = colWidth - (padding * 2); // ~74mm
+
+              const wrappedExists = doc.splitTextToSize(opp.whyExists || "N/A", textWidth);
+              const wrappedAchieved = doc.splitTextToSize(opp.howAchieved || "N/A", textWidth);
+              const wrappedLook = doc.splitTextToSize(opp.whereLook || "N/A", textWidth);
+              const wrappedValidate = doc.splitTextToSize(opp.howValidate || "N/A", textWidth);
+
+              // Row 1 box height
+              const existsHeight = 6 + (wrappedExists.length * 4) + 4;
+              const achievedHeight = 6 + (wrappedAchieved.length * 4) + 4;
+              const row1Height = Math.max(existsHeight, achievedHeight, 18);
+
+              // Row 2 box height
+              const lookHeight = 6 + (wrappedLook.length * 4) + 4;
+              const validateHeight = 6 + (wrappedValidate.length * 4) + 4;
+              const row2Height = Math.max(lookHeight, validateHeight, 18);
+
+              // Draw Row 1
+              checkPageBoundary(row1Height + 4);
+
+              // 1. Why Exists (Slate-50)
+              doc.setFillColor(248, 250, 252);
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.3);
+              doc.rect(margin, y, colWidth, row1Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(71, 85, 105);
+              doc.text("WHY THIS OPPORTUNITY EXISTS", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedExists.length; j++) {
+                doc.text(wrappedExists[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              // 2. How Achieved (Green-50)
+              doc.setFillColor(240, 253, 244);
+              doc.setDrawColor(209, 250, 229);
+              doc.rect(margin + colWidth + 6, y, colWidth, row1Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(6, 95, 70);
+              doc.text("HOW THIS COULD BE ACHIEVED", margin + colWidth + 6 + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedAchieved.length; j++) {
+                doc.text(wrappedAchieved[j], margin + colWidth + 6 + padding, y + 10 + (j * 4));
+              }
+
+              y += row1Height + 4;
+
+              // Draw Row 2
+              checkPageBoundary(row2Height + 6);
+
+              // 3. Where Look (Amber-50)
+              doc.setFillColor(254, 243, 199);
+              doc.setDrawColor(253, 230, 138);
+              doc.rect(margin, y, colWidth, row2Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(146, 64, 14);
+              doc.text("WHERE TO LOOK FIRST", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedLook.length; j++) {
+                doc.text(wrappedLook[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              // 4. How Validate (Blue-50)
+              doc.setFillColor(239, 246, 255);
+              doc.setDrawColor(191, 219, 254);
+              doc.rect(margin + colWidth + 6, y, colWidth, row2Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(29, 78, 216);
+              doc.text("HOW TO VALIDATE", margin + colWidth + 6 + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedValidate.length; j++) {
+                doc.text(wrappedValidate[j], margin + colWidth + 6 + padding, y + 10 + (j * 4));
+              }
+
+              y += row2Height + 6;
+            } else {
+              // Older format: Recommendation, Expected Impact, Why Prioritize
+              const colWidth = (contentWidth - 6) / 2;
+              const padding = 4;
+              const textWidth = colWidth - (padding * 2);
+
+              const wrappedRec = doc.splitTextToSize(opp.recommendation || "N/A", textWidth);
+              const wrappedImpact = doc.splitTextToSize(opp.expectedImpact || "N/A", textWidth);
+              const wrappedPrioritize = doc.splitTextToSize(opp.whyPrioritize || "N/A", textWidth);
+
+              const recHeight = 6 + (wrappedRec.length * 4) + 4;
+              const impactHeight = 6 + (wrappedImpact.length * 4) + 4;
+              const row1Height = Math.max(recHeight, impactHeight, 18);
+              
+              const row2Height = 6 + (wrappedPrioritize.length * 4) + 4;
+
+              checkPageBoundary(row1Height + row2Height + 10);
+
+              // 1. Recommendation (Slate-50)
+              doc.setFillColor(248, 250, 252);
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.3);
+              doc.rect(margin, y, colWidth, row1Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(71, 85, 105);
+              doc.text("RECOMMENDATION", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedRec.length; j++) {
+                doc.text(wrappedRec[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              // 2. Expected Impact (Green-50)
+              doc.setFillColor(240, 253, 244);
+              doc.setDrawColor(209, 250, 229);
+              doc.rect(margin + colWidth + 6, y, colWidth, row1Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(6, 95, 70);
+              doc.text("EXPECTED BUSINESS IMPACT & GROWTH", margin + colWidth + 6 + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedImpact.length; j++) {
+                doc.text(wrappedImpact[j], margin + colWidth + 6 + padding, y + 10 + (j * 4));
+              }
+
+              y += row1Height + 4;
+
+              // 3. Why Prioritize (Amber-50, Full Width)
+              doc.setFillColor(254, 243, 199);
+              doc.setDrawColor(253, 230, 138);
+              doc.rect(margin, y, contentWidth, row2Height, "FD");
+
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7.5);
+              doc.setTextColor(146, 64, 14);
+              doc.text("WHY PRIORITIZE", margin + padding, y + 5);
+
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedPrioritize.length; j++) {
+                doc.text(wrappedPrioritize[j], margin + padding, y + 10 + (j * 4));
+              }
+
+              y += row2Height + 6;
+            }
+          });
+          y += 3;
+        }
+
+        // --- SECTION 4: QUESTIONS WORTH EXPLORING ---
+        if (parsed.questions) {
+          drawSectionTitle("03 - QUESTIONS WORTH EXPLORING");
+
+          const padding = 6;
+          const textWidth = contentWidth - (padding * 2);
+          const wrappedQuestions = doc.splitTextToSize(parsed.questions, textWidth);
+          const boxHeight = (wrappedQuestions.length * 4.2) + (padding * 2);
+
+          checkPageBoundary(boxHeight + 6);
+
+          // Slate-900 background block
+          doc.setFillColor(15, 23, 42); // slate-900
+          doc.rect(margin, y, contentWidth, boxHeight, "F");
+
+          doc.setFont("Helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(241, 245, 249); // light text
+          for (let j = 0; j < wrappedQuestions.length; j++) {
+            doc.text(wrappedQuestions[j], margin + padding, y + padding + 3 + (j * 4.2));
+          }
+
+          y += boxHeight + 6;
+        }
+
+        // --- SECTION 5: WHERE TO FOCUS NEXT ---
+        if (parsed.focusPoint) {
+          drawSectionTitle("04 - WHERE TO FOCUS NEXT");
+
+          const padding = 6;
+          const textWidth = contentWidth - (padding * 2);
+
+          // 1. Draw Focus Point Description
+          const wrappedFocus = doc.splitTextToSize(parsed.focusPoint, textWidth);
+          const contentHeight = (wrappedFocus.length * 4.2) + 10;
+
+          checkPageBoundary(contentHeight + 10);
+
+          doc.setFillColor(254, 252, 232); // Amber-50 / Yellow-50
+          doc.setDrawColor(253, 242, 196); // Yellow-100
+          doc.setLineWidth(0.3);
+          doc.rect(margin, y, contentWidth, contentHeight, "FD");
+
+          doc.setFont("Helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(30, 41, 59); // Slate-800
+          for (let j = 0; j < wrappedFocus.length; j++) {
+            doc.text(wrappedFocus[j], margin + padding, y + padding + 2 + (j * 4.2));
+          }
+
+          y += contentHeight + 6;
+
+          // 2. Draw focus steps (if any)
+          if (parsed.focusSteps && parsed.focusSteps.length > 0) {
+            checkPageBoundary(15);
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(7.5);
+            doc.setTextColor(146, 64, 14); // Amber-800
+            doc.text("SUGGESTED NEXT STEPS", margin, y);
+            y += 5;
+
+            parsed.focusSteps.forEach((step, idx) => {
+              const wrappedStep = doc.splitTextToSize(step, contentWidth - 12);
+              const stepHeight = (wrappedStep.length * 4) + 6;
+
+              checkPageBoundary(stepHeight + 2);
+
+              doc.setFillColor(255, 255, 255);
+              doc.setDrawColor(253, 242, 196);
+              doc.rect(margin, y, contentWidth, stepHeight, "FD");
+
+              // Number circle/square
+              doc.setFillColor(254, 243, 199);
+              doc.rect(margin + 3, y + 2.5, 4, 4, "F");
+              doc.setFont("Helvetica", "bold");
+              doc.setFontSize(7);
+              doc.setTextColor(146, 64, 14);
+              doc.text(`${idx + 1}`, margin + 4.5, y + 5.5);
+
+              // Step text
+              doc.setFont("Helvetica", "normal");
+              doc.setFontSize(8.5);
+              doc.setTextColor(30, 41, 59);
+              for (let j = 0; j < wrappedStep.length; j++) {
+                doc.text(wrappedStep[j], margin + 9, y + 5.5 + (j * 4));
+              }
+
+              y += stepHeight + 2;
+            });
             y += 4;
           }
 
-          if (y > 265) {
+          // 3. Alternative Interpretation (if any)
+          if (parsed.alternativeInterpretation) {
+            const wrappedAlt = doc.splitTextToSize(parsed.alternativeInterpretation, textWidth);
+            const altHeight = (wrappedAlt.length * 4) + 10;
+
+            checkPageBoundary(altHeight + 6);
+
+            doc.setFillColor(254, 252, 232); // Amber-50
+            doc.setDrawColor(253, 242, 196);
+            doc.rect(margin, y, contentWidth, altHeight, "FD");
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(7.5);
+            doc.setTextColor(146, 64, 14);
+            doc.text("ALTERNATIVE STRATEGIC VIEW", margin + padding, y + 5);
+
+            doc.setFont("Helvetica", "italic");
+            doc.setFontSize(8.5);
+            doc.setTextColor(71, 85, 105); // Slate-600
+            for (let j = 0; j < wrappedAlt.length; j++) {
+              doc.text(wrappedAlt[j], margin + padding, y + 10 + (j * 4));
+            }
+
+            y += altHeight + 6;
+          }
+        }
+      } else {
+        // Fallback to original line-by-line parsing if parsed is null
+        const lines = result.blueprint.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line === "") {
+            y += 3;
+            continue;
+          }
+
+          // Check if page height boundary is exceeded
+          if (y > 270) {
             doc.addPage();
             currentPage++;
             y = 25;
@@ -1404,61 +2080,104 @@ export default function DiagnosticWizard() {
             y += 5;
           }
 
-          // Draw small solid rectangle in primary slate for headings
-          doc.setFillColor(15, 23, 42);
-          doc.rect(margin, y - 3, 2, 4, "F");
+          if (line.startsWith("---SECTION")) {
+            // A Section Header delimiter
+            const titleText = line.replace(/---SECTION \d+:\s*([^-]+)---/i, "$1").trim();
+            
+            if (y > 40) {
+              y += 5;
+            }
 
-          doc.setFont("Helvetica", "bold");
-          doc.setFontSize(10);
-          doc.setTextColor(15, 23, 42);
-          doc.text(titleText, margin + 4, y);
-          y += 6;
-
-        } else if (line.startsWith("-") || line.startsWith("*")) {
-          // A List Item
-          const rawItem = line.substring(1).trim();
-          doc.setFont("Helvetica", "normal");
-          doc.setFontSize(8.5);
-          doc.setTextColor(51, 65, 85);
-
-          // Split the text to size so list item can wrap cleanly
-          const wrappedItem = doc.splitTextToSize(rawItem, contentWidth - 8);
-          
-          // Draw small neat slate bullet
-          doc.setFillColor(71, 85, 105);
-          doc.circle(margin + 2, y - 1, 0.8, "F");
-
-          // Render wrapped bullet item lines
-          for (let j = 0; j < wrappedItem.length; j++) {
-            if (y > 270) {
+            if (y > 260) {
               doc.addPage();
               currentPage++;
               y = 25;
               addSubsequentHeader(currentPage);
               y += 5;
             }
-            doc.text(wrappedItem[j], margin + 6, y);
-            y += 4.5;
-          }
-        } else {
-          // Generic paragraph text
-          doc.setFont("Helvetica", "normal");
-          doc.setFontSize(8.5);
-          doc.setTextColor(51, 65, 85);
 
-          const wrappedPara = doc.splitTextToSize(line, contentWidth);
-          for (let j = 0; j < wrappedPara.length; j++) {
-            if (y > 270) {
+            // Draw a solid rectangle banner in primary slate for SECTION headers
+            doc.setFillColor(15, 23, 42);
+            doc.rect(margin, y - 4, contentWidth, 6.5, "F");
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(255, 255, 255); // White text inside banner
+            doc.text(titleText, margin + 3, y + 0.5);
+            y += 8.5;
+          } else if (line.startsWith("###") || line.startsWith("##") || line.match(/^\d+\./)) {
+            // A Section Header
+            const titleText = line.replace(/###|##/g, "").trim();
+            
+            // Let's add extra space before headers if not at the very top
+            if (y > 40) {
+              y += 4;
+            }
+
+            if (y > 265) {
               doc.addPage();
               currentPage++;
               y = 25;
               addSubsequentHeader(currentPage);
               y += 5;
             }
-            doc.text(wrappedPara[j], margin, y);
-            y += 4.5;
+
+            // Draw small solid rectangle in primary slate for headings
+            doc.setFillColor(15, 23, 42);
+            doc.rect(margin, y - 3, 2, 4, "F");
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(15, 23, 42);
+            doc.text(titleText, margin + 4, y);
+            y += 6;
+
+          } else if (line.startsWith("-") || line.startsWith("*")) {
+            // A List Item
+            const rawItem = line.substring(1).trim();
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(8.5);
+            doc.setTextColor(51, 65, 85);
+
+            // Split the text to size so list item can wrap cleanly
+            const wrappedItem = doc.splitTextToSize(rawItem, contentWidth - 8);
+            
+            // Draw small neat slate bullet
+            doc.setFillColor(71, 85, 105);
+            doc.circle(margin + 2, y - 1, 0.8, "F");
+
+            // Render wrapped bullet item lines
+            for (let j = 0; j < wrappedItem.length; j++) {
+              if (y > 270) {
+                doc.addPage();
+                currentPage++;
+                y = 25;
+                addSubsequentHeader(currentPage);
+                y += 5;
+              }
+              doc.text(wrappedItem[j], margin + 6, y);
+              y += 4.5;
+            }
+          } else {
+            // Generic paragraph text
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(8.5);
+            doc.setTextColor(51, 65, 85);
+
+            const wrappedPara = doc.splitTextToSize(line, contentWidth);
+            for (let j = 0; j < wrappedPara.length; j++) {
+              if (y > 270) {
+                doc.addPage();
+                currentPage++;
+                y = 25;
+                addSubsequentHeader(currentPage);
+                y += 5;
+              }
+              doc.text(wrappedPara[j], margin, y);
+              y += 4.5;
+            }
+            y += 1.5;
           }
-          y += 1.5;
         }
       }
 
