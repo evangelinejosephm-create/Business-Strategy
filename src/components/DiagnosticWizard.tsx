@@ -1049,6 +1049,83 @@ export default function DiagnosticWizard() {
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
   const [sendingFeedback, setSendingFeedback] = useState(false);
 
+  const [isDetectingIndustry, setIsDetectingIndustry] = useState(false);
+  const [lastProcessedWebsite, setLastProcessedWebsite] = useState("");
+
+  const detectIndustryFromWebsite = async (websiteUrl: string) => {
+    if (!websiteUrl || websiteUrl.trim().length < 3) return;
+    
+    const clean = websiteUrl.trim().replace(/^(https?:\/\/)?(www\.)?/, "");
+    const simpleRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,18}(\/.*)?$/;
+    if (!simpleRegex.test(clean)) {
+      setError("Please enter a valid company website (e.g. company.com)");
+      setIndustry("");
+      return;
+    }
+
+    setIsDetectingIndustry(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/detect-industry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ website: websiteUrl.trim() }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.industry) {
+          if (data.industry === "INVALID_WEBSITE") {
+            setError("Invalid company website. This domain could not be found or verified on the internet. Please enter a valid, active company website.");
+            setIndustry("");
+          } else {
+            setIndustry(data.industry);
+            setError(null);
+          }
+        } else {
+          setError("Could not auto-detect industry for this website.");
+          setIndustry("");
+        }
+      } else {
+        setError("Could not verify company website. Please check your network or enter a valid website.");
+        setIndustry("");
+      }
+    } catch (err) {
+      console.error("Error auto-filling industry:", err);
+      setError("Connection error verifying company website.");
+      setIndustry("");
+    } finally {
+      setIsDetectingIndustry(false);
+    }
+  };
+
+  // Automatically trigger industry detection once website looks valid
+  useEffect(() => {
+    const trimmed = companyName.trim();
+    if (!trimmed) {
+      setLastProcessedWebsite("");
+      return;
+    }
+
+    const clean = trimmed.replace(/^(https?:\/\/)?(www\.)?/, "");
+    // Check if the domain has at least a dot and a valid-looking TLD
+    const simpleRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,18}(\/.*)?$/;
+    if (!simpleRegex.test(clean)) {
+      // Still typing, don't trigger yet, but don't clear industry yet unless it was already invalid
+      return;
+    }
+
+    if (trimmed === lastProcessedWebsite) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLastProcessedWebsite(trimmed);
+      detectIndustryFromWebsite(trimmed);
+    }, 700); // 700ms debounce
+
+    return () => clearTimeout(timer);
+  }, [companyName, lastProcessedWebsite]);
+
   // Gmail integration states
   const [gmailToken, setGmailToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -2265,6 +2342,14 @@ ${result.blueprint}`;
       setError("Company Website is required to bind parameters.");
       return;
     }
+    if (isDetectingIndustry) {
+      setError("Please wait while we auto-detect the industry from your company website.");
+      return;
+    }
+    if (!industry || industry.trim() === "" || industry === "INVALID_WEBSITE") {
+      setError("Please enter a valid, active company website to auto-fill the industry before running diagnostic.");
+      return;
+    }
     if (!emailAddress.trim()) {
       setError("Email Address is required to finalize system diagnostic.");
       return;
@@ -2370,58 +2455,36 @@ ${result.blueprint}`;
               </div>
             </div>
 
-            {/* Market Vertical & Ecosystem Phase */}
+            {/* Industry & Ecosystem Phase */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Market Vertical */}
-              <div>
-                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest mb-2.5">
-                  Market Vertical
-                </label>
-                {isOtherIndustry ? (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Type your industry..."
-                      value={industry}
-                      onChange={(e) => setIndustry(e.target.value)}
-                      className="w-full pl-4 pr-16 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg transition-all duration-150"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsOtherIndustry(false);
-                        setIndustry(INDUSTRY_OPTIONS[0]);
-                      }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-amber-600 hover:text-slate-900 transition-colors uppercase tracking-widest font-bold cursor-pointer"
-                    >
-                      Reset
-                    </button>
+              {/* Industry */}
+              <div className="group relative">
+                <div className="flex items-center justify-between mb-2.5">
+                  <label className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
+                    <span>Industry</span>
+                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/60 text-[9px] font-sans font-medium text-slate-500 lowercase tracking-normal normal-case">
+                      <Sparkles size={10} className="text-amber-500" />
+                      auto-detected
+                    </span>
+                  </label>
+                  {isDetectingIndustry && (
+                    <span className="text-[10px] text-amber-600 font-mono animate-pulse">
+                      Analyzing...
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    placeholder="Auto-filled from website..."
+                    value={industry}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-200 bg-slate-50/70 text-sm text-slate-700 font-sans font-medium rounded-lg focus:outline-none cursor-not-allowed transition-all duration-150 shadow-inner"
+                  />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Sparkles size={14} className="text-slate-400" />
                   </div>
-                ) : (
-                  <div className="relative">
-                    <select
-                      value={industry}
-                      onChange={(e) => {
-                        if (e.target.value === "Other") {
-                          setIsOtherIndustry(true);
-                          setIndustry("");
-                        } else {
-                          setIndustry(e.target.value);
-                        }
-                      }}
-                      className="w-full pl-4 pr-10 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg appearance-none transition-all cursor-pointer"
-                    >
-                      {INDUSTRY_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                      <option value="Other">Other</option>
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                      <ChevronDown size={16} />
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
               {/* Ecosystem Phase */}

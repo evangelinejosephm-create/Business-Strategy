@@ -391,6 +391,144 @@ One immediate focus area is to streamline the transaction path by turning the ch
 The request appears to focus on increasing marketing budget to drive more top-of-funnel traffic. However, if the lower-funnel conversion and checkout experiences are highly inefficient, driving more traffic will simply waste advertising spend. The higher-leverage investment is likely stabilizing the conversion path first to maximize the value of existing traffic before scaling acquisition. This interpretation would change where marketing capital is allocated.`;
 }
 
+// Helper to fetch website metadata with timeout for industry detection
+async function fetchWebsiteMetadata(urlStr: string): Promise<{ title: string; description: string; textSnippet: string } | null> {
+  let targetUrl = urlStr.trim();
+  if (!targetUrl) return null;
+  
+  // Clean URL if it's just words
+  if (!targetUrl.includes(".")) {
+    return null;
+  }
+
+  if (!/^https?:\/\//i.test(targetUrl)) {
+    targetUrl = "https://" + targetUrl;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5 seconds timeout
+
+    const res = await fetch(targetUrl, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      }
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const html = await res.text();
+    
+    // Extract title
+    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const title = titleMatch ? titleMatch[1].trim() : "";
+
+    // Extract meta description
+    const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([\s\S]*?)["']/i) || 
+                      html.match(/<meta[^>]+content=["']([\s\S]*?)["'][^>]+name=["']description["']/i);
+    const description = descMatch ? descMatch[1].trim() : "";
+
+    // Extract some visible body text or tags (headings, paragraphs) to understand product
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    let bodyText = bodyMatch ? bodyMatch[1] : html;
+    
+    // Simple regex to strip HTML tags and scripts
+    bodyText = bodyText
+      .replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "")
+      .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const textSnippet = bodyText.substring(0, 1500);
+
+    return { title, description, textSnippet };
+  } catch (err: any) {
+    console.log(`[Info] Fetching webpage ${targetUrl} skipped, timed out, or restricted. Falling back to LLM domain lookup.`);
+    return null;
+  }
+}
+
+// REST Endpoint: Detect Industry from Company Website
+app.post("/api/detect-industry", async (req, res) => {
+  try {
+    const { website } = req.body;
+    if (!website) {
+      return res.status(400).json({ error: "Website is required." });
+    }
+
+    const cleanWeb = website.replace(/^(https?:\/\/)?(www\.)?/, "").toLowerCase();
+
+    // Standard fallback mapping
+    let fallbackIndustry = "Other";
+    if (cleanWeb.includes("shop") || cleanWeb.includes("store") || cleanWeb.includes("cart") || cleanWeb.includes("ecommerce") || cleanWeb.includes("amazon") || cleanWeb.includes("shopify")) {
+      fallbackIndustry = "E-commerce";
+    } else if (cleanWeb.includes("saas") || cleanWeb.includes("app") || cleanWeb.includes("software") || cleanWeb.includes("crm") || cleanWeb.includes("api") || cleanWeb.includes("platform")) {
+      fallbackIndustry = "B2B SaaS";
+    } else if (cleanWeb.includes("edu") || cleanWeb.includes("school") || cleanWeb.includes("university") || cleanWeb.includes("learn") || cleanWeb.includes("course") || cleanWeb.includes("academy")) {
+      fallbackIndustry = "Education";
+    } else if (cleanWeb.includes("energy") || cleanWeb.includes("solar") || cleanWeb.includes("power") || cleanWeb.includes("grid") || cleanWeb.includes("fuel") || cleanWeb.includes("climate")) {
+      fallbackIndustry = "Energy";
+    } else if (cleanWeb.includes("health") || cleanWeb.includes("clinic") || cleanWeb.includes("med") || cleanWeb.includes("care") || cleanWeb.includes("doctor") || cleanWeb.includes("hospital")) {
+      fallbackIndustry = "Healthcare";
+    } else if (cleanWeb.includes("logistics") || cleanWeb.includes("ship") || cleanWeb.includes("delivery") || cleanWeb.includes("cargo") || cleanWeb.includes("freight") || cleanWeb.includes("fleet")) {
+      fallbackIndustry = "Logistics";
+    }
+
+    const ai = getAi();
+    if (!ai) {
+      return res.json({ industry: fallbackIndustry });
+    }
+
+    // Attempt to fetch website metadata for rich real-time context
+    const metadata = await fetchWebsiteMetadata(website);
+    let fetchedContext = "";
+    if (metadata) {
+      fetchedContext = `
+Below is the actual metadata retrieved from fetching the website "${website}":
+- Page Title: "${metadata.title}"
+- Description: "${metadata.description}"
+- Text Snippet: "${metadata.textSnippet}"
+`;
+    }
+
+    const prompt = `You are a professional business strategist and market analyst.
+Your task is to analyze the company website URL or name: "${website}".${fetchedContext}
+
+Based on this URL/name, any fetched website content, and your general knowledge of public signals/data about this domain name or company, determine the most accurate industry/market vertical.
+
+CRITICAL: If the website is completely invalid, a fake/dummy domain (e.g., 'example.com', 'test.com', 'xyz.abc'), typed gibberish (e.g., 'asdfasdf.com'), or cannot be found/does not exist anywhere on the public internet, respond with exactly "INVALID_WEBSITE" and absolutely nothing else.
+
+Otherwise, provide a clean, elegant, standard industry/market vertical name (usually 1-3 words, capitalized cleanly, e.g. "B2B SaaS" or "Financial Services" or "Renewable Energy" or "Digital Agency").
+Do NOT write any explanation, markdown formatting, bullet points, introductory text, or punctuation. Output ONLY the raw industry name or "INVALID_WEBSITE".`;
+
+    try {
+      const text = await generateContentWithRetry({
+        contents: prompt,
+        config: {
+          systemInstruction: "You are a precise business categorizer. Output only the plain text industry name.",
+          temperature: 0.1
+        }
+      });
+      const detected = text.trim().replace(/[*`_]/g, "");
+      if (detected) {
+        return res.json({ industry: detected });
+      }
+    } catch (apiError) {
+      console.error("[GEMINI DETECT INDUSTRY ERROR] Failed:", apiError);
+    }
+
+    return res.json({ industry: fallbackIndustry });
+  } catch (error: any) {
+    console.error("[DETECT INDUSTRY ROUTE ERROR]:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // REST Endpoint: Diagnose Bottlenecks / Striction Audit
 app.post("/api/audit", async (req, res) => {
   try {
