@@ -5,6 +5,7 @@ import { Loader2, ArrowUpRight, AlertCircle, Info, FileText, ChevronDown, Copy, 
 import { jsPDF } from "jspdf";
 import SuccessConfetti from "./SuccessConfetti";
 import { googleSignIn, logout, initAuth } from "../lib/firebase";
+import { motion, AnimatePresence } from "motion/react";
 
 interface ParsedStrategicReport {
   executiveSummary: string;
@@ -1137,6 +1138,302 @@ export default function DiagnosticWizard() {
   const [emailStatus, setEmailStatus] = useState<"idle" | "success" | "error">("idle");
   const [emailErrorMsg, setEmailErrorMsg] = useState("");
 
+  // Northbound Coaching System States
+  const [coachingStep, setCoachingStep] = useState<"obstacle" | "who" | "success" | "done" | null>(null);
+  const [coachingAnswers, setCoachingAnswers] = useState({
+    obstacle: "",
+    who: "",
+    success: ""
+  });
+  const [coachingInlineInput, setCoachingInlineInput] = useState("");
+
+  const countSentences = (text: string): number => {
+    if (!text) return 0;
+    const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 5);
+    return sentences.length;
+  };
+
+  const getInteractiveCoachingStep = (
+    text: string,
+    step: "obstacle" | "who" | "success" | "done"
+  ) => {
+    const rawText = text.trim();
+    const lower = rawText.toLowerCase();
+
+    // Determine specific sub-niches based on keywords in what they've typed so far
+    const isEnterprise = lower.includes("enterprise") || lower.includes("b2b") || lower.includes("corp") || lower.includes("deal") || lower.includes("sales cycle");
+    const isSaaS = lower.includes("saas") || lower.includes("software") || lower.includes("app") || lower.includes("subscription") || lower.includes("platform");
+    const isEcommerce = lower.includes("ecom") || lower.includes("shop") || lower.includes("store") || lower.includes("retail") || lower.includes("commerce") || lower.includes("product");
+    const isMarketing = lower.includes("market") || lower.includes("lead") || lower.includes("traffic") || lower.includes("ad") || lower.includes("campaign") || lower.includes("customer");
+    const isFriction = lower.includes("slow") || lower.includes("friction") || lower.includes("drop") || lower.includes("churn") || lower.includes("difficult") || lower.includes("manual");
+
+    // Extract a brief topic to personalize the question
+    let userTopic = "";
+    if (rawText.length > 0 && rawText.length < 50) {
+      userTopic = rawText
+        .replace(/Our goal is to/i, "")
+        .replace(/We want to/i, "")
+        .replace(/I want to/i, "")
+        .trim();
+      if (userTopic.endsWith(".")) {
+        userTopic = userTopic.slice(0, -1);
+      }
+    }
+
+    // Determine primary goal context based on selected bottleneck (Business Goal)
+    const goalContext = bottleneck || "Revenue Growth";
+
+    if (step === "obstacle") {
+      if (goalContext === "Revenue Growth") {
+        const questionText = userTopic 
+          ? `To build a thoughtful strategy around "${userTopic}", what is the single hardest truth about your sales or customer acquisition funnel today?`
+          : `To drive Revenue Growth for ${companyName || "your business"} in the ${industry} space, what is the single hardest truth about your current acquisition funnel?`;
+        
+        return {
+          question: questionText,
+          options: isEnterprise 
+            ? [
+                { label: "Our enterprise sales cycles are too long and deals stall in complex decision-making", textToAppend: "Our primary bottleneck is that our enterprise sales cycles are too long and deals stall in decision-making." },
+                { label: "We lack a repeatable, high-intent outbound prospecting engine targeting enterprise executives", textToAppend: "Our primary bottleneck is that we lack a repeatable, high-intent outbound prospecting engine targeting key executives." },
+                { label: "Our pricing structure is overly complex and requires custom approvals", textToAppend: "Our primary bottleneck is that our enterprise pricing structure is too complex and requires custom approvals." }
+              ]
+            : isEcommerce || isSaaS || isMarketing
+            ? [
+                { label: "Low self-serve conversion—users drop off during trial/checkout", textToAppend: "Our primary bottleneck is that self-serve signups drop off before completing their first trial task or checkout." },
+                { label: "High customer acquisition cost (CAC) makes paid marketing channels unsustainable", textToAppend: "Our primary bottleneck is that high customer acquisition cost (CAC) makes paid marketing channels unprofitable." },
+                { label: "Website traffic is not translating into high-intent leads", textToAppend: "Our primary bottleneck is a low conversion rate of website traffic into qualified high-intent leads." }
+              ]
+            : [
+                { label: "Our customer acquisition processes are highly manual and do not scale", textToAppend: "Our primary bottleneck is that our customer acquisition is highly manual and cannot scale with our current team." },
+                { label: "We lack consistent, predictable inbound lead volume", textToAppend: "Our primary bottleneck is a lack of consistent, predictable inbound lead volume." },
+                { label: "Our current pricing and packaging do not align with our customers' actual budget", textToAppend: "Our primary bottleneck is that our pricing structures are not aligned with customer willingness-to-pay." }
+              ],
+          placeholder: "e.g. Leads are unqualified and take too long to close."
+        };
+      }
+
+      if (goalContext === "Product Strategy") {
+        const questionText = userTopic
+          ? `When defining your product direction for "${userTopic}", what is the most challenging or unanswered question on your plate?`
+          : `When looking at the product landscape for the ${industry} market, what is the most challenging or unanswered question on your plate today?`;
+
+        return {
+          question: questionText,
+          options: isSaaS || isEnterprise
+            ? [
+                { label: "We struggle to prioritize which enterprise features to build next on our roadmap", textToAppend: "Our primary challenge is prioritizing enterprise feature demands against standard self-serve roadmap items." },
+                { label: "Users sign up, but their ongoing engagement with core features is extremely low", textToAppend: "Our primary challenge is a mismatch between initial user excitement and long-term feature engagement." },
+                { label: "Our product's core value proposition is not clearly differentiated from aggressive competitors", textToAppend: "Our primary challenge is articulating a highly differentiated value proposition in a crowded competitor landscape." }
+              ]
+            : [
+                { label: "We struggle to prioritize our development roadmap and find ourselves reactive to customer requests", textToAppend: "Our primary challenge is prioritizing our product roadmap, causing us to be overly reactive to individual client requests." },
+                { label: "We aren't sure if we have true product-market fit or if we are building the wrong solution", textToAppend: "Our primary challenge is validating and finding true product-market fit for our core offering." },
+                { label: "Our user onboarding is confusing, causing users to drop off before experiencing the product's value", textToAppend: "Our primary challenge is that our product onboarding is confusing, preventing users from seeing immediate value." }
+              ],
+          placeholder: "e.g. Deciding whether to build enterprise vs self-serve features."
+        };
+      }
+
+      if (goalContext === "Customer Retention") {
+        const questionText = userTopic
+          ? `Regarding "${userTopic}", what is the primary underlying reason why customers choose to fade away or cancel?`
+          : `To protect and grow retention at ${companyName || "your business"}, what is the primary underlying reason why customers choose to fade away or cancel?`;
+
+        return {
+          question: questionText,
+          options: isEnterprise || isSaaS
+            ? [
+                { label: "Clients struggle to track or prove the ongoing financial ROI of our solution", textToAppend: "Our primary bottleneck is that clients struggle to track or prove the ongoing financial ROI of our solution." },
+                { label: "The onboarding takes too long, and they lose momentum before completing setup", textToAppend: "Our primary bottleneck is that onboarding takes too long, causing clients to lose interest before launching." },
+                { label: "Our champion or power user leaves the company, and the rest of the team stops using us", textToAppend: "Our primary bottleneck is champion departure, which leaves our account inactive and at high risk of churn." }
+              ]
+            : [
+                { label: "Customers drop off in the first 30 days due to a lack of clear guidance/onboarding", textToAppend: "Our primary bottleneck is high churn in the first 30 days because users don't have a structured onboarding path." },
+                { label: "They use basic features, but never adopt our stickier, higher-value capabilities", textToAppend: "Our primary bottleneck is that customers only use basic features and never adopt our higher-value, sticky capabilities." },
+                { label: "We react to churn too late, rather than pro-actively tracking customer health", textToAppend: "Our primary bottleneck is that we react to churn too late, rather than pro-actively tracking customer health." }
+              ],
+          placeholder: "e.g. Onboarding takes too long and users lose momentum."
+        };
+      }
+
+      if (goalContext === "Operational Efficiency") {
+        const questionText = userTopic
+          ? `To streamline "${userTopic}", what manual process or repetitive workflow is draining the most time and team energy?`
+          : `To scale operations cleanly for ${companyName || "your business"} in ${industry}, what manual process or repetitive workflow is draining the most time?`;
+
+        return {
+          question: questionText,
+          options: isSaaS || isEnterprise || isFriction
+            ? [
+                { label: "Client onboarding and technical setup require manual, custom engineering intervention", textToAppend: "Our primary bottleneck is that client onboarding and technical setup require manual, custom engineering intervention." },
+                { label: "Repetitive manual data entry and copying customer specs across separate software systems", textToAppend: "Our primary bottleneck is repetitive manual data entry and copying customer specs across separate software systems." },
+                { label: "Generating strategic reports and client deliverables is a highly manual, bespoke process", textToAppend: "Our primary bottleneck is that generating strategic reports and client deliverables is a highly manual, bespoke process." }
+              ]
+            : [
+                { label: "Our team is constantly firefighting manual administrative tasks instead of working on core growth", textToAppend: "Our primary bottleneck is high operational overhead, leaving our team stuck firefighting manual administrative tasks." },
+                { label: "We lack a centralized, automated source of truth, leading to communication gaps and double-work", textToAppend: "Our primary bottleneck is disconnected systems that lack a centralized, automated source of truth." },
+                { label: "Project and service handoffs between our internal departments are slow and manual", textToAppend: "Our primary bottleneck is that project/service handoffs between our internal departments are slow and manual." }
+              ],
+          placeholder: "e.g. Manually compiling customer data from three spreadsheets."
+        };
+      }
+    }
+
+    if (step === "who") {
+      const isRetentionOrRevenue = goalContext === "Revenue Growth" || goalContext === "Customer Retention";
+      const questionText = `Who is bearing the brunt of this bottleneck? Whose day-to-day experience is impacted most?`;
+
+      return {
+        question: questionText,
+        options: isRetentionOrRevenue
+          ? [
+              { label: "High-value enterprise decision-makers who expect a white-glove experience", textToAppend: "This friction is felt most acutely by high-value enterprise decision-makers who expect a white-glove experience." },
+              { label: "Mid-market and SMB buyers who expect self-serve velocity", textToAppend: "This friction is felt most acutely by mid-market and SMB buyers who expect self-serve velocity." },
+              { label: "Our customer success team who must manually save accounts at renewal time", textToAppend: "This issue is experienced most by our customer success team who must manually save accounts at renewal time." }
+            ]
+          : [
+              { label: "Our power users whose workflow habits are constrained by product limitations", textToAppend: "This challenge is felt most by our power users whose workflow habits are constrained by product limitations." },
+              { label: "Our core engineering and product teams who are distracted by custom requests and manual support", textToAppend: "This challenge is experienced most by our core technical team who is constantly pulled into manual support and custom builds." },
+              { label: "Our operational team who must manually patch system gaps to hit delivery deadlines", textToAppend: "This challenge is borne by our operational team who must manually patch system gaps to hit delivery deadlines." }
+            ],
+        placeholder: "e.g. Customer support reps, or enterprise admins."
+      };
+    }
+
+    if (step === "success") {
+      const questionText = `If we solve this perfectly, what is the single most meaningful metric or breakthrough that represents a true "win" for ${companyName || "us"}?`;
+
+      if (goalContext === "Revenue Growth") {
+        return {
+          question: questionText,
+          options: [
+            { label: "Shortening our enterprise sales cycle length by 30% to increase velocity", textToAppend: "Success looks like shortening our enterprise sales cycle length by 30% to increase velocity." },
+            { label: "Achieving a predictable, automated customer acquisition pipeline with positive unit economics", textToAppend: "Success looks like achieving a predictable, automated customer acquisition pipeline with positive unit economics." },
+            { label: "Unlocking low-friction self-serve conversion that increases checkout volume by 25%", textToAppend: "Success looks like a frictionless checkout flow that boosts self-serve revenue by 25%." }
+          ],
+          placeholder: "e.g. Reduce sales cycle to 4 months."
+        };
+      }
+
+      if (goalContext === "Product Strategy") {
+        return {
+          question: questionText,
+          options: [
+            { label: "A high-clarity feature roadmap validated by real user engagement data", textToAppend: "Success looks like a high-clarity feature roadmap validated by real user engagement data." },
+            { label: "Strong, validated product-market fit that unlocks organic customer referrals", textToAppend: "Success looks like strong, validated product-market fit that unlocks organic customer referrals." },
+            { label: "A unique, highly differentiated product position that drives instant buyer interest", textToAppend: "Success looks like a unique, highly differentiated product position that drives instant buyer interest." }
+          ],
+          placeholder: "e.g. Launch a validated MVP with 85% approval rating."
+        };
+      }
+
+      if (goalContext === "Customer Retention") {
+        return {
+          question: questionText,
+          options: [
+            { label: "Reducing churn by 20% by guiding new accounts to their first 'aha' value-moment quickly", textToAppend: "Success looks like reducing churn by 20% by guiding new accounts to their first 'aha' value-moment quickly." },
+            { label: "Achieving a major increase in multi-feature adoption, leading to contract expansion at renewal", textToAppend: "Success looks like a major increase in multi-feature adoption, leading to contract expansion at renewal." },
+            { label: "An automated early-warning health scorecard to resolve account issues before renewal", textToAppend: "Success looks like an automated early-warning health scorecard to resolve account issues 90 days before renewal." }
+          ],
+          placeholder: "e.g. Reduce customer churn rate below 5%."
+        };
+      }
+
+      if (goalContext === "Operational Efficiency") {
+        return {
+          question: questionText,
+          options: [
+            { label: "Automating 80% of repetitive data syncs, saving our team 15+ hours per week per person", textToAppend: "Success looks like automating 80% of repetitive data syncs, saving our team 15+ hours per week per person." },
+            { label: "A fully automated, self-serve client onboarding setup that takes under 5 minutes", textToAppend: "Success looks like a fully automated, self-serve client onboarding setup that takes under 5 minutes." },
+            { label: "Unifying our software tools to establish a single, automated source of truth", textToAppend: "Success looks like unifying our software tools to establish a single, automated source of truth." }
+          ],
+          placeholder: "e.g. Saving 20 hours of manual labor per week."
+        };
+      }
+    }
+
+    return null;
+  };
+
+  const handleSelectOption = (option: { label: string; textToAppend: string }) => {
+    let currentText = businessUsecase.trim();
+    const lower = currentText.toLowerCase();
+    
+    if (lower === "growth" || lower === "grow") {
+      currentText = "Our goal is to drive business growth.";
+    } else if (lower === "automation" || lower === "automate") {
+      currentText = "Our goal is to introduce process automation.";
+    } else if (lower === "product") {
+      currentText = "Our goal is to refine our product strategy.";
+    } else if (lower === "10x revenue" || lower === "10x" || lower === "revenue" || lower === "sales") {
+      currentText = "Our goal is to drive 10X revenue scaling.";
+    }
+
+    const separator = currentText ? (currentText.endsWith(".") ? " " : ". ") : "";
+    const updatedText = `${currentText}${separator}${option.textToAppend}`;
+    setBusinessUsecase(updatedText);
+
+    if (coachingStep === "obstacle") {
+      setCoachingAnswers(prev => ({ ...prev, obstacle: option.label }));
+      setCoachingStep("who");
+    } else if (coachingStep === "who") {
+      setCoachingAnswers(prev => ({ ...prev, who: option.label }));
+      setCoachingStep("success");
+    } else if (coachingStep === "success") {
+      setCoachingAnswers(prev => ({ ...prev, success: option.label }));
+      setCoachingStep("done");
+    }
+  };
+
+  const handleCustomSubmit = () => {
+    if (!coachingInlineInput.trim()) return;
+    
+    let currentText = businessUsecase.trim();
+    const lower = currentText.toLowerCase();
+    if (lower === "growth" || lower === "grow") {
+      currentText = "Our goal is to drive business growth.";
+    } else if (lower === "automation" || lower === "automate") {
+      currentText = "Our goal is to introduce process automation.";
+    } else if (lower === "product") {
+      currentText = "Our goal is to refine our product strategy.";
+    } else if (lower === "10x revenue" || lower === "10x" || lower === "revenue" || lower === "sales") {
+      currentText = "Our goal is to drive 10X revenue scaling.";
+    }
+
+    let textToAppend = "";
+    if (coachingStep === "obstacle") {
+      textToAppend = `Our primary bottleneck is that ${coachingInlineInput.trim()}`;
+      if (!textToAppend.endsWith(".")) textToAppend += ".";
+      setCoachingAnswers(prev => ({ ...prev, obstacle: coachingInlineInput.trim() }));
+      setCoachingStep("who");
+    } else if (coachingStep === "who") {
+      textToAppend = `This is primarily experienced by ${coachingInlineInput.trim()}`;
+      if (!textToAppend.endsWith(".")) textToAppend += ".";
+      setCoachingAnswers(prev => ({ ...prev, who: coachingInlineInput.trim() }));
+      setCoachingStep("success");
+    } else if (coachingStep === "success") {
+      textToAppend = `Success looks like ${coachingInlineInput.trim()}`;
+      if (!textToAppend.endsWith(".")) textToAppend += ".";
+      setCoachingAnswers(prev => ({ ...prev, success: coachingInlineInput.trim() }));
+      setCoachingStep("done");
+    }
+
+    const separator = currentText ? (currentText.endsWith(".") ? " " : ". ") : "";
+    setBusinessUsecase(`${currentText}${separator}${textToAppend}`);
+    setCoachingInlineInput("");
+  };
+
+  const handleUsecaseChange = (val: string) => {
+    setBusinessUsecase(val);
+    const words = val.trim().split(/\s+/).filter(Boolean).length;
+    if (words === 0) {
+      setCoachingStep(null);
+      setCoachingAnswers({ obstacle: "", who: "", success: "" });
+    } else if (words > 0 && !coachingStep) {
+      setCoachingStep("obstacle");
+    }
+  };
+
   // Google Calendar Integration States
   const [showCalendarPanel, setShowCalendarPanel] = useState(false);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
@@ -1329,7 +1626,18 @@ export default function DiagnosticWizard() {
     if (typeof window !== "undefined") {
       localStorage.setItem("diag_businessUsecase", businessUsecase);
     }
-  }, [businessUsecase]);
+    const words = getWordCount(businessUsecase);
+    const sentences = countSentences(businessUsecase);
+    if (words >= 10 && sentences >= 1) {
+      if (error && (
+        error.includes("Business Use Case") || 
+        error.includes("Business use case") || 
+        error.includes("detailed Business Use Case")
+      )) {
+        setError(null);
+      }
+    }
+  }, [businessUsecase, error]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -2359,6 +2667,13 @@ ${result.blueprint}`;
       return;
     }
 
+    const wordCount = getWordCount(businessUsecase);
+    const sentenceCount = countSentences(businessUsecase);
+    if (wordCount < 10 || sentenceCount < 1) {
+      setError("Please provide a more detailed Business Use Case (at least 10 words or a full sentence) so Northbound can generate a highly accurate, personalized strategic blueprint. Use our inline conversational assistant below to help you frame it easily!");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setFeedbackType(null);
@@ -2552,19 +2867,130 @@ ${result.blueprint}`;
             </div>
 
             {/* Business Use Case */}
-            <div id="business-usecase-field" className="space-y-1.5">
-              <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
-                Business Use Case
-              </label>
+            <div id="business-usecase-field" className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
+                  Business Use Case
+                </label>
+              </div>
+
               <textarea
                 id="business-usecase-textarea"
                 required
                 value={businessUsecase}
-                onChange={(e) => setBusinessUsecase(e.target.value)}
+                onChange={(e) => handleUsecaseChange(e.target.value)}
                 placeholder={getBusinessUsecasePlaceholder(industry, bottleneck)}
                 rows={6}
                 className="w-full px-4 py-3 border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900/15 font-sans rounded-lg resize-y transition-all duration-150"
               />
+
+              {/* Dynamic Interactive Conversational Assistant Inline */}
+              {(() => {
+                const words = getWordCount(businessUsecase);
+                const sentences = countSentences(businessUsecase);
+                const isShort = words > 0 && (words < 12 || sentences < 2);
+                
+                if (isShort && coachingStep && coachingStep !== "done") {
+                  const stepData = getInteractiveCoachingStep(businessUsecase, coachingStep);
+                  if (!stepData) return null;
+
+                  return (
+                    <div className="border border-amber-200/60 bg-amber-50/20 rounded-xl p-4 md:p-5 space-y-4 shadow-xs relative overflow-hidden">
+                      {/* Coach Header */}
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
+                            <Sparkles size={10} className="text-amber-400 animate-pulse" />
+                          </div>
+                          {/* Span removed */}
+                        </div>
+                        <span className="text-[10px] font-mono font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100/55 uppercase tracking-wider">
+                          Strategic Reflection
+                        </span>
+                      </div>
+
+                      {/* Coach Prompt Message */}
+                      <div className="space-y-3.5">
+                        <div className="flex gap-2.5 items-start">
+                          <div className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center text-[9px] font-bold text-white uppercase shrink-0">
+                            NB
+                          </div>
+                          <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-3 max-w-[90%] shadow-xs">
+                            <p className="text-xs text-slate-800 font-sans font-semibold leading-relaxed">
+                              {stepData.question}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Interactive Click Options */}
+                        <div className="flex flex-col gap-1.5 pl-8.5">
+                          {stepData.options.map((opt, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => handleSelectOption(opt)}
+                              className="w-full text-left px-3.5 py-2.5 text-xs font-bold font-sans text-slate-700 bg-white hover:bg-amber-50/20 border border-slate-200 hover:border-amber-500/40 rounded-lg cursor-pointer transition-all hover:translate-x-0.5 active:scale-98"
+                            >
+                              • {opt.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Custom Input Inline */}
+                        <div className="pl-8.5 pt-1.5 border-t border-slate-100/50 flex gap-2">
+                          <input
+                            type="text"
+                            value={coachingInlineInput}
+                            onChange={(e) => setCoachingInlineInput(e.target.value)}
+                            placeholder={stepData.placeholder || "Or type your custom answer..."}
+                            className="flex-1 px-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:outline-none focus:border-slate-400 font-sans"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleCustomSubmit();
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleCustomSubmit}
+                            disabled={!coachingInlineInput.trim()}
+                            className="px-3 py-2 text-xs font-mono font-bold text-white bg-slate-900 hover:bg-slate-850 disabled:opacity-40 rounded-lg transition-colors cursor-pointer active:scale-95 flex items-center gap-1 shrink-0"
+                          >
+                            <span>Send</span>
+                            <ArrowUpRight size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // If they have typed enough manually or via options
+                if (words >= 10 && sentences >= 1 && !result) {
+                  return (
+                    <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl flex items-center justify-between text-xs font-sans font-medium">
+                      <div className="flex items-center gap-2">
+                        <Check size={14} className="text-emerald-600 shrink-0" />
+                        <span>Looking great! Your Business Use Case is descriptive and ready for diagnostic compiling.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBusinessUsecase("");
+                          setCoachingStep(null);
+                          setCoachingAnswers({ obstacle: "", who: "", success: "" });
+                        }}
+                        className="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-mono shrink-0 ml-4 cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
             </div>
 
             {error && (
@@ -2671,6 +3097,14 @@ ${result.blueprint}`;
 
           {result && !isLoading && (
             <div className="flex-1 flex flex-col min-h-0 h-full overflow-hidden">
+              {result.isFallback && (
+                <div className="mb-4 p-3.5 bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl text-xs font-sans font-medium flex items-start gap-2.5 shadow-2xs">
+                  <Sparkles size={14} className="text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                  <div className="flex-1 leading-relaxed">
+                    <span className="font-bold">Strategic Synthesis Fallback Active:</span> The live AI model is currently busy, unresponsive, or experiencing quota rate limits. Northbound's resilient local strategy engine has automatically compiled this high-competency tactical blueprint for you!
+                  </div>
+                </div>
+              )}
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-outline-variant/40 pb-4 shrink-0 mb-4">
                 <div>
                   <p className="text-sm font-sans font-semibold text-slate-800">Strategy Matrix for {bottleneck}</p>
@@ -2713,7 +3147,7 @@ ${result.blueprint}`;
                     ) : (
                       <>
                         <Copy size={13} />
-                        <span>Copy Matrix</span>
+                        <span>Copy</span>
                       </>
                     )}
                   </button>

@@ -58,9 +58,9 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
 
   const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
   const baseModels = [
+    "gemini-2.5-flash",
     "gemini-3.5-flash",
     "gemini-3.1-flash-lite",
-    "gemini-2.5-flash",
     "gemini-flash-latest",
     "gemini-3.1-pro-preview"
   ];
@@ -651,6 +651,7 @@ Examine the user's situation from a completely different strategic angle. Questi
       } catch (apiError: any) {
         console.error("[GEMINI AUDIT ERROR] Gemini generation failed. Root cause:", apiError?.message || apiError, apiError?.stack || "");
         console.log("[GEMINI API INFO] Model generation fallback in Audit initialized. Utilizing dynamic offline template block.");
+        isFallbackResponse = true;
         text = getFallbackBlueprint(companyName, ecosystemPhase, industry, bottleneck, summarizeProblem, expectedResult);
       }
     }
