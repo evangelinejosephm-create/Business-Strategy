@@ -58,11 +58,11 @@ async function generateContentWithRetry(params: GenerateContentParams): Promise<
 
   const customModel = (process.env.GEMINI_MODEL || "").replace(/^["']|["']$/g, "").trim();
   const baseModels = [
-    "gemini-2.5-flash",
     "gemini-3.5-flash",
     "gemini-3.1-flash-lite",
     "gemini-flash-latest",
-    "gemini-3.1-pro-preview"
+    "gemini-3.1-pro-preview",
+    "gemini-2.5-flash"
   ];
   const modelsToTry = customModel ? [customModel, ...baseModels.filter(m => m !== customModel)] : baseModels;
   let lastError: any = null;

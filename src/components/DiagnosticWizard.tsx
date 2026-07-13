@@ -1050,17 +1050,35 @@ export default function DiagnosticWizard() {
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
   const [sendingFeedback, setSendingFeedback] = useState(false);
 
+  const [industryCache, setIndustryCache] = useState<Record<string, string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("diag_industry_cache");
+        return saved ? JSON.parse(saved) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+    return {};
+  });
+
   const [isDetectingIndustry, setIsDetectingIndustry] = useState(false);
   const [lastProcessedWebsite, setLastProcessedWebsite] = useState("");
 
   const detectIndustryFromWebsite = async (websiteUrl: string) => {
     if (!websiteUrl || websiteUrl.trim().length < 3) return;
     
-    const clean = websiteUrl.trim().replace(/^(https?:\/\/)?(www\.)?/, "");
+    const clean = websiteUrl.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "");
     const simpleRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,18}(\/.*)?$/;
     if (!simpleRegex.test(clean)) {
       setError("Please enter a valid company website (e.g. company.com)");
       setIndustry("");
+      return;
+    }
+
+    if (industryCache[clean]) {
+      setIndustry(industryCache[clean]);
+      setError(null);
       return;
     }
 
@@ -1081,6 +1099,11 @@ export default function DiagnosticWizard() {
           } else {
             setIndustry(data.industry);
             setError(null);
+            const updatedCache = { ...industryCache, [clean]: data.industry };
+            setIndustryCache(updatedCache);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("diag_industry_cache", JSON.stringify(updatedCache));
+            }
           }
         } else {
           setError("Could not auto-detect industry for this website.");
@@ -1107,7 +1130,7 @@ export default function DiagnosticWizard() {
       return;
     }
 
-    const clean = trimmed.replace(/^(https?:\/\/)?(www\.)?/, "");
+    const clean = trimmed.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "");
     // Check if the domain has at least a dot and a valid-looking TLD
     const simpleRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,18}(\/.*)?$/;
     if (!simpleRegex.test(clean)) {
@@ -1119,13 +1142,20 @@ export default function DiagnosticWizard() {
       return;
     }
 
+    if (industryCache[clean]) {
+      setLastProcessedWebsite(trimmed);
+      setIndustry(industryCache[clean]);
+      setError(null);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setLastProcessedWebsite(trimmed);
       detectIndustryFromWebsite(trimmed);
     }, 700); // 700ms debounce
 
     return () => clearTimeout(timer);
-  }, [companyName, lastProcessedWebsite]);
+  }, [companyName, lastProcessedWebsite, industryCache]);
 
   // Gmail integration states
   const [gmailToken, setGmailToken] = useState<string | null>(null);
@@ -1355,6 +1385,59 @@ export default function DiagnosticWizard() {
     return null;
   };
 
+  const getCurrentCoachingStep = (text: string): "warmup" | "obstacle" | "who" | "success" | "done" => {
+    const words = getWordCount(text);
+    const sentences = countSentences(text);
+    if (words === 0 || words < 12 || sentences < 2) {
+      return "warmup";
+    }
+    
+    const lower = text.toLowerCase();
+    
+    const hasObstacle = 
+      lower.includes("bottleneck") || 
+      lower.includes("obstacle") || 
+      lower.includes("challenge") || 
+      lower.includes("stuck") || 
+      lower.includes("hindered") || 
+      lower.includes("struggle") || 
+      lower.includes("difficult") || 
+      lower.includes("hardest truth") || 
+      lower.includes("problem") || 
+      lower.includes("issue") ||
+      coachingAnswers.obstacle !== "";
+
+    const hasWho = 
+      lower.includes("experienced by") || 
+      lower.includes("felt by") || 
+      lower.includes("impacts") || 
+      lower.includes("team") || 
+      lower.includes("users") || 
+      lower.includes("customers") || 
+      lower.includes("staff") || 
+      lower.includes("reps") || 
+      lower.includes("buyers") || 
+      lower.includes("person") ||
+      coachingAnswers.who !== "";
+
+    const hasSuccess = 
+      lower.includes("success looks like") || 
+      lower.includes("metric") || 
+      lower.includes("breakthrough") || 
+      lower.includes("win") || 
+      lower.includes("goal") || 
+      lower.includes("reduce") || 
+      lower.includes("increase") || 
+      lower.includes("shorten") || 
+      lower.includes("automate") ||
+      coachingAnswers.success !== "";
+
+    if (!hasObstacle) return "obstacle";
+    if (!hasWho) return "who";
+    if (!hasSuccess) return "success";
+    return "done";
+  };
+
   const handleSelectOption = (option: { label: string; textToAppend: string }) => {
     let currentText = businessUsecase.trim();
     const lower = currentText.toLowerCase();
@@ -1373,15 +1456,13 @@ export default function DiagnosticWizard() {
     const updatedText = `${currentText}${separator}${option.textToAppend}`;
     setBusinessUsecase(updatedText);
 
-    if (coachingStep === "obstacle") {
+    const activeStep = getCurrentCoachingStep(businessUsecase);
+    if (activeStep === "obstacle") {
       setCoachingAnswers(prev => ({ ...prev, obstacle: option.label }));
-      setCoachingStep("who");
-    } else if (coachingStep === "who") {
+    } else if (activeStep === "who") {
       setCoachingAnswers(prev => ({ ...prev, who: option.label }));
-      setCoachingStep("success");
-    } else if (coachingStep === "success") {
+    } else if (activeStep === "success") {
       setCoachingAnswers(prev => ({ ...prev, success: option.label }));
-      setCoachingStep("done");
     }
   };
 
@@ -1400,22 +1481,20 @@ export default function DiagnosticWizard() {
       currentText = "Our goal is to drive 10X revenue scaling.";
     }
 
+    const activeStep = getCurrentCoachingStep(businessUsecase);
     let textToAppend = "";
-    if (coachingStep === "obstacle") {
+    if (activeStep === "obstacle") {
       textToAppend = `Our primary bottleneck is that ${coachingInlineInput.trim()}`;
       if (!textToAppend.endsWith(".")) textToAppend += ".";
       setCoachingAnswers(prev => ({ ...prev, obstacle: coachingInlineInput.trim() }));
-      setCoachingStep("who");
-    } else if (coachingStep === "who") {
+    } else if (activeStep === "who") {
       textToAppend = `This is primarily experienced by ${coachingInlineInput.trim()}`;
       if (!textToAppend.endsWith(".")) textToAppend += ".";
       setCoachingAnswers(prev => ({ ...prev, who: coachingInlineInput.trim() }));
-      setCoachingStep("success");
-    } else if (coachingStep === "success") {
+    } else if (activeStep === "success") {
       textToAppend = `Success looks like ${coachingInlineInput.trim()}`;
       if (!textToAppend.endsWith(".")) textToAppend += ".";
       setCoachingAnswers(prev => ({ ...prev, success: coachingInlineInput.trim() }));
-      setCoachingStep("done");
     }
 
     const separator = currentText ? (currentText.endsWith(".") ? " " : ". ") : "";
@@ -1425,12 +1504,9 @@ export default function DiagnosticWizard() {
 
   const handleUsecaseChange = (val: string) => {
     setBusinessUsecase(val);
-    const words = val.trim().split(/\s+/).filter(Boolean).length;
+    const words = getWordCount(val);
     if (words === 0) {
-      setCoachingStep(null);
       setCoachingAnswers({ obstacle: "", who: "", success: "" });
-    } else if (words > 0 && !coachingStep) {
-      setCoachingStep("obstacle");
     }
   };
 
@@ -2777,28 +2853,29 @@ ${result.blueprint}`;
                 <div className="flex items-center justify-between mb-2.5">
                   <label className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
                     <span>Industry</span>
-                    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/60 text-[9px] font-sans font-medium text-slate-500 lowercase tracking-normal normal-case">
-                      <Sparkles size={10} className="text-amber-500" />
-                      auto-detected
-                    </span>
+                    {industry && !isDetectingIndustry && (
+                      <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-[9px] font-sans font-medium text-emerald-600 lowercase tracking-normal normal-case">
+                        <Sparkles size={10} className="text-emerald-500" />
+                        auto-detected
+                      </span>
+                    )}
                   </label>
-                  {isDetectingIndustry && (
-                    <span className="text-[10px] text-amber-600 font-mono animate-pulse">
-                      Analyzing...
-                    </span>
-                  )}
                 </div>
                 <div className="relative">
                   <input
                     type="text"
                     readOnly
-                    placeholder="Auto-filled from website..."
-                    value={industry}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-200 bg-slate-50/70 text-sm text-slate-700 font-sans font-medium rounded-lg focus:outline-none cursor-not-allowed transition-all duration-150 shadow-inner"
+                    placeholder={isDetectingIndustry ? "Analyzing..." : "Auto-filled from website..."}
+                    value={isDetectingIndustry ? "" : industry}
+                    className={`w-full pl-4 py-3 border border-slate-200 bg-slate-50/70 text-sm text-slate-700 font-sans font-medium rounded-lg focus:outline-none cursor-not-allowed transition-all duration-150 shadow-inner ${
+                      isDetectingIndustry ? "border-amber-200 bg-amber-50/20 pr-10" : "pr-4"
+                    }`}
                   />
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <Sparkles size={14} className="text-slate-400" />
-                  </div>
+                  {isDetectingIndustry && (
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <div className="w-4 h-4 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2870,7 +2947,7 @@ ${result.blueprint}`;
             <div id="business-usecase-field" className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-mono font-bold text-slate-950 uppercase tracking-widest">
-                  Business Use Case
+                  What's happening in your business?
                 </label>
               </div>
 
@@ -2888,10 +2965,71 @@ ${result.blueprint}`;
               {(() => {
                 const words = getWordCount(businessUsecase);
                 const sentences = countSentences(businessUsecase);
-                const isShort = words > 0 && (words < 12 || sentences < 2);
+                const activeStep = getCurrentCoachingStep(businessUsecase);
                 
-                if (isShort && coachingStep && coachingStep !== "done") {
-                  const stepData = getInteractiveCoachingStep(businessUsecase, coachingStep);
+                if (activeStep === "warmup" && words > 0) {
+                  // Starters based on bottleneck
+                  let starters: Array<{ label: string; text: string }> = [];
+                  if (bottleneck === "Revenue Growth") {
+                    starters = [
+                      { label: "Growth goal: Accelerate lead generation and customer acquisition", text: "Our goal is to drive business growth by accelerating B2B lead generation and customer acquisition. Currently, we need to scale our sales pipeline." },
+                      { label: "Growth goal: Unlock self-serve conversion to boost checkouts", text: "Our goal is to drive revenue growth by unlocking self-serve conversion and boosting checkout volume. We want to make checkout frictionless." }
+                    ];
+                  } else if (bottleneck === "Product Strategy") {
+                    starters = [
+                      { label: "Product goal: Validate feature roadmap and engagement", text: "Our goal is to refine our product strategy by validating our feature roadmap with user engagement data. We want to align engineering with business needs." },
+                      { label: "Product goal: Improve product onboarding and activation", text: "Our goal is to refine our product strategy by improving user onboarding and driving long-term retention. We want to design a clearer activation flow." }
+                    ];
+                  } else if (bottleneck === "Customer Retention") {
+                    starters = [
+                      { label: "Retention goal: Reduce account churn and increase satisfaction", text: "Our goal is to improve customer retention by reducing account churn and elevating satisfaction. We need to proactively address drifting accounts." },
+                      { label: "Retention goal: Increase contract renewals and expansion revenue", text: "Our goal is to improve customer retention by increasing contract renewals and unlocking expansion revenue during account reviews." }
+                    ];
+                  } else if (bottleneck === "Operational Efficiency") {
+                    starters = [
+                      { label: "Efficiency goal: Automate manual data specs and workflows", text: "Our goal is to introduce operational efficiency by automating manual data specs and repetitive workflows. We want to save valuable team hours." },
+                      { label: "Efficiency goal: Centralize tools and establish source of truth", text: "Our goal is to introduce operational efficiency by centralizing our software tools and establishing an automated source of truth." }
+                    ];
+                  } else {
+                    starters = [
+                      { label: "Business goal: Drive growth and optimize core processes", text: "Our goal is to drive business growth and optimize our core processes to deliver maximum value to our clients." }
+                    ];
+                  }
+
+                  return (
+                    <div className="border border-amber-200/50 bg-amber-50/10 rounded-xl p-4 md:p-5 space-y-3 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <div className="flex items-center gap-1.5 text-xs font-sans font-medium text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
+                            <Sparkles size={10} className="text-amber-400 animate-pulse" />
+                          </div>
+                          <span className="font-sans font-bold text-slate-900 text-xs">Northbound Coach</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100/55 uppercase tracking-wider">
+                          Warmup
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed font-sans font-medium">
+                        To unlock strategic follow-up questions, write a multi-sentence description (at least 12 words and 2 sentences) describing what's happening in your business, or click a quick-start goal below:
+                      </p>
+                      <div className="flex flex-col gap-1.5 pt-1">
+                        {starters.map((starter, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setBusinessUsecase(starter.text)}
+                            className="w-full text-left px-3 py-2 text-xs font-bold font-sans text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg cursor-pointer transition-all active:scale-98"
+                          >
+                            💡 {starter.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                
+                if (activeStep !== "warmup" && activeStep !== "done") {
+                  const stepData = getInteractiveCoachingStep(businessUsecase, activeStep);
                   if (!stepData) return null;
 
                   return (
@@ -2902,7 +3040,7 @@ ${result.blueprint}`;
                           <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
                             <Sparkles size={10} className="text-amber-400 animate-pulse" />
                           </div>
-                          {/* Span removed */}
+                          <span className="text-[11px] font-sans font-bold text-slate-900">Northbound Coach</span>
                         </div>
                         <span className="text-[10px] font-mono font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100/55 uppercase tracking-wider">
                           Strategic Reflection
@@ -2967,7 +3105,7 @@ ${result.blueprint}`;
                 }
 
                 // If they have typed enough manually or via options
-                if (words >= 10 && sentences >= 1 && !result) {
+                if (activeStep === "done" && !result) {
                   return (
                     <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl flex items-center justify-between text-xs font-sans font-medium">
                       <div className="flex items-center gap-2">
@@ -2978,7 +3116,6 @@ ${result.blueprint}`;
                         type="button"
                         onClick={() => {
                           setBusinessUsecase("");
-                          setCoachingStep(null);
                           setCoachingAnswers({ obstacle: "", who: "", success: "" });
                         }}
                         className="text-[10px] text-emerald-700 hover:text-emerald-950 underline font-mono shrink-0 ml-4 cursor-pointer"
